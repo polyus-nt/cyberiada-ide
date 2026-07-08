@@ -808,7 +808,7 @@ export class ModelController extends EventEmitter<ModelControllerEvents> {
       (transitionId) => sm.transitions[transitionId].sourceId == id
     );
     if (!transitionId) return;
-    this.model.deleteVertex(smId, id, 'finalStates'); // Удаляем модель
+    this.model.deleteVertex(smId, id, 'initialStates'); // Удаляем модель
     if (canUndo) {
       this.history.do({
         type: 'deleteInitialState',
