@@ -14,7 +14,7 @@ export const Badge: React.FC<BadgeProps> = ({ children, show }) => {
   return (
     <div
       className={twMerge(
-        "relative after:absolute after:right-0 after:top-0 after:h-2 after:w-2 after:rounded-full after:bg-primary after:content-['']",
+        "relative w-full after:absolute after:right-2 after:top-1/2 after:h-2 after:w-2 after:-translate-y-1/2 after:rounded-full after:bg-primary after:content-['']",
         !show && 'after:hidden'
       )}
     >

@@ -1,8 +1,8 @@
-import { useState } from 'react';
+// TODO (L140-beep) Что делаем с этими вкладками?
 
 import { twMerge } from 'tailwind-merge';
 
-import { CodeEditor, DiagramEditor } from '@renderer/components';
+import { CodeEditor } from '@renderer/components';
 import { FlasherTab } from '@renderer/components/Sidebar/Flasher/Flasher';
 import { SerialMonitorTab } from '@renderer/components/Sidebar/Flasher/SerialMonitor';
 import { useModelContext } from '@renderer/store/ModelContext';
@@ -15,27 +15,13 @@ import { NotInitialized } from '../NotInitialized';
 
 export const Tabs: React.FC = () => {
   const modelController = useModelContext();
-  const [items, activeTab, setActiveTab, swapTabs, closeTab] = useTabs((state) => [
+  const [items, activeTab, setActiveTab] = useTabs((state) => [
     state.items,
     state.activeTab,
     state.setActiveTab,
-    state.swapTabs,
-    state.closeTab,
   ]);
 
-  const [dragId, setDragId] = useState<string | null>(null);
-
-  const handleDrag = (tabName: string) => {
-    setDragId(tabName);
-  };
-
-  const handleDrop = (tabName: string) => {
-    if (tabName === 'editor' || !dragId) return;
-
-    swapTabs(dragId, tabName);
-  };
-
-  if (items.length === 0) {
+  if (modelController.isNotInitialized()) {
     return (
       <div className="flex h-full w-full flex-row items-center justify-center overflow-auto align-middle scrollbar-thin scrollbar-track-transparent scrollbar-thumb-current">
         <NotInitialized />
@@ -45,16 +31,6 @@ export const Tabs: React.FC = () => {
 
   const selectTab = (item: TabType) => {
     switch (item.type) {
-      case 'editor':
-        // Вкладки удаляются только после удаления контроллеров.
-        // И до удаления вкладок вызывается ререндер, вызывающий эту функцию
-        if (!modelController.controllers[item.canvasId]) return undefined;
-        return (
-          <DiagramEditor
-            controller={modelController.controllers[item.canvasId]}
-            editor={modelController.controllers[item.canvasId].app}
-          />
-        );
       case 'transition':
       case 'state':
       case 'code':
@@ -78,18 +54,9 @@ export const Tabs: React.FC = () => {
           <Tab
             key={tab.name}
             isActive={activeTab === tab.name}
-            isDragging={dragId === tab.name}
-            draggable={true}
             type={tab.type}
-            name={tab.name}
-            showName={true}
-            onDragStart={() => handleDrag(tab.name)}
-            onDrop={() => handleDrop(tab.name)}
             onMouseDown={() => {
-              setActiveTab(modelController, tab.name);
-            }}
-            onClose={() => {
-              closeTab(tab.name, modelController);
+              setActiveTab(tab.name);
             }}
           />
         ))}

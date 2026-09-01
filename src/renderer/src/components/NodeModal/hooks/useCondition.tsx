@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { SingleValue } from 'react-select';
 
-import { SelectOption } from '@renderer/components/UI';
+import { ParameterSelectOption } from '@renderer/components/UI';
 import { serializeCondition } from '@renderer/lib/data/GraphmlBuilder';
 import { CanvasController } from '@renderer/lib/data/ModelController/CanvasController';
 import { operatorSet } from '@renderer/lib/data/PlatformManager';
@@ -30,7 +30,7 @@ export const useCondition = (
 
   const [tabValue, setTabValue] = useState(0);
 
-  const [conditionOperator, setConditionOperator] = useState<string | null>(null);
+  const [conditionOperator, setConditionOperator] = useState<string | null>('greater');
 
   const [selectedComponentParam1, setSelectedComponentParam1] = useState<string | null>(null);
   const [selectedComponentParam2, setSelectedComponentParam2] = useState<string | null>(null);
@@ -48,23 +48,23 @@ export const useCondition = (
   const [text, setText] = useState('');
 
   const { getComponentOptions, getPropertyOptions } = useActions(smId, controller, null);
-
-  const componentOptionsParam1: SelectOption[] = useMemo(() => {
-    return getComponentOptions('variables', false);
+  const iconClassName = 'mr-1 h-5 w-5';
+  const componentOptionsParam1: ParameterSelectOption[] = useMemo(() => {
+    return getComponentOptions('variables', false, iconClassName);
   }, [smId, controller, componentsData, controller.platform, visual]);
 
-  const componentOptionsParam2: SelectOption[] = useMemo(() => {
-    return getComponentOptions('variables', false);
+  const componentOptionsParam2: ParameterSelectOption[] = useMemo(() => {
+    return getComponentOptions('variables', false, iconClassName);
   }, [smId, controller, componentsData, controller.platform, visual]);
 
-  const methodOptionsParam1: SelectOption[] = useMemo(() => {
+  const methodOptionsParam1: ParameterSelectOption[] = useMemo(() => {
     if (!selectedComponentParam1) return [];
-    return getPropertyOptions(selectedComponentParam1, 'variables');
+    return getPropertyOptions(selectedComponentParam1, 'variables', iconClassName);
   }, [smId, controller, controller.platform, selectedComponentParam1, visual]);
 
-  const methodOptionsParam2: SelectOption[] = useMemo(() => {
+  const methodOptionsParam2: ParameterSelectOption[] = useMemo(() => {
     if (!selectedComponentParam2 || !controller.platform[smId]) return [];
-    return getPropertyOptions(selectedComponentParam2, 'variables');
+    return getPropertyOptions(selectedComponentParam2, 'variables', iconClassName);
   }, [smId, controller, controller.platform, selectedComponentParam2, visual]);
 
   const checkForErrors = useCallback(() => {
@@ -112,23 +112,23 @@ export const useCondition = (
     // setSelectedMethodParam1(null);
   }, []);
 
-  const handleComponentParam1Change = useCallback((value: SingleValue<SelectOption>) => {
+  const handleComponentParam1Change = useCallback((value: SingleValue<ParameterSelectOption>) => {
     setSelectedComponentParam1(value?.value ?? null);
     setSelectedMethodParam1(null);
   }, []);
-  const handleComponentParam2Change = useCallback((value: SingleValue<SelectOption>) => {
+  const handleComponentParam2Change = useCallback((value: SingleValue<ParameterSelectOption>) => {
     setSelectedComponentParam2(value?.value ?? null);
     setSelectedMethodParam2(null);
   }, []);
 
-  const handleMethodParam1Change = useCallback((value: SingleValue<SelectOption>) => {
+  const handleMethodParam1Change = useCallback((value: SingleValue<ParameterSelectOption>) => {
     setSelectedMethodParam1(value?.value ?? null);
   }, []);
-  const handleMethodParam2Change = useCallback((value: SingleValue<SelectOption>) => {
+  const handleMethodParam2Change = useCallback((value: SingleValue<ParameterSelectOption>) => {
     setSelectedMethodParam2(value?.value ?? null);
   }, []);
 
-  const handleConditionOperatorChange = useCallback((value: SingleValue<SelectOption>) => {
+  const handleConditionOperatorChange = useCallback((value: SingleValue<ParameterSelectOption>) => {
     setConditionOperator(value?.value ?? null);
   }, []);
 
@@ -136,7 +136,7 @@ export const useCondition = (
     setSelectedComponentParam1(null);
     setSelectedComponentParam2(null);
     setArgsParam1('');
-    setConditionOperator(null);
+    setConditionOperator('greater');
     setSelectedMethodParam1(null);
     setSelectedMethodParam2(null);
     setArgsParam2('');

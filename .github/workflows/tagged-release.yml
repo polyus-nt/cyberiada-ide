@@ -33,8 +33,6 @@ jobs:
       - name: Download gcc-arm-none-eabi
         run: |
           wget https://seafile.polyus-nt.ru/f/83d0be836d1c491fa3b3/?dl=1 -O build/gcc-arm-none-eabi.zip
-          unzip build/gcc-arm-none-eabi.zip -d build/gcc-arm-none-eabi
-          rm -f build/gcc-arm-none-eabi.zip
       - name: Download IRPCB dependencies
         run: |
           wget https://seafile.polyus-nt.ru/f/6377a640bc344e31bd6d/?dl=1 -O build/irpcb.zip
@@ -46,10 +44,36 @@ jobs:
           image: electronuserland/builder:wine
           options: -v ${{ github.workspace }}:/project
           run: |
+            apt-get update
+            apt-get install -y zip
             npm ci
             npm run build
             npm run bundle:linux
             npm run bundle:win
+            VERSION=$(node -p "require('./package.json').version")
+
+            mkdir -p outputs
+            mkdir -p outputs/seafile-upload
+            mkdir -p outputs/windows-release/setup_data
+
+            cp dist/*-setup.exe outputs/windows-release/
+            cp build/gcc-arm-none-eabi.zip outputs/windows-release/setup_data/gcc-arm-none-eabi.zip
+            
+            mkdir -p outputs/windows-release/setup_data/irpcb
+            cp -r build/irpcb/bin outputs/windows-release/setup_data/irpcb/bin
+            
+            mkdir -p outputs/windows-release/setup_data/lapki-compiler/fullgraphmlparser
+            cp -r build/lapki-compiler/compiler/library outputs/windows-release/setup_data/lapki-compiler/library
+            cp -r build/lapki-compiler/compiler/platforms outputs/windows-release/setup_data/lapki-compiler/platforms
+            cp -r build/lapki-compiler/compiler/fullgraphmlparser/templates outputs/windows-release/setup_data/lapki-compiler/fullgraphmlparser/templates
+            (
+              cd outputs/windows-release
+              zip -r "../cyberiada-${VERSION}-windows.zip" .
+            )
+            cp outputs/cyberiada-${VERSION}-windows.zip outputs/seafile-upload/
+            cp dist/*.deb outputs/seafile-upload/
+            cp dist/*.snap outputs/seafile-upload/
+            cp dist/*.AppImage outputs/seafile-upload/
 
       - uses: 'marvinpinto/action-automatic-releases@latest'
         id: 'automatic_releases'
@@ -62,6 +86,7 @@ jobs:
             dist/*.snap
             dist/*.AppImage
             dist/*.exe
+            outputs/*.zip
 
   mac-build:
     runs-on: 'macos-latest'

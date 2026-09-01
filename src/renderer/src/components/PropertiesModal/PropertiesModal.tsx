@@ -3,7 +3,7 @@ import React, { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { ReactComponent as StateMachineIcon } from '@renderer/assets/icons/state_machine.svg';
-import { Modal, Select, SelectOption } from '@renderer/components/UI';
+import { Modal, ParameterSelect, ParameterSelectOption } from '@renderer/components/UI';
 import { CanvasController } from '@renderer/lib/data/ModelController/CanvasController';
 import { getPlatform } from '@renderer/lib/data/PlatformLoader';
 import { useModelContext } from '@renderer/store/ModelContext';
@@ -67,7 +67,7 @@ export const PropertiesModal: React.FC<PropertiesModalProps> = ({
     setBaseProperties(propertiesValues);
   }, [platform, basename, name, smName, meta]);
 
-  const smOptions: SelectOption[] = useMemo(() => {
+  const smOptions: ParameterSelectOption[] = useMemo(() => {
     const getOption = (id: string) => {
       return {
         value: id,
@@ -123,7 +123,7 @@ export const PropertiesModal: React.FC<PropertiesModalProps> = ({
       title="Свойства"
     >
       <h3 className="mb-1 text-xl">Свойства файла</h3>
-      <Select
+      <ParameterSelect
         containerClassName="w-[250px]"
         options={smOptions}
         onChange={(opt) => handleStateMachineChange(opt?.value ?? '')}

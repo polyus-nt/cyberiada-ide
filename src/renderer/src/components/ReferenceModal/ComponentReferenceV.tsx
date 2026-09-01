@@ -9,7 +9,7 @@ import { ComponentProto } from '@renderer/types/platform';
 
 import { ComponentInfo } from './ComponentInfo';
 
-import { Select, SelectOption } from '../UI';
+import { ParameterSelect, ParameterSelectOption } from '../UI';
 
 const picto = new Picto();
 
@@ -26,7 +26,7 @@ export const ComponentReferenceV: React.FC<ComponentReferenceProps> = ({ platfor
   const [entry, setEntry] = useState<ComponentEntry | null>(null);
   const [manager, setManager] = useState<PlatformManager | null>(null);
   const [platformComponents, setPlatformComponents] = useState<ComponentEntry[]>([]);
-  const [componentOptions, setComponentOptions] = useState<SelectOption[]>([]);
+  const [componentOptions, setComponentOptions] = useState<ParameterSelectOption[]>([]);
 
   const resetData = () => {
     setCursor(null);
@@ -61,7 +61,7 @@ export const ComponentReferenceV: React.FC<ComponentReferenceProps> = ({ platfor
         idx,
       })
     );
-    const options: SelectOption[] = components.map((c) => ({
+    const options: ParameterSelectOption[] = components.map((c) => ({
       value: c.idx,
       label: c.name || c.idx,
       icon: manager.getRawComponentIcon(c.idx, 'mr-1 h-7 w-7'),
@@ -72,7 +72,7 @@ export const ComponentReferenceV: React.FC<ComponentReferenceProps> = ({ platfor
     setCursor(null);
   }, [platformIdx]);
 
-  const onCompClick = (entry: SingleValue<SelectOption>) => {
+  const onCompClick = (entry: SingleValue<ParameterSelectOption>) => {
     const idx = entry?.value ?? null;
     setCursor(idx);
     if (idx) {
@@ -101,13 +101,12 @@ export const ComponentReferenceV: React.FC<ComponentReferenceProps> = ({ platfor
 
   return (
     <div className="h-full gap-2">
-      <Select
+      <ParameterSelect
         className="w-full"
         options={componentOptions}
         value={componentOptions.find((o) => o.value === cursor) ?? null}
         onChange={onCompClick}
         placeholder="Выберите компонент..."
-        isMulti={false}
         isClearable={false}
         isSearchable={true}
         noOptionsMessage={() => <div>Отсутствуют подходящие компоненты</div>}

@@ -1,7 +1,7 @@
 import { Controller, UseFormReturn } from 'react-hook-form';
 import { twMerge } from 'tailwind-merge';
 
-import { Modal, Select } from '@renderer/components/UI';
+import { Modal, ParameterSelect } from '@renderer/components/UI';
 import { StateMachineData } from '@renderer/lib/types';
 import { useModelContext } from '@renderer/store/ModelContext';
 
@@ -13,6 +13,7 @@ type optionType = {
 };
 
 interface StateMachineEditModalProps {
+  variant: 'create' | 'edit';
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: StateMachineData) => void;
@@ -27,6 +28,7 @@ interface StateMachineEditModalProps {
 }
 
 export const StateMachineEditModal: React.FC<StateMachineEditModalProps> = ({
+  variant,
   isOpen,
   onClose,
   onSubmit,
@@ -49,6 +51,7 @@ export const StateMachineEditModal: React.FC<StateMachineEditModalProps> = ({
   const modelController = useModelContext();
   const headControllerId = modelController.model.useData('', 'headControllerId');
   const editor = modelController.controllers[headControllerId].app;
+  const isCreateMode = variant === 'create';
 
   // Сброс к начальному состоянию после закрытия
   const handleAfterClose = () => {
@@ -81,22 +84,29 @@ export const StateMachineEditModal: React.FC<StateMachineEditModalProps> = ({
       isOpen={isOpen}
       onRequestClose={onClose}
       onAfterClose={handleAfterClose}
-      title="Машина состояний"
+      title={isCreateMode ? 'Новая машина состояний' : 'Редактор машины состояний'}
       middleLabel={duplicateStateMachine ? 'Дублировать' : undefined}
       onMiddle={duplicateStateMachine}
       submitLabel={submitLabel}
       onSubmit={handleSubmit}
       sideLabel={sideLabel}
       onSide={handleDelete ?? undefined}
+      className="top-5 w-[calc(100%-40px)] max-w-[404px]"
+      contentClassName="mb-6"
+      actionsClassName="gap-3"
+      sideClassName="btn-secondary border-red-500 danger"
+      middleClassName="btn-secondary border-primary text-primary"
+      hideCancelButton
     >
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-3">
         <Controller
           name="name"
           control={control}
           render={({ field: { onChange, value } }) => (
             <ComponentFormFieldLabel
               label="Название"
-              placeholder="Введите название..."
+              labelClassName="w-[72px]"
+              placeholder={isCreateMode ? 'Введите название' : 'Введите название...'}
               onChange={onChange}
               value={value ?? ''}
               error={errors.name?.message}
@@ -107,11 +117,15 @@ export const StateMachineEditModal: React.FC<StateMachineEditModalProps> = ({
           name="platform"
           control={control}
           render={({ field: { onChange, value } }) => (
-            <ComponentFormFieldLabel label="Платформа" error={errors.platform?.message}>
-              <Select
-                className={twMerge('w-[250px]', selectorDisable && 'opacity-60')}
+            <ComponentFormFieldLabel
+              label="Платформа"
+              labelClassName="w-[72px]"
+              error={errors.platform?.message}
+            >
+              <ParameterSelect
+                className={twMerge('w-full', selectorDisable && 'opacity-60')}
                 isSearchable={false}
-                placeholder="Выберите платформу..."
+                placeholder={isCreateMode ? 'Выберите платформу' : 'Выберите платформу...'}
                 options={platformList}
                 value={platformList.find((opt) => opt.value === value)}
                 onChange={(opt) => {

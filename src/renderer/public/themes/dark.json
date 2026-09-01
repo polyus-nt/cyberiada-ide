@@ -8,7 +8,7 @@
   "bg-primary": "#262626",
   "bg-secondary": "#121111",
   "bg-hover": "#434343",
-  "bg-active": "#545454",
+  "bg-active": "#E6F4FF",
 
   "matrix-active": "#f8f9fa",
   "matrix-inactive": "#343a40",

@@ -43,13 +43,13 @@ export const TitleRender: React.FC<TitleRenderProps> = (props) => {
   const parts = search ? title.split(new RegExp(`(${search})`, 'gi')) : [title.toString()];
 
   return (
-    <div className="group flex w-full items-center gap-2">
+    <div className="group ml-1 flex w-full items-center gap-2">
       <WithHint hint={title} placement="right" offset={5} delay={100}>
         {(props) => (
           <div {...props} className="flex w-full items-center gap-1">
             <div className="text-[#737373]">
               <Icon
-                className={twMerge('h-6 w-6', type === 'stateMachine' && 'fill-border-contrast')}
+                className={twMerge('size-4', type === 'stateMachine' && 'fill-border-contrast')}
               />
             </div>
 

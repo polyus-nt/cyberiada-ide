@@ -80,17 +80,19 @@ export const CreateSchemeModal: React.FC<CreateSchemeModalProps> = ({
   return (
     <Modal
       {...props}
+      hideCancelButton
       onRequestClose={handleCLose}
       onSubmit={handleSubmit}
       submitDisabled={submitDisabled}
       title="Создание документа"
-      submitLabel="Создать"
+      submitLabel={tabValue === 1 ? 'Открыть' : 'Сохранить'}
     >
       <Tabs
-        className="mb-4"
+        className="mb-3"
         tabs={['Платформы', 'Шаблоны']}
         value={tabValue}
         onChange={setTabValue}
+        variant="pill"
       />
 
       <TabPanel value={0} tabValue={tabValue}>

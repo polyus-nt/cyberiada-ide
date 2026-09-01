@@ -14,9 +14,9 @@ import { useSerialMonitor } from '@renderer/store/useSerialMonitor';
 
 import { DeviceList } from './DeviceList';
 
-import { Select, Switch, TextInput, WithHint } from '../../UI';
+import { ParameterSelect, Switch, TextInput, WithHint } from '../../UI';
 
-type LineBreakType = 'LF' | 'CR' | 'CRLF' | 'Без';
+type LineBreakType = 'LF' | 'CR' | 'CRLF' | 'без';
 // опции выбора символа окончания строки
 // при изменение данных здесь, нужно не забыть проверить стандартные настройки (setting.ts)
 class LineBreakOptions {
@@ -36,7 +36,7 @@ class LineBreakOptions {
     hint: 'Символы возврата каретки и новой строки',
   };
   static EMPTY = {
-    label: 'Без' as LineBreakType,
+    label: 'без' as LineBreakType,
     value: '',
     hint: 'Без символов окончания строки',
   };
@@ -59,9 +59,37 @@ class TextModeOptions {
 
 export interface SerialMonitorTabProps {
   isTabOpen: boolean;
+  showStatus?: boolean;
 }
 
-export const SerialMonitorTab: React.FC<SerialMonitorTabProps> = ({ isTabOpen }) => {
+const getCurrentDeviceDisplay = (
+  device: ReturnType<typeof useSerialMonitor.getState>['device'],
+  connectionStatus: string
+) => {
+  if (connectionStatus === SERIAL_MONITOR_NO_SERVER_CONNECTION) {
+    return connectionStatus;
+  }
+  if (device === undefined) {
+    return 'Устройство отсутствует';
+  }
+  return `${device.displaySerialName()} - ${connectionStatus}`;
+};
+
+export const SerialMonitorStatus: React.FC = () => {
+  const { device, connectionStatus } = useSerialMonitor();
+
+  return (
+    <span className="font-normal">
+      Статус:{' '}
+      <span className="text-primary">{getCurrentDeviceDisplay(device, connectionStatus)}</span>
+    </span>
+  );
+};
+
+export const SerialMonitorTab: React.FC<SerialMonitorTabProps> = ({
+  isTabOpen,
+  showStatus = true,
+}) => {
   const [monitorSetting, setMonitorSetting] = useSettings('serialmonitor');
 
   const {
@@ -202,16 +230,6 @@ export const SerialMonitorTab: React.FC<SerialMonitorTabProps> = ({ isTabOpen })
     setLog(() => []);
   };
 
-  const handleCurrentDeviceDisplay = () => {
-    if (connectionStatus === SERIAL_MONITOR_NO_SERVER_CONNECTION) {
-      return connectionStatus;
-    }
-    if (device === undefined) {
-      return 'Устройство отсутствует';
-    }
-    return `${device.displaySerialName()} - ${connectionStatus}`;
-  };
-
   const handleConnectionButton = () => {
     if (device === undefined) {
       return;
@@ -226,7 +244,7 @@ export const SerialMonitorTab: React.FC<SerialMonitorTabProps> = ({ isTabOpen })
   const settingLineBreak = (newBreakLine: LineBreakType) => {
     let settingValue: typeof monitorSetting.lineBreak;
     switch (newBreakLine) {
-      case 'Без':
+      case 'без':
         settingValue = 'EMPTY';
         break;
       default:
@@ -282,10 +300,17 @@ export const SerialMonitorTab: React.FC<SerialMonitorTabProps> = ({ isTabOpen })
   };
 
   return (
-    <section className="mr-3 flex h-full flex-col overflow-auto bg-bg-secondary">
-      <div className="m-2 flex justify-between">
+    <section className="flex h-full min-h-[500px] flex-col overflow-auto bg-bg-primary">
+      {showStatus && (
+        <div className="mb-4 border-b border-border-primary pb-3">
+          <SerialMonitorStatus />
+        </div>
+      )}
+
+      <div className="flex items-center gap-3">
         <button
-          className="btn-primary"
+          type="button"
+          className="btn-secondary h-8 min-w-0 border-primary px-3 py-1.5 text-primary"
           onClick={openDeviceList}
           disabled={
             connectionStatus === SERIAL_MONITOR_CONNECTING ||
@@ -294,14 +319,72 @@ export const SerialMonitorTab: React.FC<SerialMonitorTabProps> = ({ isTabOpen })
         >
           Выбрать устройство
         </button>
-        {`${handleCurrentDeviceDisplay()}`}
+
+        <span>Бод:</span>
+        <ParameterSelect
+          containerClassName="w-24"
+          value={makeOption(monitorSetting.baudRate)}
+          onChange={(option) => {
+            if (option) {
+              settingBaudRate(Number(option.value));
+              if (device && connectionStatus === SERIAL_MONITOR_CONNECTED) {
+                SerialMonitor.changeBaud(device.deviceID, Number(option.value));
+              }
+            }
+          }}
+          options={baudRateAll}
+          isDisabled={connectionStatus === SERIAL_MONITOR_CONNECTING}
+        />
+
+        <button
+          type="button"
+          className="btn-primary h-8 min-w-0 px-3 py-1.5"
+          onClick={handleConnectionButton}
+          disabled={
+            connectionStatus === SERIAL_MONITOR_NO_SERVER_CONNECTION ||
+            connectionStatus === SERIAL_MONITOR_CONNECTING ||
+            !device
+          }
+        >
+          {connectionStatus === SERIAL_MONITOR_CONNECTED ? 'Отключиться' : 'Подключиться'}
+        </button>
+
+        <label className="ml-auto flex items-center gap-3">
+          Автопрокрутка
+          <Switch
+            checked={monitorSetting.autoScroll}
+            onCheckedChange={() => {
+              setMonitorSetting({ ...monitorSetting, autoScroll: !monitorSetting.autoScroll });
+            }}
+          />
+        </label>
       </div>
-      <div className="m-2 flex">
+
+      <h2 className="h2-header mt-6">Приём</h2>
+      <div
+        className="mt-3 min-h-[120px] flex-1 select-text overflow-y-auto whitespace-break-spaces break-words rounded-lg border border-border-primary bg-bg-primary p-2 scrollbar-thin scrollbar-track-scrollbar-track scrollbar-thumb-scrollbar-thumb"
+        ref={deviceMessageContainerRef}
+      >
+        {deviceMessages}
+      </div>
+
+      <div className="mt-3 flex justify-end">
+        <button
+          type="button"
+          className="btn-secondary h-8 min-w-0 border-primary px-3 py-1.5 text-primary"
+          onClick={handleClear}
+        >
+          Очистить
+        </button>
+      </div>
+
+      <h2 className="h2-header mt-6">Отправка</h2>
+      <div className="mt-3 flex items-start gap-3">
         <WithHint hint={inputError}>
           {(hintProps) => (
             <TextInput
               {...hintProps}
-              className="mr-2 max-w-full"
+              className="h-8 max-w-none flex-1 rounded-lg py-1.5"
               placeholder="Напишите значение"
               value={inputValue}
               onChange={(e) => {
@@ -315,103 +398,44 @@ export const SerialMonitorTab: React.FC<SerialMonitorTabProps> = ({ isTabOpen })
             />
           )}
         </WithHint>
-        <div className="mr-2 w-48">
-          <Select
-            isSearchable={false}
-            value={TextModeOptions[monitorSetting.textMode]}
-            placeholder="Режим..."
-            onChange={(option) => {
-              if (option) {
-                settingTextMode(option.value as TextModeType);
-              }
-            }}
-            options={[TextModeOptions.text, TextModeOptions.hex]}
-          />
-        </div>
-        <div className="mr-2 w-48">
-          <Select
-            isSearchable={false}
-            value={LineBreakOptions[monitorSetting.lineBreak]}
-            placeholder="Выберите конец строки..."
-            onChange={(option) => {
-              if (option) {
-                settingLineBreak(option.label as LineBreakType);
-              }
-            }}
-            options={[
-              LineBreakOptions.LF,
-              LineBreakOptions.CR,
-              LineBreakOptions.CRLF,
-              LineBreakOptions.EMPTY,
-            ]}
-          />
-        </div>
+        <ParameterSelect
+          containerClassName="w-24 shrink-0"
+          value={TextModeOptions[monitorSetting.textMode]}
+          onChange={(option) => {
+            if (option) {
+              settingTextMode(option.value as TextModeType);
+            }
+          }}
+          options={[TextModeOptions.text, TextModeOptions.hex]}
+        />
+        <ParameterSelect
+          containerClassName="w-24 shrink-0"
+          value={LineBreakOptions[monitorSetting.lineBreak]}
+          onChange={(option) => {
+            if (option) {
+              settingLineBreak(option.label as LineBreakType);
+            }
+          }}
+          options={[
+            LineBreakOptions.LF,
+            LineBreakOptions.CR,
+            LineBreakOptions.CRLF,
+            LineBreakOptions.EMPTY,
+          ]}
+        />
         <button
-          className="btn-primary"
+          type="button"
+          className="btn-primary h-8 min-w-0 px-3 py-1.5"
           onClick={handleSend}
-          disabled={connectionStatus != SERIAL_MONITOR_CONNECTED}
+          disabled={connectionStatus !== SERIAL_MONITOR_CONNECTED}
         >
           Отправить
         </button>
       </div>
-      <div className="m-2 flex justify-between">
-        <div className="flex w-40 items-center justify-between">
-          <Switch
-            checked={monitorSetting.autoScroll}
-            onCheckedChange={() => {
-              setMonitorSetting({ ...monitorSetting, autoScroll: !monitorSetting.autoScroll });
-            }}
-          />
-          Автопрокрутка
-        </div>
-        <button className="btn-primary" onClick={handleClear}>
-          Очистить
-        </button>
-        <div className="flex flex-row items-center">
-          <div className="mr-2 w-12">{'Бод:'}</div>
-          <div className="mr-2 w-48">
-            <Select
-              isSearchable={false}
-              value={makeOption(monitorSetting.baudRate)}
-              placeholder="Выберите скорость передачи..."
-              onChange={(option) => {
-                if (option) {
-                  settingBaudRate(Number(option.value));
-                  if (device && connectionStatus === SERIAL_MONITOR_CONNECTED) {
-                    SerialMonitor.changeBaud(device?.deviceID, Number(option.value));
-                  }
-                }
-              }}
-              options={baudRateAll}
-              isDisabled={connectionStatus === SERIAL_MONITOR_CONNECTING}
-            />
-          </div>
-          <div>
-            <button
-              className="btn-primary"
-              onClick={handleConnectionButton}
-              disabled={
-                connectionStatus === SERIAL_MONITOR_NO_SERVER_CONNECTION ||
-                connectionStatus === SERIAL_MONITOR_CONNECTING ||
-                !device
-              }
-            >
-              {connectionStatus === SERIAL_MONITOR_CONNECTED ? 'Отключиться' : 'Подключиться'}
-            </button>
-          </div>
-        </div>
-      </div>
+
+      <h2 className="h2-header mt-6">Журнал порта</h2>
       <div
-        className="mx-2 h-full select-text overflow-y-auto whitespace-break-spaces break-words bg-bg-primary scrollbar-thin scrollbar-track-scrollbar-track scrollbar-thumb-scrollbar-thumb"
-        ref={deviceMessageContainerRef}
-      >
-        {deviceMessages}
-      </div>
-      <br></br>
-      <hr></hr>
-      <br></br>
-      <div
-        className="mx-2 h-full select-text overflow-y-auto whitespace-break-spaces break-words bg-bg-primary scrollbar-thin scrollbar-track-scrollbar-track scrollbar-thumb-scrollbar-thumb"
+        className="mt-3 h-[120px] min-h-[80px] select-text overflow-y-auto whitespace-break-spaces break-words rounded-lg border border-border-primary bg-bg-primary p-2 scrollbar-thin scrollbar-track-scrollbar-track scrollbar-thumb-scrollbar-thumb"
         ref={logContainerRef}
       >
         {log.map((msg, index) => (

@@ -1,72 +1,36 @@
-Section "DriversSection" SEC02
-    SetOutPath "$PLUGINSDIR"
-    ;File /oname=$PLUGINSDIR\wdi-simple64.exe "${BUILD_RESOURCES_DIR}\wdi-simple64.exe"
-    File /oname=$PLUGINSDIR\install.bat "${BUILD_RESOURCES_DIR}\install.bat"
-    File /oname=$PLUGINSDIR\install_compiler_deps.ps1 "${BUILD_RESOURCES_DIR}\install_compiler_deps.ps1"
-    ;File /oname=$PLUGINSDIR\move_compiler_resourses.bat "${BUILD_RESOURCES_DIR}\move_compiler_resourses.bat"
-    ;File /oname=$PLUGINSDIR\move_arm_gcc.bat "${BUILD_RESOURCES_DIR}\move_arm_gcc.bat"
+!macro customInit
+  IfFileExists "$EXEDIR\setup_data\gcc-arm-none-eabi.zip" +3 0
+    MessageBox MB_ICONSTOP|MB_OK "Не могу найти setup_data\gcc-arm-none-eabi.zip. Это часть установочного комплекта. Убедитесь, что вы скачали комплект полностью и разархивировали перед запуском."
+    Abort
 
-    ; создаём у себя поддиректорию
-    CreateDirectory "$PLUGINSDIR\gcc-arm-none-eabi"
+  IfFileExists "$EXEDIR\setup_data\irpcb\bin\*.*" +3 0
+    MessageBox MB_ICONSTOP|MB_OK "Не могу найти setup_data\irpcb\bin. Это часть установочного комплекта. Убедитесь, что вы скачали комплект полностью и разархивировали перед запуском."
+    Abort
 
-    ; переключаемся в неё
-    SetOutPath "$PLUGINSDIR\gcc-arm-none-eabi"
+  IfFileExists "$EXEDIR\setup_data\lapki-compiler\library\*.*" +3 0
+    MessageBox MB_ICONSTOP|MB_OK "Не могу найти setup_data\lapki-compiler\library. Это часть установочного комплекта. Убедитесь, что вы скачали комплект полностью и разархивировали перед запуском."
+    Abort
 
-    ; рекурсивно забираем всё из исходной папки
-    File /r "${BUILD_RESOURCES_DIR}\gcc-arm-none-eabi\*.*"
+  IfFileExists "$EXEDIR\setup_data\lapki-compiler\platforms\*.*" +3 0
+    MessageBox MB_ICONSTOP|MB_OK "Не могу найти setup_data\lapki-compiler\platforms. Это часть установочного комплекта. Убедитесь, что вы скачали комплект полностью и разархивировали перед запуском."
+    Abort
 
-    CreateDirectory "$PLUGINSDIR\irpcb\bin"
-    SetOutPath "$PLUGINSDIR\irpcb\bin"
-    File "${BUILD_RESOURCES_DIR}\irpcb\bin\*.*"
-
-    CreateDirectory "$PLUGINSDIR\lapki-compiler"
-    CreateDirectory "$PLUGINSDIR\lapki-compiler\library"
-    CreateDirectory "$PLUGINSDIR\lapki-compiler\platforms"
-    CreateDirectory "$PLUGINSDIR\lapki-compiler\fullgraphmlparser"
-    CreateDirectory "$PLUGINSDIR\lapki-compiler\fullgraphmlparser\templates"
-    ; переключаемся в неё
-    SetOutPath "$PLUGINSDIR\lapki-compiler\library"
-
-    ; TODO: Попробовать засунуть все это в pre-init вызовом скрипта
-    ; рекурсивно забираем всё из исходной папки
-    File /r "${BUILD_RESOURCES_DIR}\lapki-compiler\compiler\library\*.*"
-    SetOutPath "$PLUGINSDIR\lapki-compiler\platforms"
-    File /r "${BUILD_RESOURCES_DIR}\lapki-compiler\compiler\platforms\"
-    SetOutPath "$PLUGINSDIR\lapki-compiler\fullgraphmlparser\templates"
-    File /r "${BUILD_RESOURCES_DIR}\lapki-compiler\compiler\fullgraphmlparser\templates"
-
-    SetOutPath "$PLUGINSDIR"
-    ;ExecWait 'powershell.exe -Command "$PLUGINSDIR\install.bat $PLUGINSDIR"'
-    ExecWait 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$PLUGINSDIR\install_compiler_deps.ps1" "$INSTDIR"'
-    ;ExecWait 'powershell.exe -Command "$PLUGINSDIR\move_compiler_resourses.bat ${BUILD_RESOURCES_DIR}"'
-SectionEnd
+  IfFileExists "$EXEDIR\setup_data\lapki-compiler\fullgraphmlparser\templates\*.*" +3 0
+    MessageBox MB_ICONSTOP|MB_OK "Не могу найти setup_data\lapki-compiler\fullgraphmlparser\templates. Это часть установочного комплекта. Убедитесь, что вы скачали комплект полностью и разархивировали перед запуском."
+    Abort
+!macroend
 
 !macro customInstall
-  DetailPrint "Running post–install batch…"
+  SetOutPath "$PLUGINSDIR"
+  File /oname=$PLUGINSDIR\install_payload.ps1 "${BUILD_RESOURCES_DIR}\install_payload.ps1"
+  File /oname=$PLUGINSDIR\install_compiler_deps.ps1 "${BUILD_RESOURCES_DIR}\install_compiler_deps.ps1"
 
-  DetailPrint "Copying gcc-arm-none-eabi from $PLUGINSDIR to $INSTDIR…"
-  ; Убедимся, что папка приёмник существует
-  CreateDirectory "$INSTDIR\gcc-arm-none-eabi"
+  DetailPrint "Running external setup data installer..."
+  ExecWait 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$PLUGINSDIR\install_payload.ps1" -InstallDir "$INSTDIR" -SetupDataDir "$EXEDIR\setup_data"' $0
+  StrCmp $0 0 payload_done
 
-  ; Рекурсивно скопируем все файлы и подпапки
-  CopyFiles /SILENT "$PLUGINSDIR\gcc-arm-none-eabi\*.*" "$INSTDIR\gcc-arm-none-eabi\"
-  ; Удалим временную директорию (чтобы не оставлять мусор)
-  RMDir /r "$PLUGINSDIR\gcc-arm-none-eabi"
+  MessageBox MB_ICONSTOP|MB_OK "Не могу найти setup_data. Это часть установочного комплекта. Убедитесь, что вы скачали комплект полностью и разархивировали перед запуском."
+  Abort
 
-  DetailPrint "Done. INSTDIR now contains:"
-  DetailPrint "  $INSTDIR\gcc-arm-none-eabi"
-
-  CreateDirectory "$INSTDIR\resources\app.asar.unpacked\resources\modules\win32\lapki-compiler"
-  CreateDirectory "$INSTDIR\resources\app.asar.unpacked\resources\modules\win32\lapki-compiler\library"
-  CreateDirectory "$INSTDIR\resources\app.asar.unpacked\resources\modules\win32\lapki-compiler\platforms"
-  CreateDirectory "$INSTDIR\resources\app.asar.unpacked\resources\modules\win32\lapki-compiler\fullgraphmlparser"
-  CreateDirectory "$INSTDIR\resources\app.asar.unpacked\resources\modules\win32\lapki-compiler\fullgraphmlparser\templates"
-
-  CreateDirectory "$INSTDIR\irpcb\bin"
-  CopyFiles /SILENT "$PLUGINSDIR\irpcb\bin\*.*" "$INSTDIR\irpcb\bin"
-
-  CopyFiles /SILENT "$PLUGINSDIR\lapki-compiler\library\*.*" "$INSTDIR\resources\app.asar.unpacked\resources\modules\win32\lapki-compiler\library\"
-  CopyFiles /SILENT "$PLUGINSDIR\lapki-compiler\platforms\*.*" "$INSTDIR\resources\app.asar.unpacked\resources\modules\win32\lapki-compiler\platforms\"
-  CopyFiles /SILENT "$PLUGINSDIR\lapki-compiler\fullgraphmlparser\templates\*.*" "$INSTDIR\resources\app.asar.unpacked\resources\modules\win32\lapki-compiler\fullgraphmlparser\"
-  ExecWait "arduino-cli core install arduino:avr"
+  payload_done:
 !macroend

@@ -6,7 +6,7 @@ import { ReactComponent as AddIcon } from '@renderer/assets/icons/add.svg';
 import { ReactComponent as EditIcon } from '@renderer/assets/icons/edit.svg';
 import { ReactComponent as LensIcon } from '@renderer/assets/icons/metadata.svg';
 import { ReactComponent as SubtractIcon } from '@renderer/assets/icons/subtract.svg';
-import { Modal } from '@renderer/components/UI';
+import { Modal, ScrollArea } from '@renderer/components/UI';
 import { useModal } from '@renderer/hooks';
 import { AddressData } from '@renderer/types/FlasherTypes';
 
@@ -25,11 +25,10 @@ interface AddressBookModalProps {
   openAddressEnrtyAdd: () => void;
 }
 
-/**
- * Модальное окно с адресной книгой МС-ТЮК.
- */
+/** Модальное окно с адресной книгой МС-ТЮК. */
 export const AddressBookModal: React.FC<AddressBookModalProps> = ({
   addressBookSetting,
+  isOpen,
   onRemove,
   onSwapEntries,
   getID,
@@ -37,25 +36,27 @@ export const AddressBookModal: React.FC<AddressBookModalProps> = ({
   onSubmit,
   addressEnrtyEdit,
   openAddressEnrtyAdd,
-  ...props
 }) => {
-  // выбранная запись с адресом, undefined означает, что ни одна запись не выбрана;
-  const [selectedEntry, setSelectedEntry] = useState<number | undefined>(undefined);
-  // индекс записи для переноса при начале drag
-  const [dragIndex, setDragIndex] = useState<number | undefined>(undefined);
-
+  const [selectedEntry, setSelectedEntry] = useState<number>();
+  const [dragIndex, setDragIndex] = useState<number>();
   const [isMetaDataOpen, openMetaData, closeMetaData] = useModal(false);
+  const { handleSubmit: hookHandleSubmit } = useForm();
 
-  /**
-   * замена двух записей при drag&drop
-   * @param index - индекс второй записи, при drop, первая запись берётся из {@link dragIndex}
-   */
+  const selectedData =
+    selectedEntry === undefined ? undefined : addressBookSetting?.[selectedEntry];
+
   const handleSwapEntries = (index: number) => {
     if (addressBookSetting === null || dragIndex === undefined) {
       setDragIndex(undefined);
       return;
     }
+
     onSwapEntries(dragIndex, index);
+    if (selectedEntry === dragIndex) {
+      setSelectedEntry(index);
+    } else if (selectedEntry === index) {
+      setSelectedEntry(dragIndex);
+    }
     setDragIndex(undefined);
   };
 
@@ -66,117 +67,118 @@ export const AddressBookModal: React.FC<AddressBookModalProps> = ({
 
   const handleRemove = () => {
     if (selectedEntry === undefined) return;
-    setSelectedEntry(undefined);
     onRemove(selectedEntry);
+    setSelectedEntry(undefined);
   };
-
-  const { handleSubmit: hookHandleSubmit } = useForm();
 
   const handleSubmit = hookHandleSubmit(() => {
     if (selectedEntry === undefined || addressBookSetting === null) return;
-    const ID = getID(selectedEntry);
-    if (ID !== null) {
-      onSubmit(ID);
-    }
+    const id = getID(selectedEntry);
+    if (id !== null) onSubmit(id);
   });
 
-  const metaDataModal = () => {
-    if (addressBookSetting !== null && selectedEntry !== undefined) {
-      return (
-        <MetaDataModal
-          addressData={addressBookSetting[selectedEntry]}
-          isOpen={isMetaDataOpen}
-          onClose={closeMetaData}
-        />
-      );
-    }
-    return null;
+  const handleClose = () => {
+    setSelectedEntry(undefined);
+    setDragIndex(undefined);
+    onClose();
   };
 
   return (
-    <div>
+    <>
       <Modal
-        {...props}
-        onRequestClose={onClose}
+        isOpen={isOpen}
+        onRequestClose={handleClose}
         title="Адресная книга"
         onSubmit={handleSubmit}
         submitDisabled={selectedEntry === undefined}
         submitLabel="Добавить в таблицу прошивок"
+        className="top-[18px] box-border flex h-[430px] max-h-[calc(100vh-36px)] w-[calc(100%-40px)] max-w-[720px] flex-col bg-bg-primary p-6"
+        headerClassName="mb-[23px] min-h-[39px] pb-3"
+        titleClassName="text-xs font-medium"
+        closeClassName="p-2"
+        closeIconClassName="h-2.5 w-2.5"
+        formClassName="flex min-h-0 flex-1 flex-col"
+        contentClassName="mb-0 min-h-0 flex-1"
+        actionsClassName="mt-6"
+        submitClassName="btn-primary h-8 min-w-0 px-3 py-1.5"
+        hideCancelButton
       >
-        <div className="flex gap-2 pl-4">
-          <div className="flex h-60 w-full flex-col overflow-y-auto break-words rounded border border-border-primary bg-bg-secondary scrollbar-thin scrollbar-track-scrollbar-track scrollbar-thumb-scrollbar-thumb">
-            {addressBookSetting === null ? (
-              <p className="mx-2 my-2 flex text-text-inactive">Адресная книга не загрузилась</p>
-            ) : addressBookSetting.length === 0 ? (
-              <p className="mx-2 my-2 flex text-text-inactive">Нет записей в книге</p>
-            ) : (
-              <AddressBookRow
-                // заголовок таблицы
-                isSelected={false}
-                data={{ name: 'Название', address: 'Адрес', type: 'Тип', meta: undefined }}
-                onSelect={() => undefined}
-                onEdit={() => undefined}
-                onDragStart={() => undefined}
-                onDrop={() => undefined}
-              />
-            )}
-            {addressBookSetting?.map((field, index) => {
-              const ID = getID(index);
-              if (ID === null) return;
-              return (
-                <div key={getID(index)}>
-                  <AddressBookRow
-                    isSelected={index === selectedEntry}
-                    data={field}
-                    onSelect={() => setSelectedEntry(index)}
-                    onEdit={() => handleEdit(field, index)}
-                    onDragStart={() => setDragIndex(index)}
-                    onDrop={() => handleSwapEntries(index)}
-                  />
-                </div>
-              );
-            })}
-          </div>
-          <div className="flex flex-col gap-2">
+        <section className="flex h-full min-h-0 flex-col">
+          <div className="mb-4 flex min-h-8 shrink-0 items-center gap-3 overflow-x-auto">
             <button
               type="button"
-              className="btn-secondary p-1"
+              className="btn-secondary flex h-8 min-w-0 items-center gap-2 border-primary px-3 py-1.5 text-primary"
               onClick={openAddressEnrtyAdd}
               disabled={!addressBookSetting}
             >
-              <AddIcon />
+              <AddIcon className="h-4 w-4" />
+              Добавить
             </button>
             <button
               type="button"
-              className="btn-secondary p-1"
+              className="btn-secondary flex h-8 min-w-0 items-center gap-2 border-primary px-3 py-1.5 text-primary"
+              onClick={() => selectedData && addressEnrtyEdit(selectedData)}
+              disabled={!selectedData}
+            >
+              <EditIcon className="h-4 w-4" />
+              Изменить
+            </button>
+            <button
+              type="button"
+              className="btn-secondary danger flex h-8 min-w-0 items-center gap-2 border-red-500 px-3 py-1.5"
               onClick={handleRemove}
-              disabled={selectedEntry === undefined}
+              disabled={!selectedData}
             >
-              <SubtractIcon />
+              <SubtractIcon className="h-4 w-4" />
+              Удалить
             </button>
             <button
               type="button"
-              className="btn-secondary p-1"
-              // (Roundabout1) Если значение selectedEntry не определено, то кнопка будет заблокирована,
-              // также кнопка не будет отрисована пока не загрузится адресная книга, поэтому доп. проверка не нужна здесь
-              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              onClick={() => addressEnrtyEdit(addressBookSetting![selectedEntry!])}
-              disabled={selectedEntry === undefined}
+              className="ml-auto flex h-8 min-w-0 items-center gap-2 whitespace-nowrap px-0 py-1.5 text-primary transition-opacity enabled:hover:opacity-75 disabled:opacity-30"
+              onClick={openMetaData}
+              disabled={!selectedData}
             >
-              <EditIcon />
-            </button>
-            <button
-              type="button"
-              className="btn-secondary p-1"
-              onClick={() => openMetaData()}
-              disabled={selectedEntry === undefined}
-            >
-              <LensIcon />
+              <LensIcon className="h-4 w-4" />
+              Метаданные
             </button>
           </div>
-        </div>
+
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-border-primary">
+            <div className="grid min-h-9 shrink-0 grid-cols-[minmax(120px,1fr)_160px_minmax(120px,1fr)] items-center border-b border-border-primary bg-bg-secondary px-3 py-2 font-medium">
+              <span>Название</span>
+              <span>Адрес</span>
+              <span>Тип</span>
+            </div>
+            <ScrollArea className="min-h-0 flex-1" viewportClassName="p-1.5" role="listbox">
+              {addressBookSetting === null ? (
+                <p className="px-3 py-2 text-text-inactive">Адресная книга не загрузилась</p>
+              ) : addressBookSetting.length === 0 ? (
+                <p className="px-3 py-2 text-text-inactive">Нет записей в книге</p>
+              ) : (
+                addressBookSetting.map((field, index) => {
+                  const id = getID(index);
+                  if (id === null) return null;
+                  return (
+                    <AddressBookRow
+                      key={id}
+                      isSelected={index === selectedEntry}
+                      data={field}
+                      onSelect={() => setSelectedEntry(index)}
+                      onEdit={() => handleEdit(field, index)}
+                      onDragStart={() => setDragIndex(index)}
+                      onDrop={() => handleSwapEntries(index)}
+                    />
+                  );
+                })
+              )}
+            </ScrollArea>
+          </div>
+        </section>
       </Modal>
-      {metaDataModal()}
-    </div>
+
+      {selectedData && (
+        <MetaDataModal addressData={selectedData} isOpen={isMetaDataOpen} onClose={closeMetaData} />
+      )}
+    </>
   );
 };

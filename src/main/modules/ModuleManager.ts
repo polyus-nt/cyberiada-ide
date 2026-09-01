@@ -10,7 +10,7 @@ import { findFreePort, getUsedPorts } from './freePortFinder';
 
 import { defaultSettings } from '../settings';
 import { basePath } from '../utils';
-export type ModuleName = 'lapki-flasher' | 'lapki-compiler';
+export type ModuleName = 'lapki-flasher' | 'lapki-compiler' | 'sm-interpreter';
 
 export class ModuleStatus {
   /* 
@@ -111,6 +111,13 @@ export class ModuleManager {
                   `К сожалению, локальный компилятор не поддерживается на данной платформе (${platform}).`
                 );
             }
+            break;
+          }
+          case 'sm-interpreter': {
+            const port = await findFreePort({ usedPorts });
+            await settings.set('interpreter.localPort', port);
+            defaultSettings.interpreter.localPort = Number(port);
+            chprocess = spawn(modulePath, [`--host=127.0.0.1`, `--port=${port}`]);
             break;
           }
           default:

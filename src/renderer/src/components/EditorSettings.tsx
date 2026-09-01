@@ -8,7 +8,6 @@ import { ReactComponent as ZoomIn } from '@renderer/assets/icons/zoom-in.svg';
 import { ReactComponent as ZoomOut } from '@renderer/assets/icons/zoom-out.svg';
 import { useSettings } from '@renderer/hooks/useSettings';
 import { useModelContext } from '@renderer/store/ModelContext';
-import { useTabs } from '@renderer/store/useTabs';
 
 import { WithHint } from './UI';
 
@@ -23,8 +22,6 @@ interface SettingsItem {
 const defaultItemClassName = 'px-2 outline-none hover:bg-bg-hover active:bg-bg-active';
 
 export const EditorSettings: React.FC = () => {
-  const [activeTabName, items] = useTabs((state) => [state.activeTab, state.items]);
-  const activeTab = items.find((tab) => tab.name === activeTabName);
   const modelController = useModelContext();
   const { redoStack, undoStack } = modelController.history.use();
   const headControllerId = modelController.model.useData('', 'headControllerId');
@@ -110,26 +107,24 @@ export const EditorSettings: React.FC = () => {
   ];
 
   return (
-    activeTab?.type === 'editor' && (
-      <div className="absolute -left-[280px] bottom-3 flex items-stretch overflow-hidden rounded bg-bg-secondary">
-        {buttons.map(({ className, content, hint, onClick, disabled }, index) => (
-          <WithHint key={index} hint={hint}>
-            {(props) => (
-              <button
-                {...props}
-                // Подсказка  не появляется, если кнопка залочена, поэтому делаем ее "залоченной" вручную
-                className={twMerge(
-                  className,
-                  disabled && 'cursor-default opacity-50 hover:bg-transparent active:bg-transparent'
-                )}
-                onClick={!disabled ? onClick : () => undefined}
-              >
-                {content}
-              </button>
-            )}
-          </WithHint>
-        ))}
-      </div>
-    )
+    <div className="absolute -left-[280px] bottom-3 flex items-stretch overflow-hidden rounded bg-bg-secondary">
+      {buttons.map(({ className, content, hint, onClick, disabled }, index) => (
+        <WithHint key={index} hint={hint}>
+          {(props) => (
+            <button
+              {...props}
+              // Подсказка  не появляется, если кнопка залочена, поэтому делаем ее "залоченной" вручную
+              className={twMerge(
+                className,
+                disabled && 'cursor-default opacity-50 hover:bg-transparent active:bg-transparent'
+              )}
+              onClick={!disabled ? onClick : () => undefined}
+            >
+              {content}
+            </button>
+          )}
+        </WithHint>
+      ))}
+    </div>
   );
 };

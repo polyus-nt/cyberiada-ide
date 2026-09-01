@@ -2,8 +2,6 @@ import { twMerge } from 'tailwind-merge';
 
 import { AddressData } from '@renderer/types/FlasherTypes';
 
-import { TextInput } from '../../UI/TextInput';
-
 interface AddressBookRowProps {
   data: AddressData;
   isSelected: boolean;
@@ -14,32 +12,37 @@ interface AddressBookRowProps {
 }
 export const AddressBookRow: React.FC<AddressBookRowProps> = (props) => {
   const { data, onSelect, isSelected, onEdit, onDragStart, onDrop } = props;
-  const labelClassName = twMerge('flex w-full', isSelected && 'bg-bg-active');
   return (
     <div
-      className="flex items-start"
+      role="option"
+      aria-selected={isSelected}
+      tabIndex={0}
+      className={twMerge(
+        'grid min-h-9 cursor-pointer grid-cols-[minmax(120px,1fr)_160px_minmax(120px,1fr)] items-center rounded-lg px-3 py-2 transition-colors hover:bg-bg-hover',
+        isSelected && 'bg-bg-active hover:bg-bg-active'
+      )}
       draggable
       onClick={onSelect}
       onDoubleClick={onEdit}
       onDragStart={onDragStart}
+      onDragOver={(event) => event.preventDefault()}
       onDrop={onDrop}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          onSelect();
+        }
+      }}
     >
-      <label className={labelClassName}>
-        <TextInput value={data.name ?? ''} disabled={true} placeholder="Название" />
-      </label>
-
-      <label className={labelClassName}>
-        <TextInput value={data.address} disabled={true} />
-      </label>
-
-      <label className={labelClassName}>
-        <TextInput
-          value={data.type ?? ''}
-          placeholder="Тип"
-          className="w-full max-w-full"
-          disabled={true}
-        />
-      </label>
+      <span className="truncate pr-4" title={data.name || 'Без названия'}>
+        {data.name || 'Без названия'}
+      </span>
+      <span className="truncate pr-4 font-Fira-Mono" title={data.address}>
+        {data.address}
+      </span>
+      <span className="truncate" title={data.type || 'Не указан'}>
+        {data.type || 'Не указан'}
+      </span>
     </div>
   );
 };

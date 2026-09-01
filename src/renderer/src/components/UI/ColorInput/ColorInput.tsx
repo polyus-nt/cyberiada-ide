@@ -24,6 +24,7 @@ import './style.css';
 
 interface BaseColorInputProps {
   onClose?: () => void;
+  className?: string;
 }
 
 interface ClearableColorInputProps extends BaseColorInputProps {
@@ -41,7 +42,7 @@ interface NonClearableColorInputProps extends BaseColorInputProps {
 type ColorInputProps = ClearableColorInputProps | NonClearableColorInputProps;
 
 export const ColorInput: React.FC<ColorInputProps> = (props) => {
-  const { value, onChange, onClose, clearable } = props;
+  const { value, onChange, onClose, clearable, className } = props;
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -80,8 +81,8 @@ export const ColorInput: React.FC<ColorInputProps> = (props) => {
       <button
         type="button"
         className={twMerge(
-          'grid h-7 w-7 cursor-pointer place-content-center rounded',
-          !value && 'border border-border-primary'
+          'grid h-7 w-7 cursor-pointer place-content-center rounded border border-border-primary',
+          className
         )}
         style={{ backgroundColor: value }}
         ref={refs.setReference}

@@ -3,8 +3,7 @@ import React, { useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 
 import UnknownIcon from '@renderer/assets/icons/unknown.svg';
-import { ScrollableList } from '@renderer/components/ScrollableList';
-import { Modal } from '@renderer/components/UI';
+import { Modal, ScrollArea } from '@renderer/components/UI';
 import { ComponentEntry } from '@renderer/lib/data/PlatformManager';
 import { icons } from '@renderer/lib/drawable';
 import { useModelContext } from '@renderer/store/ModelContext';
@@ -71,34 +70,40 @@ export const ComponentAddModal: React.FC<ComponentAddModalProps> = ({
       {...props}
       onAfterClose={handleAfterClose}
       onRequestClose={onRequestClose}
-      title="Выберите компонент"
+      title="Новый компонент"
       submitLabel="Добавить"
       onSubmit={handleSubmit}
+      submitDisabled={!cursor}
+      className="top-[18px] box-border flex h-[704px] max-h-[calc(100vh-36px)] w-[calc(100%-40px)] max-w-[640px] flex-col p-6"
+      formClassName="flex min-h-0 flex-1 flex-col"
+      contentClassName="mb-0 min-h-0 flex-1"
+      actionsClassName="mt-auto"
+      submitClassName="btn-primary h-8 min-w-[82px] px-3 py-1.5"
+      hideCancelButton
     >
-      <div className="grid grid-cols-2">
-        <ScrollableList
-          className="max-h-[40vh]"
-          listItems={vacantComponents}
-          heightOfItem={10}
-          maxItemsToRender={50}
-          renderItem={(entry) => (
-            <div
+      <div className="grid h-full grid-cols-[254px_minmax(0,1fr)] gap-6">
+        <ScrollArea className="h-full">
+          {vacantComponents.map((entry) => (
+            <button
+              type="button"
               key={entry.idx}
               className={twMerge(
-                'flex items-center gap-2 p-1',
-                entry.idx == cursor?.idx && 'bg-bg-active'
+                'flex h-[42px] w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-[#E6F4FF]',
+                entry.idx === cursor?.idx && 'bg-[#E6F4FF]'
               )}
               onClick={() => onCompClick(entry)}
             >
               <img
-                className="h-8 w-8 object-contain"
+                className="h-[25px] w-[25px] shrink-0 object-contain"
                 src={icons.get(entry.img || 'stubComponent')?.src ?? UnknownIcon}
               />
-              <p className="line-clamp-1">{entry.name}</p>
-            </div>
-          )}
-        />
-        <div className="pl-4">{description}</div>
+              <span className="line-clamp-1">{entry.name}</span>
+            </button>
+          ))}
+        </ScrollArea>
+        <ScrollArea className="h-full" viewportClassName="pt-1 leading-[15px]">
+          {description}
+        </ScrollArea>
       </div>
     </Modal>
   );

@@ -6,6 +6,7 @@ import { WithHint } from '@renderer/components/UI';
 
 interface ComponentProps {
   name: string;
+  variant?: 'default' | 'compact';
   isSelected: boolean;
   isDragging: boolean;
   icon?: React.ReactNode;
@@ -31,6 +32,7 @@ export const Component: React.FC<ComponentProps> = (props) => {
     onCallContextMenu,
     description,
     icon,
+    variant = 'default',
   } = props;
 
   const [dragOver, setDragOver] = useState(false);
@@ -68,7 +70,8 @@ export const Component: React.FC<ComponentProps> = (props) => {
         <button
           type="button"
           className={twMerge(
-            'flex w-full items-center p-1',
+            'flex w-full items-center rounded-lg text-left transition-colors',
+            variant === 'compact' ? 'h-[26px] px-2' : 'h-9 px-4',
             (isSelected || dragOver) && 'bg-bg-active'
           )}
           onClick={onSelect}
@@ -83,8 +86,15 @@ export const Component: React.FC<ComponentProps> = (props) => {
           draggable
           {...props}
         >
-          <div className="size-8">{icon ?? ''}</div>
-          <p className="ml-2 line-clamp-1 text-left"> {name}</p>
+          <div
+            className={twMerge(
+              'shrink-0 [&>img]:size-full [&>svg]:size-full',
+              variant === 'compact' ? 'size-[26px]' : 'size-6'
+            )}
+          >
+            {icon ?? ''}
+          </div>
+          <p className={twMerge('line-clamp-1', variant === 'compact' ? 'ml-3' : 'ml-2')}>{name}</p>
         </button>
       )}
     </WithHint>
