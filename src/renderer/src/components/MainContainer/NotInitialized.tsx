@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
-import { ReactComponent as Icon } from '@renderer/assets/icons/icon.svg';
-import { ReactComponent as SeriousIcon } from '@renderer/assets/icons/state_machine.svg';
-import { appName, appVersion, askAppVersion, seriousMode } from '@renderer/version';
+import { ReactComponent as StateMachineIcon } from '@renderer/assets/icons/MS.svg';
+import { appName, appVersion, askAppVersion } from '@renderer/version';
 
 const combination = [
   {
@@ -47,36 +46,32 @@ export const NotInitialized: React.FC = () => {
 
   useEffect(() => {
     askAppVersion().then(() => {
-      if (shownVersion !== appVersion) setShownVersion(appVersion);
+      setShownVersion(appVersion);
     });
   }, []);
 
-  const seriousIcon = <SeriousIcon width={200} opacity={0.3} />;
-  const lapkiIcon = <Icon width={200} opacity={0.3} />;
-  const icon = seriousMode ? seriousIcon : lapkiIcon;
-
-  const hotKeyStyle = 'rounded border-2 border-border-contrast px-1';
+  const hotKeyStyle =
+    'flex h-5 min-w-5 items-center justify-center rounded border border-border-contrast px-1 text-xs leading-none';
 
   return (
-    <div className="flex flex-col items-center">
-      {icon}
-      <br />
-      <p className="text-center text-2xl font-bold">
+    <section className="flex w-[366px] flex-col items-center text-[13px] leading-5 text-text-primary">
+      <StateMachineIcon aria-hidden="true" className="h-[179px] w-[142px]" />
+      <p className="mt-3 text-center text-base font-bold leading-5">
         {appName} {shownVersion ? `v${shownVersion}` : ''}
       </p>
-      <p className="pt- pb-5 text-center text-base">
+      <p className="mt-2 text-center">
         Перетащите файл в эту область или воспользуйтесь комбинацией клавиш:
       </p>
-      <table>
+      <table className="mt-2">
         <tbody>
-          {combination.map((value, key) => (
-            <tr key={key}>
-              <td className="px-1 py-2">{value.name}</td>
-              <td className="ml-3 flex items-start py-2">
+          {combination.map((value) => (
+            <tr key={value.name}>
+              <td className="py-1 pr-12">{value.name}</td>
+              <td className="flex items-center py-1">
                 <div className={hotKeyStyle}>{value.command.button1}</div>
                 {value.command.button2 && (
                   <>
-                    <p className="px-1">+</p>
+                    <span className="px-1">+</span>
                     <div className={hotKeyStyle}>{value.command.button2}</div>
                   </>
                 )}
@@ -85,6 +80,6 @@ export const NotInitialized: React.FC = () => {
           ))}
         </tbody>
       </table>
-    </div>
+    </section>
   );
 };

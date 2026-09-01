@@ -17,6 +17,10 @@ export const useSettings = <T extends SettingsKey>(key: T) => {
     return window.electron.ipcRenderer.invoke('settings:reset', key);
   }, [key]);
 
+  const getDefaultSetting = useCallback(() => {
+    return window.electron.ipcRenderer.invoke('settings:getDefault', key) as Promise<Settings[T]>;
+  }, [key]);
+
   useEffect(() => {
     window.electron.ipcRenderer.invoke('settings:get', key).then(setValue);
 
@@ -29,7 +33,7 @@ export const useSettings = <T extends SettingsKey>(key: T) => {
     };
   }, [key]);
 
-  return [value, setSetting, resetSetting] as const;
+  return [value, setSetting, resetSetting, getDefaultSetting] as const;
 };
 
 export const fullResetSetting = () => {

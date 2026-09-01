@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { Select } from '@renderer/components/UI';
+import { ParameterSelect } from '@renderer/components/UI';
 import { getAvailablePlatforms } from '@renderer/lib/data/PlatformLoader';
 import { PlatformInfo } from '@renderer/types/platform';
 
@@ -52,7 +52,7 @@ export const Reference: React.FC = () => {
 
   return (
     <div className="flex h-full flex-col gap-2">
-      <Select
+      <ParameterSelect
         containerClassName="w-full"
         options={platformOptions}
         onChange={(opt) => handlePlatformChange(opt?.value ?? '')}

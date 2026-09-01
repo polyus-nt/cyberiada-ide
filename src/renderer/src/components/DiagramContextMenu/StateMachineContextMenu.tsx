@@ -11,10 +11,10 @@ import { ReactComponent as CopyIcon } from '@renderer/assets/icons/copy.svg';
 import { ReactComponent as DeleteIcon } from '@renderer/assets/icons/delete.svg';
 import { ReactComponent as EditIcon } from '@renderer/assets/icons/edit.svg';
 import { ReactComponent as FinalStateIcon } from '@renderer/assets/icons/final_state.svg';
-import { ReactComponent as ShallowHistoryIcon } from '@renderer/assets/icons/shallowHistory.svg';
 import { ReactComponent as InvertIcon } from '@renderer/assets/icons/invert.svg';
 import { ReactComponent as NoteIcon } from '@renderer/assets/icons/note.svg';
 import { ReactComponent as PasteIcon } from '@renderer/assets/icons/paste.svg';
+import { ReactComponent as ShallowHistoryIcon } from '@renderer/assets/icons/shallowHistory.svg';
 import { ReactComponent as StateIcon } from '@renderer/assets/icons/state_add.svg';
 import { useModal } from '@renderer/hooks';
 import { useClickOutside } from '@renderer/hooks/useClickOutside';
@@ -306,7 +306,7 @@ export const StateMachineContextMenu: React.FC<StateMachineContextMenuProps> = (
           </MenuItem>
 
           <MenuItem
-            className="enabled:hover:bg-error"
+            className="danger enabled:hover:bg-error"
             onClick={() => modelController.deleteState({ smId: smId, id: state.id })}
           >
             <DeleteIcon className="size-6 flex-shrink-0" /> Удалить
@@ -321,7 +321,7 @@ export const StateMachineContextMenu: React.FC<StateMachineContextMenuProps> = (
       return (
         <ContextMenu onClose={close}>
           <MenuItem
-            className="enabled:hover:bg-error"
+            className="danger enabled:hover:bg-error"
             onClick={() => modelController.deleteFinalState({ smId: smId, id: state.id })}
           >
             <DeleteIcon className="size-6 flex-shrink-0" /> Удалить
@@ -337,7 +337,7 @@ export const StateMachineContextMenu: React.FC<StateMachineContextMenuProps> = (
       return (
         <ContextMenu onClose={close}>
           <MenuItem
-            className="enabled:hover:bg-error"
+            className="danger enabled:hover:bg-error"
             onClick={() => modelController.deleteChoiceState({ smId: smId, id: state.id })}
           >
             <DeleteIcon className="size-6 flex-shrink-0" /> Удалить
@@ -353,7 +353,7 @@ export const StateMachineContextMenu: React.FC<StateMachineContextMenuProps> = (
       return (
         <ContextMenu onClose={close}>
           <MenuItem
-            className="enabled:hover:bg-error"
+            className="danger enabled:hover:bg-error"
             onClick={() =>
               modelController.deleteEvent({
                 smId: smId,
@@ -461,7 +461,7 @@ export const StateMachineContextMenu: React.FC<StateMachineContextMenuProps> = (
           </MenuItem>
 
           <MenuItem
-            className="enabled:hover:bg-error"
+            className="danger enabled:hover:bg-error"
             onClick={() =>
               modelController.deleteTransition({
                 smId: smId,
@@ -493,7 +493,7 @@ export const StateMachineContextMenu: React.FC<StateMachineContextMenuProps> = (
       return (
         <ContextMenu onClose={close}>
           <MenuItem
-            className="enabled:hover:bg-error"
+            className="danger enabled:hover:bg-error"
             onClick={() =>
               modelController.deleteShallowHistory({ smId: smId, id: menuVariant.state.id })
             }

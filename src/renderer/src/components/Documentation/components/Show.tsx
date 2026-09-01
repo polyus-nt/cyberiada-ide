@@ -20,7 +20,7 @@ const ShowHtml: React.FC<ShowProps> = ({ item }) => {
   if (error || !data) {
     return (
       <div className="px-4 pt-10">
-        <div className="text-lg">Ошибка загрузки. Что-то пошло не так.</div>
+        <div className="text-xs">Ошибка загрузки. Что-то пошло не так.</div>
         <button className="btn-primary" onClick={refetch}>
           Перезагрузить
         </button>
@@ -45,7 +45,7 @@ export const Show: React.FC<ShowProps> = ({ item }) => {
 
   return (
     <div className="p-4">
-      <h2 className="mb-2 text-xl font-bold">
+      <h2 className="h2-header mb-2">
         {url ? 'Ссылка на материал' : 'Выберите раздел в содержании'}
       </h2>
       <a href={url} target="_blank" className="text-blue-500 hover:text-blue-700">

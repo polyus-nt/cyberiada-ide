@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 
 import { ActionsModalData } from '@renderer/components';
-import { SelectOption } from '@renderer/components/UI';
+import { ParameterSelectOption } from '@renderer/components/UI';
 import { useModal } from '@renderer/hooks/useModal';
 import { serializeActions } from '@renderer/lib/data/GraphmlBuilder';
 import { CanvasController } from '@renderer/lib/data/ModelController/CanvasController';
@@ -43,6 +43,7 @@ export const useActions = (
   };
   const handleDeleteAction = (index: number) => {
     setActions((p) => p.filter((_, i) => index !== i));
+    // TODO(L140-beep) мб удалять и из модели сразу?
   };
   const handleReorderAction = (from: number, to: number) => {
     setActions((p) => {
@@ -103,7 +104,11 @@ export const useActions = (
     [controller, visual, componentsData] // зависимости для того, чтобы парсер в текстовом режиме работал корректно
   );
 
-  const getComponentOption = (excludeIfEmpty: 'methods' | 'signals' | 'variables', id: string) => {
+  const getComponentOption = (
+    excludeIfEmpty: 'methods' | 'signals' | 'variables',
+    id: string,
+    className?: string
+  ) => {
     if (!controller.platform[smId]) {
       return {
         value: id,
@@ -124,18 +129,19 @@ export const useActions = (
       value: id,
       label: name,
       hint: proto?.description,
-      icon: controller.platform[smId]?.getFullComponentIcon(id, 'mr-1 h-7 w-7'),
+      icon: controller.platform[smId]?.getFullComponentIcon(id, className ?? 'mr-1 h-7 w-7'),
     };
   };
 
   const getComponentOptions = (
     excludeIfEmpty: 'methods' | 'signals' | 'variables',
-    isEvent: boolean
+    isEvent: boolean,
+    className?: string
   ) => {
     if (!controller.platform[smId]) return [];
 
     const result = getFilteredOptions(
-      getComponentOption.bind(this, excludeIfEmpty),
+      (id: string) => getComponentOption(excludeIfEmpty, id, className),
       componentsData
     );
 
@@ -151,8 +157,9 @@ export const useActions = (
 
   const getPropertyOptions = (
     component: string,
-    type: 'methods' | 'signals' | 'variables'
-  ): SelectOption[] => {
+    type: 'methods' | 'signals' | 'variables',
+    iconClassName?: string
+  ): ParameterSelectOption[] => {
     if (!controller.platform[smId]) return [];
     const getAll =
       controller.platform[smId][
@@ -181,7 +188,7 @@ export const useActions = (
         icon: (
           <img
             src={getImg.call(controller.platform[smId], component, name, true)}
-            className="mr-1 h-7 w-7 object-contain"
+            className={iconClassName ?? 'mr-1 h-5 w-5'}
           />
         ),
       };

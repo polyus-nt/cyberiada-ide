@@ -35,10 +35,12 @@ export default {
           '--bg-s': '#1F1F1F',
           '--bg-h': '#434343',
           '--bg-a': '#545454',
+          '--bg-c': '#1F1F1F',
 
           '--b-c': '#f8f9fa',
           '--b-p': '#666666',
           '--b-w': '#E4A11B',
+          '--b-i': '#DEDEDE',
 
           '--t-p': '#f2f2f2',
           '--t-s': '#fff',
@@ -48,8 +50,8 @@ export default {
 
           '--c-e-t': 'vs-dark',
 
-          '--s-tr': 'rgba(162,162,162, 0.5)',
-          '--s-th': 'rgba(162,162,162, 0.7)',
+          '--s-tr': '#D9D9D9',
+          '--s-th': '#9D9D9D',
 
           '--g': 'rgba(255,255,255,0.03)',
           '--d-n-bg': 'rgba(0,0,0,0.3)',
@@ -60,6 +62,9 @@ export default {
 
           '--i-a': '#CBCACA',
           '--i-s': '#B7B6B6',
+          '--i-h': '#6DC0FF',
+          '--i-s-bg': '#2F9BEE',
+          '--sw-inactive-bg': '#9D9D9D',
         },
         ':root[data-theme="light"]': {
           '--p': '#186AA9',
@@ -72,14 +77,16 @@ export default {
           '--m-a': '#f8f9fa',
           '--m-i': '#343a40',
 
-          '--bg-p': '#F1F1F1',
+          '--bg-p': '#FFFFFF',
           '--bg-s': '#EDEDED',
-          '--bg-h': '#cfcfcf',
-          '--bg-a': '#c2c2c2',
+          '--bg-h': '#E6F4FF',
+          '--bg-a': '#E6F4FF',
+          '--bg-c': '#FFFFFF',
 
           '--b-c': '#343a40',
-          '--b-p': '#c2c2c2',
+          '--b-p': '#DEDEDE',
           '--b-w': '#E4A11B',
+          '--b-i': '#DEDEDE',
 
           '--t-p': '#000',
           '--t-s': '#fff',
@@ -89,8 +96,8 @@ export default {
 
           '--c-e-t': 'vs-light',
 
-          '--s-tr': 'rgba(162,162,162, 0.5)',
-          '--s-th': 'rgba(162,162,162, 0.7)',
+          '--s-tr': '#D9D9D9',
+          '--s-th': '#9D9D9D',
 
           '--g': 'rgba(0,0,0,0.08)',
           '--d-n-bg': 'rgba(255,255,255,0.5)',
@@ -101,6 +108,9 @@ export default {
 
           '--i-a': '#5A5959',
           '--i-s': '#878686',
+          '--i-h': '#6DC0FF',
+          '--i-s-bg': '#2F9BEE',
+          '--sw-inactive-bg': '#9D9D9D',
         },
       };
 

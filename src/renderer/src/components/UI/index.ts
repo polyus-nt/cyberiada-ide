@@ -1,5 +1,5 @@
 export * from './Badge';
-export * from './Select';
+export * from './ParameterSelect';
 export * from './Tabs';
 export * from './WithHint';
 export * from './Modal';
@@ -10,3 +10,7 @@ export * from './Checkbox';
 export * from './Switch';
 export * from './TextAreaAutoResize';
 export * from './TextArea';
+export * from './SubstractButton';
+export * from './AddButton';
+export * from './ScrollArea';
+export * from './DropdownMenu';

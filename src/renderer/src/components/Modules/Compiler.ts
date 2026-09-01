@@ -1,5 +1,3 @@
-import { Dispatch, SetStateAction } from 'react';
-
 import { base64StringToBlob } from 'blob-util';
 import Websocket from 'isomorphic-ws';
 import { toast } from 'sonner';
@@ -17,9 +15,9 @@ import { ClientWS } from './Websocket/ClientWS';
 import { ComplierTimeoutTimer } from './Websocket/ReconnectTimer';
 
 export class Compiler extends ClientWS {
-  static setCompilerData: Dispatch<SetStateAction<CompilerResult | undefined>>;
-  static setCompilerMode: Dispatch<SetStateAction<string>>;
-  static setImportData: Dispatch<SetStateAction<Elements | undefined>>;
+  static setCompilerData: (data: CompilerResult | undefined) => void;
+  static setCompilerMode: (mode: string) => void;
+  static setImportData: (data: Elements | undefined) => void;
   static mode: string;
   static filename: string;
 
@@ -33,10 +31,10 @@ export class Compiler extends ClientWS {
   }
 
   static bindReact(
-    setCompilerData: Dispatch<SetStateAction<CompilerResult | undefined>>,
-    setCompilerStatus: Dispatch<SetStateAction<string>>,
-    setImportData: Dispatch<SetStateAction<Elements | undefined>>,
-    setSecondsUntilReconnect: Dispatch<SetStateAction<number | null>>
+    setCompilerData: (data: CompilerResult | undefined) => void,
+    setCompilerStatus: (status: string) => void,
+    setImportData: (data: Elements | undefined) => void,
+    setSecondsUntilReconnect: (seconds: number | null) => void
   ): void {
     super.bind(setCompilerStatus, setSecondsUntilReconnect);
     this.setCompilerData = setCompilerData;

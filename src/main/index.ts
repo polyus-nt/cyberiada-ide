@@ -17,6 +17,7 @@ import {
   initSettingsHandlers,
   settingsChangeSend,
 } from './settings';
+import { loadTaskCatalog } from './tasks';
 import { getAllTemplates, getTemplate } from './templates';
 import { basePath, installDevToolsExtension } from './utils';
 
@@ -78,6 +79,7 @@ function createWindow(): BrowserWindow {
   ipcMain.on('closed', async (_) => {
     await ModuleManager.stopModule('lapki-compiler');
     await ModuleManager.stopModule('lapki-flasher');
+    await ModuleManager.stopModule('sm-interpreter');
     app.exit(0);
   });
 
@@ -125,27 +127,37 @@ const startFlasher = async () => {
 const startCompiler = async () => {
   await ModuleManager.startLocalModule('lapki-compiler');
 };
+const startInterpreter = async () => {
+  await ModuleManager.startLocalModule('sm-interpreter');
+};
 
 const startModules = async () => {
   // Делаем в одной функции и последовательно
   // иначе будет найден одинаковый порт
   await startFlasher();
   await startCompiler();
+  await startInterpreter();
   await startDocServer();
 };
 
 initSettings();
-startModules();
 
 // Выполняется после инициализации Electron
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   if (!app.isPackaged) {
     installDevToolsExtension('react-dev-tools');
   }
   ipcMain.handle('appVersion', app.getVersion);
 
+  // Start modules before the renderer reads their dynamically assigned ports.
+  // Initial startup has no WebContents to notify about settings changes yet.
+  await startModules();
+
   const mainWindow = createWindow();
   initFileHandlersIPC();
+  const taskCatalog = loadTaskCatalog();
+
+  ipcMain.handle('tasks:getCatalog', () => taskCatalog);
 
   ipcMain.handle('Module:reboot', async (_event, module: ModuleName) => {
     await ModuleManager.stopModule(module);
@@ -155,6 +167,9 @@ app.whenReady().then(() => {
     }
     if (module === 'lapki-compiler') {
       settingsChangeSend(mainWindow.webContents, 'compiler', settings.getSync('compiler'));
+    }
+    if (module === 'sm-interpreter') {
+      settingsChangeSend(mainWindow.webContents, 'interpreter', settings.getSync('interpreter'));
     }
   });
 
@@ -216,5 +231,6 @@ app.on('window-all-closed', async () => {
   // явно останавливаем загрузчик, так как в некоторых случаях он остаётся висеть
   await ModuleManager.stopModule('lapki-flasher');
   await ModuleManager.stopModule('lapki-compiler');
+  await ModuleManager.stopModule('sm-interpreter');
   app.quit();
 });

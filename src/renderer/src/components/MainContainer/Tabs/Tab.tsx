@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+// TODO (L140-beep) Что делаем с этими вкладками?
+
+import React from 'react';
 
 import { twMerge } from 'tailwind-merge';
 
-import { ReactComponent as CloseIcon } from '@renderer/assets/icons/close.svg';
 import { ReactComponent as CodeIcon } from '@renderer/assets/icons/code.svg';
 import { ReactComponent as FlasherIcon } from '@renderer/assets/icons/flasher.svg';
 import { ReactComponent as MonitorIcon } from '@renderer/assets/icons/serial_monitor.svg';
@@ -13,32 +14,12 @@ import { Tab as TabType } from '@renderer/types/tabs';
 
 interface TabProps {
   isActive: boolean;
-  isDragging: boolean;
-  draggable: boolean;
   type: TabType['type'];
-  name: string;
-  showName: boolean;
-  canClose?: boolean;
-  onDragStart: () => void;
-  onDrop: () => void;
   onMouseDown: () => void;
-  onClose: () => void;
 }
 
 export const Tab: React.FC<TabProps> = (props) => {
-  const {
-    draggable,
-    isDragging,
-    isActive,
-    type,
-    name,
-    showName,
-    canClose = true,
-    onDragStart,
-    onDrop,
-    onMouseDown,
-    onClose,
-  } = props;
+  const { isActive, type, onMouseDown } = props;
 
   const TabIcon = {
     editor: <EditorIcon className="text-[#737373]" width={25} height={25} />,
@@ -48,69 +29,16 @@ export const Tab: React.FC<TabProps> = (props) => {
     serialMonitor: <MonitorIcon className="text-[#737373]" width={25} height={25} />,
     managerMS: <FlasherIcon className="text-[#737373]" width={25} height={25} />,
   };
-  const [dragOver, setDragOver] = useState(false);
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-
-    if (!draggable) {
-      e.dataTransfer.dropEffect = 'none';
-    }
-
-    if (!isDragging && draggable) setDragOver(true);
-  };
-
-  const handleDragLeave = () => {
-    if (!isDragging && draggable) setDragOver(false);
-  };
-
-  const handleDragStart = (e: React.DragEvent) => {
-    e.dataTransfer.effectAllowed = 'move';
-
-    onDragStart();
-  };
-
-  const handleDrop = () => {
-    onDrop();
-    setDragOver(false);
-  };
 
   return (
     <div
-      draggable={draggable}
-      onDragLeave={handleDragLeave}
-      onDragOver={handleDragOver}
-      onDragStart={handleDragStart}
-      onDrop={handleDrop}
       className={twMerge(
         'group flex cursor-pointer items-center rounded p-1 px-2 transition hover:bg-bg-primary',
-        isActive && 'bg-bg-primary',
-        dragOver && 'bg-bg-primary'
+        isActive && 'bg-bg-primary'
       )}
       onMouseDown={onMouseDown}
     >
       {TabIcon[type]}
-
-      {showName && (
-        <span title={name} className="ml-1 line-clamp-1 w-20 text-left">
-          {name}
-        </span>
-      )}
-
-      {canClose && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onClose();
-          }}
-          className={twMerge(
-            'hover:bg-bg-btn rounded-md p-1 opacity-0 transition-opacity group-hover:opacity-100',
-            isActive && 'opacity-100'
-          )}
-        >
-          <CloseIcon className="h-3 w-3" />
-        </button>
-      )}
     </div>
   );
 };

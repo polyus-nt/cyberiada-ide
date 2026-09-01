@@ -5,7 +5,13 @@ import { twMerge } from 'tailwind-merge';
 import { ReactComponent as SelectFileIcon } from '@renderer/assets/icons/upload-file.svg';
 import { BlgMbDevice } from '@renderer/components/Modules/Device';
 import { ManagerMS } from '@renderer/components/Modules/ManagerMS';
-import { Checkbox, Select, SelectOption, WithHint } from '@renderer/components/UI';
+import {
+  Checkbox,
+  ParameterSelect,
+  ParameterSelectOption,
+  ScrollArea,
+  WithHint,
+} from '@renderer/components/UI';
 import { useModelContext } from '@renderer/store/ModelContext';
 import { useFlasher } from '@renderer/store/useFlasher';
 import { StateMachine } from '@renderer/types/diagram';
@@ -19,14 +25,14 @@ interface FlasherTableProps {
 // размеры столбцов
 // tailwind почему-то не реагирует на название классов, в которые подставленны переменные (`w-[${v}vw]`),
 // поэтому при изменение стобцов приходится всё в ручную пересчитывать
-const checkColumn = twMerge('min-w-9', 'rounded border border-border-primary');
+const checkColumn = 'w-7 min-w-7';
 const stickyStyle = 'sticky top-0 z-10 bg-bg-secondary';
-const nameColumn = 'min-w-[16vw]';
-const typeColumn = 'min-w-[14vw]';
-const addressColumn = 'min-w-[16vw]';
-const firmwareSourceColumn = 'min-w-[20vw] flex-1';
-const selectSmSubColumn = 'min-w-[18vw] flex-1';
-const selectFileSubColumn = 'min-w-8';
+const nameColumn = 'w-1/4';
+const typeColumn = 'w-1/4';
+const addressColumn = 'w-1/4';
+const firmwareSourceColumn = 'w-1/4';
+const selectSmSubColumn = 'w-full min-w-0';
+const selectFileSubColumn = 'w-7 min-w-7';
 // высота клеток
 const cellHeight = 'min-h-9';
 
@@ -46,12 +52,11 @@ export const FlasherTable: React.FC<FlasherTableProps> = ({
 
   const { devices, flashTableData: tableData, setFlashTableData: setTableData } = useFlasher();
 
-  const [checkedAll, setCheckedAll] = useState<boolean>(true);
   const [fileBaseName, setFileBaseName] = useState<Map<number | string, string>>(new Map());
-  const [stateMachineOptions, setStateMachineOptions] = useState<Map<string, SelectOption[]>>(
-    new Map()
-  );
-  const [allAddressOptions, setAllAddressOptions] = useState<SelectOption[]>([]);
+  const [stateMachineOptions, setStateMachineOptions] = useState<
+    Map<string, ParameterSelectOption<string>[]>
+  >(new Map());
+  const [allAddressOptions, setAllAddressOptions] = useState<ParameterSelectOption<string>[]>([]);
 
   useEffect(() => {
     const newStateMachineOptions: typeof stateMachineOptions = new Map();
@@ -205,9 +210,6 @@ export const FlasherTable: React.FC<FlasherTableProps> = ({
   };
 
   const onCheckedChangeHandle = (tableItem: FlashTableItem) => {
-    if (checkedAll) {
-      setCheckedAll(!checkedAll);
-    }
     setTableData(
       tableData.map((item) => {
         if (item.targetId === tableItem.targetId) {
@@ -236,19 +238,6 @@ export const FlasherTable: React.FC<FlasherTableProps> = ({
     );
   };
 
-  const changeCheckedAll = (newChecked: boolean) => {
-    setCheckedAll(newChecked);
-    setTableData(
-      tableData.map((item) => {
-        const newItem: FlashTableItem = {
-          ...item,
-          isSelected: newChecked,
-        };
-        return newItem;
-      })
-    );
-  };
-
   const cellRender = (content: string | JSX.Element, mergeClassName: string, colspan?: number) => {
     return (
       <td
@@ -267,14 +256,7 @@ export const FlasherTable: React.FC<FlasherTableProps> = ({
   const headerRender = () => {
     return (
       <tr className={twMerge(stickyStyle, 'items-center justify-start font-semibold')}>
-        <td className={stickyStyle}>
-          <Checkbox
-            className={twMerge(checkColumn, cellHeight)}
-            checked={checkedAll && tableData.length > 0}
-            onCheckedChange={() => changeCheckedAll(!checkedAll)}
-            disabled={tableData.length === 0}
-          />
-        </td>
+        <td className={twMerge(stickyStyle, checkColumn)} />
         {cellRender('Наименование', twMerge(stickyStyle, nameColumn))}
         {cellRender('Тип', twMerge(stickyStyle, typeColumn))}
         {cellRender('Адрес', twMerge(stickyStyle, addressColumn))}
@@ -337,7 +319,7 @@ export const FlasherTable: React.FC<FlasherTableProps> = ({
       <tr key={tableItem.targetId}>
         <td>
           <Checkbox
-            className={twMerge(checkColumn, cellHeight)}
+            className="h-4 w-4 min-w-4 rounded-sm"
             checked={checked}
             onCheckedChange={() => onCheckedChangeHandle(tableItem)}
           />
@@ -358,14 +340,17 @@ export const FlasherTable: React.FC<FlasherTableProps> = ({
               {fileBaseName.get(tableItem.targetId) ?? 'Ошибка!'}
             </div>
           ) : (
-            <Select
+            <ParameterSelect
               options={typeId ? stateMachineOptions.get(typeId) : allAddressOptions}
               containerClassName={selectSmSubColumn}
+              menuWidth="250px"
               menuPosition="fixed"
               isSearchable={false}
               placeholder="Выберите..."
               noOptionsMessage={() => 'Нет подходящих машин состояний'}
-              value={getAssignedStateMachineOption(tableItem) as SelectOption}
+              value={
+                getAssignedStateMachineOption(tableItem) as ParameterSelectOption<string> | null
+              }
               onChange={(opt) => {
                 if (opt?.value === undefined) return;
                 onSelectChangeHandle(tableItem, opt.value);
@@ -406,12 +391,9 @@ export const FlasherTable: React.FC<FlasherTableProps> = ({
   };
 
   return (
-    <div
-      {...props}
-      className="max-h-60 overflow-y-auto scrollbar-thin scrollbar-track-scrollbar-track scrollbar-thumb-scrollbar-thumb"
-    >
+    <ScrollArea {...props} className="max-h-60 py-0" viewportClassName="mr-[6px]">
       {tableData.length > 0 ? (
-        <table className="w-full border-separate">
+        <table className="w-full table-fixed border-separate border-spacing-0">
           <thead className={twMerge(stickyStyle, 'bg-secondary font-semibold')}>
             {headerRender()}
           </thead>
@@ -424,6 +406,6 @@ export const FlasherTable: React.FC<FlasherTableProps> = ({
           </label>
         </div>
       )}
-    </div>
+    </ScrollArea>
   );
 };

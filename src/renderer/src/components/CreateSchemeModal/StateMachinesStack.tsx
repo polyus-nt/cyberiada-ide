@@ -2,7 +2,8 @@ import { useLayoutEffect, useRef } from 'react';
 
 import { twMerge } from 'tailwind-merge';
 
-import { ReactComponent as CloseIcon } from '@renderer/assets/icons/close.svg';
+import { ReactComponent as DeleteIcon } from '@renderer/assets/icons/delete.svg';
+import { ScrollArea } from '@renderer/components/UI';
 import { Platform } from '@renderer/types/platform';
 export type StateMachinesStackItem = {
   id: string;
@@ -36,38 +37,39 @@ export const StateMachinesStack: React.FC<StateMachinesStackProps> = ({
   };
 
   return (
-    <div
-      className="h-[30vh] w-full overflow-y-auto scroll-auto scrollbar-thin scrollbar-track-scrollbar-track scrollbar-thumb-scrollbar-thumb"
+    <ScrollArea
+      className="h-full w-full"
+      viewportClassName="scroll-auto px-[7px] scrollbar-thumb-scrollbar-thumb"
       ref={containerRef}
     >
       {selectedStateMachines.map((sm, index) => {
         return (
-          <div key={sm.id} className={twMerge(isSelected(index) && 'bg-bg-active')}>
-            <div
-              className="ml-2 mr-2 flex cursor-pointer select-none items-center p-2 transition-colors duration-75"
-              draggable
-              onDragStart={() => onDragStart(index)}
-              onDragEnd={() => onDragEnd()}
-              onClick={() => onSelect(index)}
-            >
-              <div className="flex-col">
-                <div className="text-base">{sm.id}</div>
-                <div className="text-sm">
-                  <i>{sm.platform.name}</i>
-                </div>
-              </div>
-              <button
-                type="button"
-                className="ml-auto rounded p-2 transition-colors hover:bg-bg-hover active:bg-bg-active"
-                onClick={(e) => handleOnDelte(e, index)}
-              >
-                <CloseIcon className="h-3 w-3" />
-              </button>
+          <div
+            key={sm.id}
+            className={twMerge(
+              'group flex cursor-pointer select-none items-center rounded-lg px-3 py-1.5 transition-colors hover:bg-bg-hover',
+              isSelected(index) && 'bg-bg-active'
+            )}
+            draggable
+            onDragStart={() => onDragStart(index)}
+            onDragEnd={() => onDragEnd()}
+            onClick={() => onSelect(index)}
+          >
+            <div className="min-w-0 leading-4">
+              <div className="truncate">{sm.id}</div>
+              <div className="truncate text-text-inactive">{sm.platform.name}</div>
             </div>
-            <hr className="ml-2 mr-2 h-[1px] w-auto border-bg-hover opacity-70" />
+            <button
+              type="button"
+              aria-label={`Удалить ${sm.id}`}
+              className="ml-auto rounded p-1 opacity-0 transition-all group-hover:opacity-100 hover:bg-bg-active focus:opacity-100"
+              onClick={(e) => handleOnDelte(e, index)}
+            >
+              <DeleteIcon className="danger h-3 w-3" />
+            </button>
           </div>
         );
       })}
-    </div>
+    </ScrollArea>
   );
 };

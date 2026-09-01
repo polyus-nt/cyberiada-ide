@@ -96,43 +96,58 @@ export const DeviceList: React.FC<DeviceListProps> = ({
     onClose();
   });
 
-  const renderBottom = () => {
+  const renderContent = () => {
     if (connectionStatus === ClientStatus.CONNECTED) {
-      const extraLabel = () => {
-        if (!listExtraLabel) return null;
-        return <div>{listExtraLabel}</div>;
-      };
       return (
-        <div>
-          <label>Устройства</label>
-          {extraLabel()}
-          <div className="mb-2 h-32 overflow-y-auto break-words rounded bg-bg-primary p-2">
-            {[...devices.keys()].map((key) => (
-              <button
-                key={key}
-                className={twMerge(
-                  'my-1 flex w-full items-center justify-center rounded border-2 border-[#557b91] p-1 hover:border-primary',
-                  isActive(key) && ' border-primary bg-primary text-white'
-                )}
-                onClick={() => setCurrentDevice(key)}
-                type="button"
-              >
-                {devices.get(key)?.displayName()}
-              </button>
-            ))}
+        <div className="grid h-full min-h-0 grid-cols-2 gap-6">
+          <div className="flex min-h-0 flex-col">
+            <div className="mb-2 flex min-h-[32px] items-center justify-between gap-3">
+              <span className="font-medium">Устройства</span>
+              {listExtraLabel && (
+                <span className="truncate text-text-inactive">{listExtraLabel}</span>
+              )}
+            </div>
+            <div className="min-h-0 flex-1 overflow-y-auto rounded-lg border border-border-primary p-1.5 scrollbar-thin scrollbar-track-scrollbar-track scrollbar-thumb-scrollbar-thumb">
+              {devices.size === 0 ? (
+                <p className="px-3 py-2 text-text-inactive">Устройства не найдены</p>
+              ) : (
+                [...devices.keys()].map((key) => (
+                  <button
+                    key={key}
+                    className={twMerge(
+                      'block w-full rounded-lg px-3 py-2 text-left transition-colors hover:bg-bg-hover',
+                      isActive(key) && 'bg-bg-active hover:bg-bg-active'
+                    )}
+                    onClick={() => setCurrentDevice(key)}
+                    type="button"
+                  >
+                    {devices.get(key)?.displayName()}
+                  </button>
+                ))
+              )}
+            </div>
           </div>
-          <label>Информация об устройстве</label>
-          <div className="mb-2 h-36 items-center overflow-y-auto break-words rounded bg-bg-primary p-2 text-left">
-            {[...devices.keys()].map((key) => (
-              <div key={key} className={twMerge('hidden', isActive(key) && 'block')}>
-                {deviceInfoDisplay(devices.get(key))}
-              </div>
-            ))}
+
+          <div className="flex min-h-0 flex-col">
+            <span className="mb-2 flex min-h-[32px] items-center font-medium">
+              Информация об устройстве
+            </span>
+            <div className="min-h-0 flex-1 overflow-y-auto break-words rounded-lg border border-border-primary p-3 text-left leading-[18px] scrollbar-thin scrollbar-track-scrollbar-track scrollbar-thumb-scrollbar-thumb">
+              {currentDeviceID ? (
+                deviceInfoDisplay(devices.get(currentDeviceID))
+              ) : (
+                <p className="text-text-inactive">Выберите устройство из списка</p>
+              )}
+            </div>
           </div>
         </div>
       );
     } else {
-      return <label>Отсутствует подключение к загрузчику</label>;
+      return (
+        <div className="grid h-full place-items-center text-text-inactive">
+          Отсутствует подключение к загрузчику
+        </div>
+      );
     }
   };
 
@@ -144,24 +159,29 @@ export const DeviceList: React.FC<DeviceListProps> = ({
       onRequestClose={onClose}
       submitLabel={submitLabel}
       onSubmit={handleSubmit}
-      className="bg-bg-secondary"
+      className="top-[18px] box-border flex h-[430px] max-h-[calc(100vh-36px)] w-[calc(100%-40px)] max-w-[640px] flex-col bg-bg-primary p-6"
+      headerClassName="mb-[23px] min-h-[39px] pb-3"
+      titleClassName="text-xs font-medium"
+      closeClassName="p-2"
+      closeIconClassName="h-2.5 w-2.5"
+      formClassName="flex min-h-0 flex-1 flex-col"
+      contentClassName="mb-0 min-h-0 flex-1"
+      actionsClassName="mt-6"
+      submitClassName="btn-primary h-8 min-w-[77px] px-3 py-1.5"
+      hideCancelButton
       submitDisabled={!currentDeviceID}
     >
-      <section className="flex h-full flex-col text-center">
-        <div className="px-4">
-          <div className="mb-2 flex rounded">
-            <button
-              className="btn-primary mr-2 flex w-full items-center justify-center gap-2 px-0"
-              onClick={() => handleGetList()}
-              disabled={connectionStatus !== ClientStatus.CONNECTED}
-              type="button"
-            >
-              <Update width="1.5rem" height="1.5rem" />
-              Обновить
-            </button>
-          </div>
-          {renderBottom()}
-        </div>
+      <section className="flex h-full min-h-0 flex-col">
+        <button
+          className="btn-secondary mb-4 flex h-8 w-fit min-w-0 items-center justify-center gap-2 border-primary px-3 py-1.5 text-primary"
+          onClick={() => handleGetList()}
+          disabled={connectionStatus !== ClientStatus.CONNECTED}
+          type="button"
+        >
+          <Update className="h-4 w-4" />
+          Обновить
+        </button>
+        <div className="min-h-0 flex-1">{renderContent()}</div>
       </section>
     </Modal>
   );

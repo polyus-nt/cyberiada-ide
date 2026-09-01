@@ -54,6 +54,10 @@ export const defaultSettings = {
     // FIXME (L140-beep): реализация локального компилятора на Linux и macOS
     type: (process.platform === 'win32' ? 'local' : 'remote') as ModuleType,
   },
+  interpreter: {
+    localHost: '127.0.0.1',
+    localPort: 0,
+  },
   flasher: {
     host: 'localhost',
     port: 0,
@@ -150,6 +154,9 @@ export const initSettings = () => {
 export const initSettingsHandlers = (webContents: WebContents) => {
   ipcMain.handle('settings:get', (_event, key) => {
     return settings.get(key);
+  });
+  ipcMain.handle('settings:getDefault', (_event, key: SettingsKey) => {
+    return structuredClone(defaultSettings[key]);
   });
   ipcMain.handle('settings:set', async (_event, key: SettingsKey, value) => {
     await settingsChange(webContents, key, value);

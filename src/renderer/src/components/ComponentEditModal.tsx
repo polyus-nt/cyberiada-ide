@@ -127,11 +127,21 @@ export const ComponentEditModal: React.FC<ComponentEditModalProps> = ({
       isOpen={isOpen}
       onRequestClose={onClose}
       onAfterClose={handleAfterClose}
-      title={componentName}
+      title={
+        <>
+          Редактор компонента: <span className="text-primary">{componentName}</span>
+        </>
+      }
       submitLabel="Применить"
       onSubmit={handleSubmit}
       sideLabel="Удалить"
       onSide={handleDelete}
+      className="top-5 w-[calc(100%-40px)] max-w-[440px]"
+      contentClassName="mb-6"
+      actionsClassName="gap-3"
+      sideClassName="btn h-8 min-w-[74px] border border-red-500 bg-transparent px-3 py-1.5 danger enabled:hover:opacity-90 enabled:active:opacity-80"
+      submitClassName="btn-primary h-8 px-3 py-1.5"
+      hideCancelButton
     >
       <ComponentFormFields
         showMainData={showMainData()}

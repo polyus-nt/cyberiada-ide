@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { Modal, Select } from '@renderer/components/UI';
+import { Modal, ParameterSelect } from '@renderer/components/UI';
 import { getAvailablePlatforms } from '@renderer/lib/data/PlatformLoader';
 import { PlatformInfo } from '@renderer/types/platform';
 
@@ -63,7 +63,7 @@ export const ReferenceModal: React.FC<ReferenceModalProps> = ({ onClose, ...prop
           <label htmlFor="platform-select" className="text-sm">
             Выберите платформу:
           </label>
-          <Select
+          <ParameterSelect
             containerClassName="w-full"
             options={platformOptions}
             onChange={(opt) => handlePlatformChange(opt?.value ?? '')}

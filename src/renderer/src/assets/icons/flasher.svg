@@ -1,12 +1,16 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<!-- Creator: CorelDRAW 2021 (64-Bit) -->
-<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" version="1.1" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" image-rendering="optimizeQuality" fill-rule="evenodd" clip-rule="evenodd"
-viewBox="0 0 11216 11216"
- xmlns:xlink="http://www.w3.org/1999/xlink"
- xmlns:xodm="http://www.corel.com/coreldraw/odm/2003">
- <g id="Слой_x0020_1">
-  <metadata id="CorelCorpID_0Corel-Layer"/>
-  <path fill="currentColor" d="M1102 3926l0 -2487c0,-185 152,-337 337,-337l2487 0 0 -990c0,-62 50,-112 112,-112l448 0c62,0 112,50 112,112l0 990 673 0 0 -990c0,-62 51,-112 113,-112l448 0c62,0 112,50 112,112l0 990 673 0 0 -990c0,-62 51,-112 112,-112l449 0c62,0 112,50 112,112l0 990 2517 0c169,0 306,138 306,306l0 2518 991 0c61,0 112,50 112,112l0 448c0,62 -51,112 -112,112l-991 0 0 673 991 0c61,0 112,51 112,113l0 448c0,62 -51,112 -112,112l-991 0 0 673 991 0c61,0 112,51 112,112l0 449c0,62 -51,112 -112,112l-991 0 0 2487c0,185 -151,336 -336,336l-2487 0 0 991c0,61 -50,112 -112,112l-449 0c-61,0 -112,-51 -112,-112l0 -991 -673 0 0 991c0,61 -50,112 -112,112l-448 0c-62,0 -113,-51 -113,-112l0 -991 -673 0 0 991c0,61 -50,112 -112,112l-448 0c-62,0 -112,-51 -112,-112l0 -991 -2487 0c-185,0 -337,-151 -337,-336l0 -2487 -990 0c-62,0 -112,-50 -112,-112l0 -449c0,-61 50,-112 112,-112l990 0 0 -673 -990 0c-62,0 -112,-50 -112,-112l0 -448c0,-62 50,-113 112,-113l990 0 0 -673 -990 0c-62,0 -112,-50 -112,-112l0 -448c0,-62 50,-112 112,-112l990 0zm649 -2242l7725 0c17,0 32,6 44,18 11,12 17,27 17,43l-5 7720c0,36 -31,67 -67,67l-7714 0c-37,0 -67,-30 -67,-67l0 -7714c0,-37 30,-67 67,-67zm6337 659l448 0c185,0 337,151 337,337l0 448c0,186 -152,337 -337,337l-448 0c-186,0 -337,-151 -337,-337l0 -448c0,-186 151,-337 337,-337zm-2480 1204l648 1122 647 1122 -959 0 0 1877 -673 0 0 -1877 -958 0 647 -1122 648 -1122z"/>
- </g>
+<svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect x="6.5" y="6.5" width="13" height="13" rx="0.5" stroke="#6B6B6B"/>
+<path d="M8 4V6" stroke="#6B6B6B" stroke-linecap="round"/>
+<path d="M18 4V6" stroke="#6B6B6B" stroke-linecap="round"/>
+<path d="M13 4V6" stroke="#6B6B6B" stroke-linecap="round"/>
+<path d="M8 20V22" stroke="#6B6B6B" stroke-linecap="round"/>
+<path d="M18 20V22" stroke="#6B6B6B" stroke-linecap="round"/>
+<path d="M13 20V22" stroke="#6B6B6B" stroke-linecap="round"/>
+<path d="M22 8L20 8" stroke="#6B6B6B" stroke-linecap="round"/>
+<path d="M22 18L20 18" stroke="#6B6B6B" stroke-linecap="round"/>
+<path d="M22 13L20 13" stroke="#6B6B6B" stroke-linecap="round"/>
+<path d="M6 8L4 8" stroke="#6B6B6B" stroke-linecap="round"/>
+<path d="M6 18L4 18" stroke="#6B6B6B" stroke-linecap="round"/>
+<path d="M6 13L4 13" stroke="#6B6B6B" stroke-linecap="round"/>
+<path d="M12.5 17C12.5 17.2761 12.7239 17.5 13 17.5C13.2761 17.5 13.5 17.2761 13.5 17L13 17L12.5 17ZM13.3536 8.64645C13.1583 8.45118 12.8417 8.45118 12.6464 8.64645L9.46447 11.8284C9.2692 12.0237 9.2692 12.3403 9.46447 12.5355C9.65973 12.7308 9.97631 12.7308 10.1716 12.5355L13 9.70711L15.8284 12.5355C16.0237 12.7308 16.3403 12.7308 16.5355 12.5355C16.7308 12.3403 16.7308 12.0237 16.5355 11.8284L13.3536 8.64645ZM13 17L13.5 17L13.5 9L13 9L12.5 9L12.5 17L13 17Z" fill="#6B6B6B"/>
 </svg>

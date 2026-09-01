@@ -6,20 +6,12 @@ import { getPlatform } from '@renderer/lib/data/PlatformLoader';
 import { StateMachineData } from '@renderer/lib/types';
 import { generateSmId } from '@renderer/lib/utils';
 import { useModelContext } from '@renderer/store/ModelContext';
-import { useTabs } from '@renderer/store/useTabs';
 import { emptyStateMachine } from '@renderer/types/diagram';
 
 import { useModal } from './useModal';
 
 export const useStateMachines = () => {
   const modelController = useModelContext();
-
-  const [items, openTab, closeTab, renameTab] = useTabs((state) => [
-    state.items,
-    state.openTab,
-    state.closeTab,
-    state.renameTab,
-  ]);
   const [idx, setIdx] = useState<string | undefined>(undefined); // индекс текущей машины состояний
   const [data, setData] = useState<StateMachineData | undefined>(undefined);
 
@@ -68,13 +60,10 @@ export const useStateMachines = () => {
     const sm = modelController.model.data.elements.stateMachines[idx];
 
     if (!sm) return;
-    const [newSmId, newName, canvasId] = modelController.duplicateStateMachine(idx);
+    const [canvasId] = modelController.duplicateStateMachine(idx);
 
-    openTab(modelController, {
-      type: 'editor',
-      canvasId: canvasId,
-      name: newName ?? newSmId,
-    });
+    modelController.changeHeadControllerId(canvasId);
+
     editClose();
   };
 
@@ -89,36 +78,17 @@ export const useStateMachines = () => {
 
     const sm = { ...emptyStateMachine(), ...data };
     const canvasId = modelController.createStateMachine(smId, sm);
-    openTab(modelController, {
-      type: 'editor',
-      canvasId: canvasId,
-      name: sm.name ?? smId,
-    });
+    modelController.changeHeadControllerId(canvasId);
   };
 
   const onEdit = (data: StateMachineData) => {
     if (!idx) return;
     const newName = data.name === '' ? undefined : data.name;
-    const sm = modelController.model.data.elements.stateMachines[idx];
-    if (newName !== sm.name) {
-      renameTab(sm.name ? sm.name : idx, data.name ? data.name : idx);
-    }
     modelController.editStateMachine(idx, { ...data, name: newName });
   };
 
   const onDelete = () => {
     if (!idx) return;
-
-    for (const tab of items) {
-      if (!(tab.type === 'editor')) continue;
-
-      const tabController = modelController.controllers[tab.canvasId];
-
-      if (!tabController.stateMachinesSub[idx] || !(tabController.type === 'specific')) continue;
-
-      closeTab(tab.name, modelController);
-      break;
-    }
     modelController.deleteStateMachine(idx);
 
     editClose();

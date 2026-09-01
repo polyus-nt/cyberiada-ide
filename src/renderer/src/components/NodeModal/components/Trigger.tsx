@@ -3,7 +3,7 @@ import React, { memo, useLayoutEffect, useMemo, useRef } from 'react';
 import CodeMirror, { Transaction, EditorState, ReactCodeMirrorRef } from '@uiw/react-codemirror';
 import throttle from 'lodash.throttle';
 
-import { Select, TabPanel, Tabs } from '@renderer/components/UI';
+import { ParameterSelect, TabPanel, Tabs } from '@renderer/components/UI';
 import { CanvasController } from '@renderer/lib/data/ModelController/CanvasController';
 import { EventData } from '@renderer/types/diagram';
 
@@ -79,7 +79,7 @@ export const Trigger: React.FC<TriggerProps> = memo(function Trigger(props) {
   return (
     <div>
       <div className="mb-2 flex items-end gap-2">
-        <p className="text-lg font-bold">Когда</p>
+        <p className="font-medium">Когда</p>
 
         {!visual && (
           <Tabs
@@ -91,10 +91,10 @@ export const Trigger: React.FC<TriggerProps> = memo(function Trigger(props) {
         )}
       </div>
 
-      <div className="pl-4">
+      <div>
         <TabPanel value={0} tabValue={tabValue}>
           <div className="flex w-full gap-2">
-            <Select
+            <ParameterSelect
               containerClassName="w-full"
               options={componentOptions}
               onChange={onComponentChange}
@@ -103,7 +103,7 @@ export const Trigger: React.FC<TriggerProps> = memo(function Trigger(props) {
               placeholder="Выберите компонент..."
               noOptionsMessage={() => 'Отсутствуют компоненты'}
             />
-            <Select
+            <ParameterSelect
               containerClassName="w-full"
               options={methodOptions}
               onChange={onMethodChange}

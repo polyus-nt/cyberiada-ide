@@ -6,7 +6,7 @@ import { formatArgType, validators } from '@renderer/utils';
 
 import { idError } from './ComponentEditModal';
 import { ComponentFormFieldLabel } from './ComponentFormFieldLabel';
-import { ColorInput, Select } from './UI';
+import { ColorInput, ParameterSelect, TextInput } from './UI';
 
 interface ComponentFormFieldsProps {
   showMainData: boolean;
@@ -83,13 +83,12 @@ export const ComponentFormFields: React.FC<ComponentFormFieldsProps> = ({
   }, [protoParameters, protoInitializationParameters, setErrors]);
 
   return (
-    <div className="flex flex-col gap-2.5">
-      <h3 className="mb-1 text-xl">Параметры</h3>
-
+    <div className="flex flex-col gap-3">
       {showMainData && (
         <>
           <ComponentFormFieldLabel
             label="Название"
+            labelClassName="w-[109px]"
             placeholder="Введите название..."
             maxLength={20}
             hint="Человекочитаемое название, которое будет отображаться в интерфейсе вместо технического. До 20 символов."
@@ -100,11 +99,8 @@ export const ComponentFormFields: React.FC<ComponentFormFieldsProps> = ({
 
           <ComponentFormFieldLabel
             placeholder="Введите идентификатор..."
-            label={
-              <>
-                Техническое <br /> название
-              </>
-            }
+            label="Тех. название"
+            labelClassName="w-[109px]"
             maxLength={20}
             hint="Уникальное техническое название, которое будет использоваться в коде. До 20 символов, среди которых – латинские буквы, цифры и знаки подчёркивания. Не должно начинаться с цифры."
             value={id}
@@ -115,19 +111,25 @@ export const ComponentFormFields: React.FC<ComponentFormFieldsProps> = ({
 
           <ComponentFormFieldLabel
             label="Подпись"
+            labelClassName="w-[109px]"
             hint="До 3-х символов. Подпись нужна для различения иконок разных компонентов одного типа на схеме."
-            value={parameters['label'] ?? ''}
-            name="label"
-            maxLength={3}
-            onChange={(e) => handleInputChange('label', e.target.value)}
-          />
-
-          <ComponentFormFieldLabel label="Цвет подписи" name="labelColor" as="div">
-            <ColorInput
-              clearable={false}
-              value={parameters['labelColor'] ?? '#FFFFFF'}
-              onChange={(value) => handleInputChange('labelColor', value)}
-            />
+            as="div"
+          >
+            <div className="flex items-center gap-2.5">
+              <TextInput
+                className="h-8 max-w-none flex-1 rounded-lg px-2 py-1"
+                value={parameters['label'] ?? ''}
+                name="label"
+                maxLength={3}
+                onChange={(e) => handleInputChange('label', e.target.value)}
+              />
+              <ColorInput
+                className="h-8 w-8 rounded-lg"
+                clearable={false}
+                value={parameters['labelColor'] ?? '#FFFFFF'}
+                onChange={(value) => handleInputChange('labelColor', value)}
+              />
+            </div>
           </ComponentFormFieldLabel>
         </>
       )}
@@ -153,14 +155,14 @@ export const ComponentFormFields: React.FC<ComponentFormFieldsProps> = ({
               key={idx}
               error={error}
               label={name}
-              labelClassName="whitespace-pre"
+              labelClassName="w-[109px] whitespace-pre"
               hint={param.description}
             >
-              <Select
-                className="w-[250px]"
+              <ParameterSelect
+                menuWidth="75px"
                 options={options}
                 value={options.find((o) => o.value === value || o.value === Number(value))}
-                onChange={({ value }: any) => handleInputChange(idx, value)}
+                onChange={(option) => handleInputChange(idx, String(option?.value ?? ''))}
               />
             </ComponentFormFieldLabel>
           );
@@ -170,7 +172,7 @@ export const ComponentFormFields: React.FC<ComponentFormFieldsProps> = ({
           <ComponentFormFieldLabel
             key={idx}
             label={name}
-            labelClassName="whitespace-pre"
+            labelClassName="w-[109px] whitespace-pre"
             hint={param.description + (type ? `\nТип: ${formatArgType(type)}` : '')}
             error={error}
             value={value}

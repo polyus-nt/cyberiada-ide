@@ -1,0 +1,56 @@
+.ParameterSelect__control {
+  @apply h-8 rounded-lg border-border-primary bg-transparent shadow-none !important;
+}
+
+.ParameterSelect__value-container {
+  @apply h-8 px-2 py-0 !important;
+}
+
+.ParameterSelect__indicators {
+  @apply h-8 !important;
+}
+
+.ParameterSelect__indicator {
+  @apply p-1 text-border-primary !important;
+}
+
+.ParameterSelect__indicator-separator {
+  @apply hidden;
+}
+
+.ParameterSelect__control--is-focused {
+  @apply border-text-primary !important;
+}
+
+.ParameterSelect__single-value {
+  @apply text-text-primary !important;
+}
+
+.ParameterSelect__menu {
+  @apply overflow-hidden rounded-lg border-0 bg-white text-text-primary shadow-[0_2px_14px_rgba(0,0,0,0.25)] !important;
+}
+
+.ParameterSelect__menu-list {
+  @apply bg-white text-text-primary scrollbar-thin scrollbar-track-scrollbar-track scrollbar-thumb-scrollbar-thumb;
+}
+
+.ParameterSelect__option {
+  @apply w-full cursor-pointer rounded-lg px-3 py-1.5 text-left text-xs text-text-primary outline-none transition-colors !important;
+}
+
+.ParameterSelect__option--is-focused,
+.ParameterSelect__option--is-selected {
+  @apply bg-[#E6F4FF] text-text-primary !important;
+}
+
+.ParameterSelect__option--is-focused:active {
+  @apply bg-bg-active !important;
+}
+
+.error > .ParameterSelect__control {
+  @apply border-error !important;
+}
+
+.ParameterSelect__placeholder {
+  @apply text-border-contrast !important;
+}

@@ -44,11 +44,11 @@ export const StateMachinesHierarchy: React.FC<StateMachinesHierarchyProps> = ({
 
   const header = () => {
     return (
-      <button className="my-3 flex items-center" onClick={() => togglePanel()}>
+      <button className="flex h-11 items-center" onClick={() => togglePanel()}>
         <ArrowIcon
-          className={twMerge('rotate-0 transition-transform', isCollapsed() && '-rotate-90')}
+          className={twMerge('size-3 rotate-0 transition-transform', isCollapsed() && '-rotate-90')}
         />
-        <h3 className="font-semibold">Иерархия</h3>
+        <h3 className="ml-1 text-xs font-medium">Иерархия</h3>
       </button>
     );
   };

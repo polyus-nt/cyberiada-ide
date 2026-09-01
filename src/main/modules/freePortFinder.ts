@@ -68,6 +68,7 @@ export async function findFreePort(data: {
 export function getUsedPorts(): number[] {
   return [
     Number(settings.getSync('compiler.localPort')),
+    Number(settings.getSync('interpreter.localPort')),
     Number(settings.getSync('flasher.localPort')),
     Number(extractPort(settings.getSync('doc.localHost') as string)),
   ];

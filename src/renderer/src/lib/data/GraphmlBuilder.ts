@@ -545,6 +545,17 @@ export function exportCGML(elements: Elements): string {
   return exportGraphml(cgmlElements);
 }
 
+export function exportStateMachineCGML(elements: Elements, smId: string): string {
+  const stateMachine = elements.stateMachines[smId];
+  if (!stateMachine || smId === '') {
+    throw new Error(`Машина состояний '${smId}' не найдена.`);
+  }
+  return exportCGML({
+    parameters: elements.parameters,
+    stateMachines: { [smId]: stateMachine },
+  });
+}
+
 export function serializeTransitionActions(
   label: Exclude<Transition['label'], undefined>,
   platform: Platform,

@@ -4,7 +4,7 @@ import { ComponentFormFieldLabel } from '@renderer/components/ComponentFormField
 import { getAvailablePlatforms } from '@renderer/lib/data/PlatformLoader';
 import { AddressData } from '@renderer/types/FlasherTypes';
 
-import { Modal, Select, SelectOption } from '../../UI';
+import { Modal, ParameterSelect, ParameterSelectOption } from '../../UI';
 
 export type AddressEntryForm = {
   name: string;
@@ -91,8 +91,17 @@ export const AddressEntryEditModal: React.FC<AddressEntryEditModalProps> = (prop
       onRequestClose={onClose}
       onSubmit={handleSubmit}
       submitLabel={submitLabel}
+      className="top-[18px] box-border w-[calc(100%-40px)] max-w-[440px] bg-bg-primary p-6"
+      headerClassName="mb-[23px] min-h-[39px] pb-3"
+      titleClassName="text-xs font-medium"
+      closeClassName="p-2"
+      closeIconClassName="h-2.5 w-2.5"
+      contentClassName="mb-0"
+      actionsClassName="mt-6"
+      submitClassName="btn-primary h-8 min-w-0 px-3 py-1.5"
+      hideCancelButton
     >
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-4">
         <Controller
           control={control}
           name="name"
@@ -149,23 +158,24 @@ export const AddressEntryEditModal: React.FC<AddressEntryEditModalProps> = (prop
                 />
               );
             } else {
-              const typeOptions: SelectOption[] = [
+              const typeOptions: ParameterSelectOption<string>[] = [
                 {
                   label: noneOption,
                   value: '',
-                  hint: 'Выберите этот вариант, если подходящей платы нет в списке. Этот выбор можно будет изменить после сохранения.',
                 },
               ];
               typeOptions.push(
                 ...getAvailablePlatforms()
                   .filter((v) => v.idx.startsWith('tjc'))
                   .map((v) => {
-                    return { label: v.idx, value: v.idx, hint: v.name } as SelectOption;
+                    return { label: v.idx, value: v.idx };
                   })
               );
               return (
                 <ComponentFormFieldLabel label={label} hint={hint} as="div">
-                  <Select
+                  <ParameterSelect
+                    containerClassName="w-full"
+                    menuWidth="280px"
                     placeholder={'Выберите тип платы'}
                     onChange={(v) => onChange(v?.value ?? '')}
                     options={typeOptions}

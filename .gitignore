@@ -17,3 +17,7 @@ resources/modules/*/arduino-cli
 resources/modules/*/avrdude
 resources/modules/*/gcc-arm-none-eabi
 resources/modules/*/lapki-compiler/build/
+
+# AI
+CONTEXT.md
+AGENTS.md

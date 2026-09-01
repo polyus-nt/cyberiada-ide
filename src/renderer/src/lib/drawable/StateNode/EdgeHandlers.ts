@@ -43,10 +43,10 @@ export class EdgeHandlers {
     И при отписке во время удаления элемента мы в unbind больше не заходим (или если не делали mount вообще).
   */
   bindEvents() {
-    if (!this.isBinded) {
-      this.isBinded = true;
-      this.app.mouse.on('mousedown', this.handleMouseDown);
-    }
+    if (!this.app.controller.isMounted || this.isBinded) return;
+
+    this.isBinded = true;
+    this.app.mouse.on('mousedown', this.handleMouseDown);
   }
 
   unbindEvents() {

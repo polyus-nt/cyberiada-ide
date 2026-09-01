@@ -1,3 +1,5 @@
+// TODO (L140-beep) Что делаем с этими вкладками?
+
 interface TabPanelProps {
   value: number;
   tabValue: number;

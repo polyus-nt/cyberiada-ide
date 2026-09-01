@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-import { ReactComponent as QuestionMark } from '@renderer/assets/icons/question-mark.svg';
 import { AttributeConstSwitch } from '@renderer/components/AttributeConstSwitch';
 import { ComponentFormFieldLabel } from '@renderer/components/ComponentFormFieldLabel';
-import { Select, SelectOption, WithHint } from '@renderer/components/UI';
+import { ParameterSelect, ParameterSelectOption, ScrollArea } from '@renderer/components/UI';
 import { CanvasController } from '@renderer/lib/data/ModelController/CanvasController';
 import { isVariable } from '@renderer/lib/utils';
 import { ArgList, Variable } from '@renderer/types/diagram';
@@ -27,8 +26,8 @@ interface ActionsModalParametersProps {
   errors: Record<string, string>;
   setErrors: React.Dispatch<React.SetStateAction<Record<string, string>>>;
 
-  componentOptions: SelectOption[];
-  attributeOptionsSearch: (selectedParameterComponent: string | null) => SelectOption[];
+  componentOptions: ParameterSelectOption[];
+  attributeOptionsSearch: (selectedParameterComponent: string | null) => ParameterSelectOption[];
 
   smId: string;
   controller: CanvasController;
@@ -77,6 +76,24 @@ export const ActionsModalParameters: React.FC<ActionsModalParametersProps> = ({
 
   const [isChecked, setIsChecked] = useState<Map<string, boolean>>(new Map());
 
+  // Initialize `isChecked` from `parameters` and `protoParameters`.
+  // Do this in an effect (not during render) to avoid mutating state while rendering
+  // which could flip the switch back immediately.
+  useEffect(() => {
+    const map = new Map<string, boolean>();
+    protoParameters.forEach((p) => {
+      const val = parameters[p.name]?.value;
+      if (typeof val === 'string') {
+        map.set(p.name, !!getComponentAttribute(val, controller.platform[smId]));
+      } else if (isVariable(val)) {
+        map.set(p.name, true);
+      } else {
+        map.set(p.name, false);
+      }
+    });
+    setIsChecked(map);
+  }, [protoParameters, parameters, smId]);
+
   const onChange = (parameter: string, row: number, col: number, value: number) => {
     (parameters[parameter].value as number[][])[row][col] = value;
     setParameters({
@@ -103,145 +120,146 @@ export const ActionsModalParameters: React.FC<ActionsModalParametersProps> = ({
   }
 
   return (
-    <div className="flex max-h-[50vh] flex-col gap-2 overflow-y-auto scrollbar-thin scrollbar-track-scrollbar-track scrollbar-thumb-scrollbar-thumb">
-      <h3 className="mb-1 text-xl">Параметры</h3>
-      {protoParameters.map((proto, idx) => {
-        const { name, description = '', type = '', range } = proto;
-        const parameter = parameters[name] ?? { value: '', order: idx };
-        const value = parameter.value;
-        const error = errors[name];
-        const hint = getHint(description, type);
-        const label = name;
-        if (Array.isArray(type)) {
-          const valueAliases = proto.valueAlias;
-          const options =
-            valueAliases !== undefined &&
-            Array.isArray(valueAliases) &&
-            valueAliases.length === type.length
-              ? type.map((value, index) => ({
-                  label: valueAliases[index] ?? value,
-                  value,
-                }))
-              : type.map((value) => ({ label: value, value }));
-          return (
-            <ComponentFormFieldLabel
-              key={name}
-              label={label}
-              labelClassName="whitespace-pre"
-              hint={hint}
-              error={error}
-              childrenDivClassname="ml-[50px] w-[300px]"
-            >
-              <Select
-                options={options}
-                // ReactSelect не сбрасывает внутреннее состояние на undefined.
-                value={options.find((o) => o.value === value) ?? null}
-                onChange={(opt) => handleInputChange(name, idx, opt?.value ?? '')}
-              />
-            </ComponentFormFieldLabel>
-          );
-        }
-        if (isMatrix(type)) {
-          const { width, height } = getMatrixDimensions(type);
-          const parsedRange = range ?? getDefaultRange();
-          if (!value) {
-            const newMatrix = createEmptyMatrix(type);
-            parameters[name] = {
-              value: newMatrix.values,
-              order: idx,
-            };
-          }
-
-          if (Array.isArray(value) && Array.isArray(value[0])) {
+    <ScrollArea className="min-h-0 flex-1">
+      <div className="flex min-w-0 flex-col gap-2">
+        <h3 className="mb-1 text-xs">Параметры</h3>
+        {protoParameters.map((proto, idx) => {
+          const { name, description = '', type = '', range } = proto;
+          const parameter = parameters[name] ?? { value: '', order: idx };
+          const value = parameter.value;
+          const error = errors[name];
+          const hint = getHint(description, type);
+          const label = name;
+          if (Array.isArray(type)) {
+            const valueAliases = proto.valueAlias;
+            const options =
+              valueAliases !== undefined &&
+              Array.isArray(valueAliases) &&
+              valueAliases.length === type.length
+                ? type.map((value, index) => ({
+                    label: valueAliases[index] ?? value,
+                    value,
+                  }))
+                : type.map((value) => ({ label: value, value }));
             return (
               <ComponentFormFieldLabel
-                as="div"
                 key={name}
                 label={label}
                 labelClassName="whitespace-pre"
                 hint={hint}
                 error={error}
-                name={name}
+                childrenDivClassname="min-w-0 w-full"
               >
-                <MatrixWidget
-                  key={name}
-                  {...{
-                    width: width,
-                    height: height,
-                    values: parameters[name].value as number[][],
-                    isClickable: true,
-                    style: {
-                      ledHeight: 12,
-                      ledWidth: 12,
-                      margin: 0.5,
-                      border: 2,
-                      isRounded: true,
-                    },
-                    range: parsedRange,
-                    isHalf: type.startsWith('Half'),
-                  }}
-                  onChange={onChange.bind(this, name)}
+                <ParameterSelect
+                  options={options}
+                  // ReactSelect не сбрасывает внутреннее состояние на undefined.
+                  value={options.find((o) => o.value === value) ?? null}
+                  onChange={(option) => handleInputChange(name, idx, String(option?.value ?? ''))}
                 />
               </ComponentFormFieldLabel>
             );
           }
-        }
-        const platform = controller.platform[smId];
-        let currentChecked = isChecked.get(name);
-        let selectedParameterMethod: string | null = null;
-        let selectedParameterComponent: string | null = null;
-        if (typeof value === 'string') {
-          const componentAttribute = getComponentAttribute(value, platform);
-          if (isChecked.get(name) === undefined) {
-            setCheckedTo(name, componentAttribute != null);
+          if (isMatrix(type)) {
+            const { width, height } = getMatrixDimensions(type);
+            const parsedRange = range ?? getDefaultRange();
+            if (!value) {
+              const newMatrix = createEmptyMatrix(type);
+              parameters[name] = {
+                value: newMatrix.values,
+                order: idx,
+              };
+            }
+
+            if (Array.isArray(value) && Array.isArray(value[0])) {
+              return (
+                <ComponentFormFieldLabel
+                  as="div"
+                  key={name}
+                  label={label}
+                  labelClassName="whitespace-pre"
+                  hint={hint}
+                  error={error}
+                  name={name}
+                >
+                  <MatrixWidget
+                    key={name}
+                    {...{
+                      width: width,
+                      height: height,
+                      values: parameters[name].value as number[][],
+                      isClickable: true,
+                      style: {
+                        ledHeight: 12,
+                        ledWidth: 12,
+                        margin: 0.5,
+                        border: 2,
+                        isRounded: true,
+                      },
+                      range: parsedRange,
+                      isHalf: type.startsWith('Half'),
+                    }}
+                    onChange={onChange.bind(this, name)}
+                  />
+                </ComponentFormFieldLabel>
+              );
+            }
           }
-          selectedParameterComponent =
-            currentChecked && componentAttribute ? componentAttribute[0] : null;
-          selectedParameterMethod =
-            currentChecked && componentAttribute ? componentAttribute[1] : null;
-        } else if (isVariable(value)) {
-          selectedParameterComponent = value.component;
-          selectedParameterMethod = value.method;
-          isChecked.set(name, true);
-          currentChecked = true;
-        }
-        const attributeOptions = attributeOptionsSearch(selectedParameterComponent);
-        return (
-          <div className="flex space-x-2" key={name}>
-            <div className="mt-[4px]">
-              <AttributeConstSwitch
-                checked={currentChecked}
-                onCheckedChange={() => {
-                  setCheckedTo(name, !currentChecked);
-                  handleInputChange(name, idx, '');
-                }}
-                hint={
-                  currentChecked
-                    ? 'Переключиться на константу'
-                    : 'Переключиться на атрибут компонента'
-                }
-              />
-            </div>
-            {currentChecked ? (
-              <div>
-                <div className="flex">
-                  <label className="grid grid-cols-[max-content,1fr] items-center justify-start gap-2">
-                    <div className="flex min-w-28 items-center gap-1">
-                      <span className="whitespace-pre">{label}</span>
-                      {hint && (
-                        <WithHint hint={hint}>
-                          {(props) => (
-                            <div className="shrink-0" {...props}>
-                              <QuestionMark className="h-5 w-5" />
-                            </div>
-                          )}
-                        </WithHint>
-                      )}
-                    </div>
-                  </label>
-                  <div className="flex w-full">
-                    <Select
-                      containerClassName="w-[250px]"
+          const platform = controller.platform[smId];
+          const currentChecked = isChecked.get(name) ?? false;
+          let selectedParameterMethod: string | null = null;
+          let selectedParameterComponent: string | null = null;
+          if (typeof value === 'string') {
+            const componentAttribute = getComponentAttribute(value, platform);
+            selectedParameterComponent =
+              currentChecked && componentAttribute ? componentAttribute[0] : null;
+            selectedParameterMethod =
+              currentChecked && componentAttribute ? componentAttribute[1] : null;
+          } else if (isVariable(value)) {
+            selectedParameterComponent = value.component;
+            selectedParameterMethod = value.method;
+            // rely on initialized state from useEffect; do not mutate during render
+          }
+          const attributeOptions = attributeOptionsSearch(selectedParameterComponent);
+          return (
+            // Clamp row height and hide overflow so visual outlines or internal focus
+            // states (like react-select indicators) cannot increase the row height
+            // and cause a scrollbar to appear.
+            <div className={'flex min-h-[32px] items-center space-x-2 overflow-hidden'} key={name}>
+              <div className="self-center">
+                <AttributeConstSwitch
+                  checked={currentChecked}
+                  onCheckedChange={(newChecked: boolean) => {
+                    setCheckedTo(name, newChecked);
+                    if (newChecked) {
+                      handleInputChange(name, idx, { component: '', method: '' });
+                    } else {
+                      handleInputChange(name, idx, '');
+                    }
+                  }}
+                  hint={
+                    currentChecked
+                      ? 'Переключиться на константу'
+                      : 'Переключиться на атрибут компонента'
+                  }
+                />
+              </div>
+              {/* Use ComponentFormFieldLabel here as well so the label column
+                  size matches the unchecked rows. childrenDivClassname="w-full min-w-0"
+                  ensures the right-side content can shrink and won't push layout. */}
+              {currentChecked ? (
+                <ComponentFormFieldLabel
+                  as="div"
+                  label={label}
+                  labelClassName="whitespace-pre"
+                  childrenDivClassname="w-full min-w-0"
+                  hint={hint}
+                  error={error}
+                >
+                  <div className="flex w-full gap-3">
+                    {/* Use `flex-1 min-w-0` so ParameterSelect can shrink inside a flex row without forcing a wrap.
+                      `h-8 box-border` keeps the control height fixed to prevent layout jumps. */}
+                    <ParameterSelect
+                      containerClassName={'flex-1 min-w-0 h-8 box-border'}
                       options={componentOptions}
                       onChange={(opt) =>
                         handleComponentAttributeChange(name, idx, opt?.value ?? '', '')
@@ -253,8 +271,8 @@ export const ActionsModalParameters: React.FC<ActionsModalParametersProps> = ({
                       noOptionsMessage={() => 'Нет подходящих компонентов'}
                       placeholder="Выберите компонент..."
                     />
-                    <Select
-                      containerClassName="w-[250px]"
+                    <ParameterSelect
+                      containerClassName={'flex-1 min-w-0 h-8 box-border'}
                       options={attributeOptions}
                       onChange={(opt) =>
                         handleComponentAttributeChange(
@@ -272,25 +290,24 @@ export const ActionsModalParameters: React.FC<ActionsModalParametersProps> = ({
                       placeholder="Выберите атрибут..."
                     />
                   </div>
-                </div>
-                <p className="pl-[120px] text-sm text-error">{error}</p>
-              </div>
-            ) : (
-              <ComponentFormFieldLabel
-                key={name}
-                label={label}
-                labelClassName="whitespace-pre"
-                hint={hint}
-                error={error}
-                value={value as string}
-                name={name}
-                placeholder="Введите значение..."
-                onChange={(e) => handleInputChange(name, idx, e.target.value)}
-              />
-            )}
-          </div>
-        );
-      })}
-    </div>
+                </ComponentFormFieldLabel>
+              ) : (
+                <ComponentFormFieldLabel
+                  key={name}
+                  label={label}
+                  hint={hint}
+                  error={error}
+                  childrenDivClassname="w-full min-w-0"
+                  value={value as string}
+                  name={name}
+                  placeholder="Введите значение..."
+                  onChange={(e) => handleInputChange(name, idx, e.target.value)}
+                />
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </ScrollArea>
   );
 };

@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 
 import { isEqual } from 'lodash';
 
-import { Modal } from '@renderer/components/UI';
 import { useModal } from '@renderer/hooks/useModal';
 import { CanvasController } from '@renderer/lib/data/ModelController/CanvasController';
 import { ChangeTransitionParams } from '@renderer/lib/types';
@@ -15,8 +14,10 @@ import {
   Transition,
 } from '@renderer/types/diagram';
 
-import { Actions, Condition, ColorField, Trigger } from './components';
+import { Actions, Condition, Trigger } from './components';
 import { useTrigger, useCondition, useActions } from './hooks';
+
+import { MovingModal } from '../UI/Modal/MovingModal';
 
 interface TransitionModalProps {
   smId: string;
@@ -27,6 +28,9 @@ export const TransitionModal: React.FC<TransitionModalProps> = ({ smId, controll
   const modelController = useModelContext();
   const visual = controller.useData('visual');
   const headControllerId = modelController.model.useData('', 'headControllerId');
+  const states = modelController.model.useData(smId, 'elements.states') as {
+    [id: string]: { name: string };
+  };
   const choiceStates = modelController.model.useData(smId, 'elements.choiceStates');
   const transitions = modelController.model.useData(smId, 'elements.transitions') as {
     [id: string]: Transition;
@@ -60,6 +64,19 @@ export const TransitionModal: React.FC<TransitionModalProps> = ({ smId, controll
     return true;
   }, [smId, controller, newTransition, transition]);
 
+  const transitionEndpoints = newTransition ?? transition;
+  const getStateName = (id: string) => states[id]?.name ?? id;
+  const title = transitionEndpoints
+    ? `Редактор перехода [${getStateName(transitionEndpoints.sourceId)} -> ${getStateName(
+        transitionEndpoints.targetId
+      )}]`
+    : 'Редактор перехода';
+
+  const closeModal = () => {
+    handleAfterClose();
+    close();
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (isInitialTransition && transition && transitionId) {
@@ -72,7 +89,7 @@ export const TransitionModal: React.FC<TransitionModalProps> = ({ smId, controll
         label: transition.label,
       });
 
-      close();
+      closeModal();
       return;
     }
 
@@ -233,7 +250,7 @@ export const TransitionModal: React.FC<TransitionModalProps> = ({ smId, controll
         } as any, // Из-за position,
       });
     }
-    close();
+    closeModal();
   };
 
   // Сброс формы после закрытия
@@ -291,14 +308,17 @@ export const TransitionModal: React.FC<TransitionModalProps> = ({ smId, controll
 
   return (
     <>
-      <Modal
-        title="Редактор соединения"
+      <MovingModal
+        id={`transition-modal-${smId}`}
+        title={title}
         onSubmit={handleSubmit}
         isOpen={isOpen}
-        onRequestClose={close}
-        onAfterClose={handleAfterClose}
+        onRequestClose={closeModal}
+        submitLabel="Сохранить"
+        cancelLabel="Отмена"
+        className="h-[440px] w-[546px]"
       >
-        <div className="flex flex-col gap-4">
+        <div className="flex h-full flex-col gap-4">
           {!isInitialTransition && showTrigger && (
             <Trigger event={(transition?.label as EventData) ?? null} {...trigger} />
           )}
@@ -307,9 +327,8 @@ export const TransitionModal: React.FC<TransitionModalProps> = ({ smId, controll
             <Actions event={(transition?.label as EventData) ?? null} {...actions} />
           )}
           {error && <div className="text-error">{error}</div>}
-          <ColorField label="Цвет линии:" value={color} onChange={setColor} />
         </div>
-      </Modal>
+      </MovingModal>
     </>
   );
 };

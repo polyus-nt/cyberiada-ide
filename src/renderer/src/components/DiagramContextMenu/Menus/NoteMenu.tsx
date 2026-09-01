@@ -116,7 +116,7 @@ export const NoteMenu: React.FC<NoteMenuProps> = ({
         </SubMenu>
       </SubMenuContainer>
       <MenuItem
-        className="enabled:hover:bg-error"
+        className="danger enabled:hover:bg-error"
         onClick={() => modelController.deleteNote({ smId, id: note.id })}
       >
         <DeleteIcon className="size-6 flex-shrink-0" /> Удалить

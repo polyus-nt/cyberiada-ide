@@ -113,6 +113,10 @@ export class ModelController extends EventEmitter<ModelControllerEvents> {
     ModelController.instance = this;
   }
 
+  isNotInitialized() {
+    return this.model.data.headControllerId === '';
+  }
+
   // Создаем пустой контроллер с пустыми данными и назначаем его главным
   emptyController() {
     const editor = new CanvasEditor('');
