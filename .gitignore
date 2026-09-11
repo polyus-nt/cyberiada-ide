@@ -17,3 +17,19 @@ resources/modules/*/arduino-cli
 resources/modules/*/avrdude
 resources/modules/*/gcc-arm-none-eabi
 resources/modules/*/lapki-compiler/build/
+resources/arduino-cli-data/
+resources/toolchains/
+build/arduino-cli-linux/
+build/gcc-arm-none-eabi.zip
+build/gcc-arm-none-eabi
+build/irpcb
+
+# lapki-flasher
+resources/modules/win32/avrdude.conf
+resources/modules/win32/avrdude.exe
+resources/modules/win32/avrdude.pdb
+/avrdude
+
+# AI
+CONTEXT.md
+AGENTS.md

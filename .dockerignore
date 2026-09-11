@@ -1,0 +1,5 @@
+# Dockerfile.release does not COPY project files: the project is mounted only
+# when the release container runs. Keep image build context effectively empty
+# so Docker Desktop does not scan the repository and generated toolchains.
+**
+!Dockerfile.release

@@ -28,8 +28,8 @@ $ git submodule update --init --recursive
 # Загрузить зависимости
 $ npm install
 
-# (необязательно, Windows)
-# Загрузить и установить зависимости (меняет PATH!)
+# (Windows, перед первой сборкой)
+# Загрузить зависимости; приложение добавляет их в PATH только для своих процессов.
 $ npm run dependencies:win
 
 # (Windows)

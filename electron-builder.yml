@@ -2,7 +2,21 @@ appId: ru.kruzhok.lapki-ide
 productName: Lapki IDE
 directories:
   buildResources: build
+afterPack: build/after-pack.js
 files:
+  # Release artifacts must never become input to a later packaging target.
+  - '!dist/**'
+  - '!outputs/**'
+  # `build` contains staging-only toolchains (including Windows ARM GCC).
+  # buildResources are still available to electron-builder for icons/scripts.
+  - '!build/**'
+  # The Linux release script removes ARM GCC from the DEB staging directory.
+  # AppImage and Snap keep the complete relocatable toolchain here.
+  - '!**/gcc-arm-none-eabi.zip'
+  # Local Docker and Compose configuration is not part of the application.
+  - '!Dockerfile*'
+  - '!compose*.yml'
+  - '!*.ps1'
   - '!**/.vscode/*'
   - '!src/*'
   - '!electron.vite.config.{js,ts,mjs,cjs}'
@@ -14,12 +28,18 @@ asarUnpack:
 # TODO: afterSign: build/notarize.js
 win:
   executableName: lapki-ide
+  files:
+    - '!resources/arduino-cli-data/linux{,/**}'
+    - '!resources/toolchains/linux{,/**}'
+  asarUnpack:
+    - resources/**
+    - '!resources/arduino-cli-data/linux{,/**}'
+    - '!resources/toolchains/linux{,/**}'
 nsis:
   artifactName: ${name}-v${version}-setup.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
-  include: build-installer/installer.nsh
 mac:
   artifactName: ${name}-v${version}.${ext}
   target:
@@ -27,16 +47,53 @@ mac:
       arch: universal
   category: 'public.app-category.developer-tools'
   entitlementsInherit: build/entitlements.mac.plist
+  files:
+    - '!resources/toolchains/linux{,/**}'
+  asarUnpack:
+    - resources/**
+    - '!resources/toolchains/linux{,/**}'
 linux:
   artifactName: ${name}-v${version}.${ext}
+  # Вырезаем не-линуксовые модули из формируемых дистрибутивов.
+  files:
+    - '!resources/modules/win32{,/**}'
+    - '!resources/modules/darwin{,/**}'
+    - '!resources/arduino-cli-data/win32{,/**}'
+  # resources are unpacked outside app.asar, so filter this copy separately.
+  asarUnpack:
+    - resources/**
+    - '!resources/modules/win32{,/**}'
+    - '!resources/modules/darwin{,/**}'
+    - '!resources/arduino-cli-data/win32{,/**}'
   target:
     - AppImage
     - snap
     - deb
+    # TODO: - rpm
   maintainer: electronjs.org
   category: Utility
-deb: 
+deb:
   afterInstall: build/udev-rules.sh
+  # Arduino CLI is bundled because Ubuntu 20.04 has no arduino-cli package.
+  # GNU Arm Embedded Toolchain remains system-provided for DEB.
+  depends:
+    - gcc-arm-none-eabi
+    - make
+    - libusb-1.0-0
+    - avrdude
+  # xz can exhaust Docker Desktop's memory while fpm creates data.tar.xz.
+  # gzip trades a slightly larger package for a much lower memory peak.
+  compression: gz
+snap:
+  # core18 provides glibc 2.27, while the bundled PyInstaller modules require
+  # GLIBC_2.29. core20 provides glibc 2.31.
+  base: core20
+  plugs:
+    - default
+    # These restricted interfaces must be connected by the administrator.
+    - raw-usb
+    - serial-port
+    - hardware-observe
 npmRebuild: false
 publish:
   provider: generic
