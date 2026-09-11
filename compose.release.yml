@@ -1,0 +1,49 @@
+services:
+  release:
+    build:
+      context: .
+      dockerfile: Dockerfile.release
+    working_dir: /project
+    volumes:
+      - .:/project
+      # Do not mount the whole Windows project twice. Only final artifacts
+      # need to be copied back from the Linux volumes.
+      - ./dist:/host-release-dist
+      - ./outputs:/host-release-outputs
+      - node-modules:/project/node_modules
+      - release-out:/project/out
+      - release-dist:/project/dist
+      - release-outputs:/project/outputs
+      - npm-cache:/root/.npm
+      - electron-cache:/root/.cache/electron
+      - electron-builder-cache:/root/.cache/electron-builder
+      - release-download-cache:/cache/release-downloads
+    environment:
+      RELEASE_DOWNLOAD_CACHE: /cache/release-downloads
+      RELEASE_ARTIFACTS_DIST_DIR: /host-release-dist
+      RELEASE_ARTIFACTS_OUTPUTS_DIR: /host-release-outputs
+      RELEASE_LINUX_TARGETS: "${RELEASE_LINUX_TARGETS:-AppImage snap deb}"
+      RELEASE_SKIP_LINUX: "${RELEASE_SKIP_LINUX:-0}"
+      RELEASE_SKIP_WINDOWS: "${RELEASE_SKIP_WINDOWS:-0}"
+      ARDUINO_PACKAGE_INDEX_URL: "${ARDUINO_PACKAGE_INDEX_URL:-https://arduino-downloads.amperka.ru/p/packages/package_index.json}"
+      ARM_GCC_LINUX_URL: "${ARM_GCC_LINUX_URL:-https://firmware.ardupilot.org/Tools/STM32-tools/gcc-arm-none-eabi-10-2020-q4-major-x86_64-linux.tar.bz2}"
+      WINE_SSL_CERT_FILE: "${WINE_SSL_CERT_FILE:-/etc/ssl/certs/ca-certificates.crt}"
+    command: bash build/release-linux-windows.sh
+  arduino-avr-smoke:
+    image: ubuntu:20.04
+    working_dir: /project
+    volumes:
+      - .:/project:ro
+    environment:
+      ARDUINO_PACKAGE_INDEX_URL: "${ARDUINO_PACKAGE_INDEX_URL:-https://arduino-downloads.amperka.ru/p/packages/package_index.json}"
+    command: bash build/test-arduino-avr-ubuntu20.sh
+
+volumes:
+  node-modules:
+  release-out:
+  release-dist:
+  release-outputs:
+  npm-cache:
+  electron-cache:
+  electron-builder-cache:
+  release-download-cache:

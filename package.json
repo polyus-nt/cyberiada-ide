@@ -23,12 +23,15 @@
     "dev": "electron-vite dev",
     "build": "npm run typecheck && electron-vite build",
     "postinstall": "electron-builder install-app-deps",
-    "build:win": "npm run build && npm run bundle:win",
+    "build:win": "npm run prepare:win && npm run build && npm run bundle:win",
     "build:linux": "npm run build && npm run bundle:linux",
     "bundle:win": "electron-builder --win --config",
-    "bundle:linux": "electron-builder --linux --config",
+    "bundle:linux": "npm run prepare:linux && electron-builder --linux --config",
     "bundle:mac": "electron-builder --mac --config",
+    "release:docker": "docker compose -f compose.release.yml run --rm release",
     "prepare:win": "build\\move_compiler_resourses.bat build",
+    "prepare:arduino-core:linux": "bash ./build/prepare-arduino-cli-core.sh linux",
+    "prepare:linux": "bash ./build/prepare-linux-compiler.sh && npm run prepare:arduino-core:linux",
     "dependencies:win": "powershell \"& build\\download_compiler_deps.ps1 resources\\modules\\win32\""
   },
   "dependencies": {

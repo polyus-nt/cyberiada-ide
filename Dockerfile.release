@@ -1,0 +1,32 @@
+FROM ubuntu:20.04 AS focal-libusb
+
+# Keep the flasher runtime compatible with Ubuntu 20.04 (glibc 2.31).
+RUN apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y avrdude binutils libusb-1.0-0 \
+    && install -D "$(ldconfig -p | awk 'index($0, "libusb-1.0.so.0") { print $NF; exit }')" /opt/lapki-runtime/libusb-1.0.so.0 \
+    && ! readelf --version-info /opt/lapki-runtime/libusb-1.0.so.0 | grep -Eq 'GLIBC_2\.(3[2-9]|[4-9][0-9])' \
+    && install -D "$(command -v avrdude)" /opt/lapki-runtime/avrdude/avrdude \
+    && install -D /etc/avrdude.conf /opt/lapki-runtime/avrdude/avrdude.conf \
+    && mkdir -p /opt/lapki-runtime/avrdude/lib \
+    && ldd "$(command -v avrdude)" | awk '$2 == "=>" && $3 ~ /^\// { print $3 }' | while read -r library; do \
+         case "$library" in \
+           /lib/x86_64-linux-gnu/libc.so.*|/lib/x86_64-linux-gnu/libdl.so.*|/lib/x86_64-linux-gnu/libm.so.*|/lib/x86_64-linux-gnu/libpthread.so.*|/lib/x86_64-linux-gnu/librt.so.*) continue ;; \
+         esac; \
+         cp -L "$library" "/opt/lapki-runtime/avrdude/lib/$(basename "$library")"; \
+       done \
+    && rm -rf /var/lib/apt/lists/*
+
+FROM electronuserland/builder:wine
+
+RUN apt-get update \
+    && apt-get install --no-install-recommends -y bzip2 ca-certificates rsync unzip wget zip \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=focal-libusb /opt/lapki-runtime/libusb-1.0.so.0 /opt/lapki-runtime/libusb-1.0.so.0
+COPY --from=focal-libusb /opt/lapki-runtime/avrdude /opt/lapki-runtime/avrdude
+ENV LAPKI_LIBUSB_PATH=/opt/lapki-runtime/libusb-1.0.so.0
+ENV LAPKI_AVRDUDE_PATH=/opt/lapki-runtime/avrdude/avrdude
+ENV LAPKI_AVRDUDE_CONFIG_PATH=/opt/lapki-runtime/avrdude/avrdude.conf
+ENV LAPKI_AVRDUDE_LIBRARY_DIR=/opt/lapki-runtime/avrdude/lib
+
+WORKDIR /project
