@@ -1,5 +1,5 @@
-appId: ru.kruzhok.lapki-ide
-productName: Lapki IDE
+appId: ru.kruzhok.cyberiada-ide
+productName: Cyberiada IDE
 directories:
   buildResources: build
 afterPack: build/after-pack.js
@@ -27,7 +27,7 @@ asarUnpack:
   - resources/**
 # TODO: afterSign: build/notarize.js
 win:
-  executableName: lapki-ide
+  executableName: cyberiada-ide
   files:
     - '!resources/arduino-cli-data/linux{,/**}'
     - '!resources/toolchains/linux{,/**}'
