@@ -16,9 +16,6 @@ resources/modules/*/lapki-compiler/platforms
 resources/modules/*/arduino-cli
 resources/modules/*/avrdude
 resources/modules/*/gcc-arm-none-eabi
-<<<<<<< HEAD
-resources/modules/*/lapki-compiler/build/
-=======
 resources/modules/*/lapki-compiler/build/
 resources/arduino-cli-data/
 resources/toolchains/
@@ -36,4 +33,3 @@ resources/modules/win32/avrdude.pdb
 # AI
 CONTEXT.md
 AGENTS.md
->>>>>>> 623baf5b (Полная пересборка сборочной системы (#1050))
