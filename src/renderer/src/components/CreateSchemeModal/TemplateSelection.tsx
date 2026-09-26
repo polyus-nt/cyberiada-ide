@@ -46,6 +46,7 @@ export const TemplateSelection: React.FC<TemplateSelectionProps> = ({
       <ScrollArea
         className="h-[148px] rounded-lg border border-border-primary bg-bg-control py-0"
         viewportClassName="px-[8px] py-[8px]"
+        verticalOverflowViewportClassName="pr-0"
       >
         {Object.entries(templates).flatMap(([type, names]) =>
           names.map((name) => (

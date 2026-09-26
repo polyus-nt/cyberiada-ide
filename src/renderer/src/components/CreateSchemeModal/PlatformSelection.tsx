@@ -101,6 +101,7 @@ export const PlatformSelection: React.FC<PlatformSelectionProps> = ({
         <ScrollArea
           className="h-[220px] w-full rounded-lg border border-border-primary bg-bg-control"
           viewportClassName="px-[7px]"
+          verticalOverflowViewportClassName="pr-0"
           ref={selectedStateMachinesViewportRef}
         >
           {selectedStateMachines.length > 0 ? (
@@ -131,6 +132,7 @@ export const PlatformSelection: React.FC<PlatformSelectionProps> = ({
         <ScrollArea
           className="h-[220px] w-full rounded-lg border border-border-primary bg-bg-control"
           viewportClassName="px-[7px]"
+          verticalOverflowViewportClassName="pr-0"
           onDragOver={(event) => event.preventDefault()}
           onDrop={() => handleDropStateMachineOnPlatforms()}
         >
