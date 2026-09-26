@@ -82,7 +82,11 @@ export const ComponentAddModal: React.FC<ComponentAddModalProps> = ({
       hideCancelButton
     >
       <div className="grid h-full grid-cols-[254px_minmax(0,1fr)] gap-6">
-        <ScrollArea className="h-full">
+        <ScrollArea
+          className="h-full py-0"
+          viewportClassName="px-[8px] py-[8px]"
+          verticalOverflowViewportClassName="pr-0"
+        >
           {vacantComponents.map((entry) => (
             <button
               type="button"
