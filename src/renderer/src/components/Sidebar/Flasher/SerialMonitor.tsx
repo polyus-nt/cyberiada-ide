@@ -11,6 +11,7 @@ import {
 import { useModal, useSettings } from '@renderer/hooks';
 import { useFlasher } from '@renderer/store/useFlasher';
 import { useSerialMonitor } from '@renderer/store/useSerialMonitor';
+import { ConnectionIndicator } from '@renderer/components/UI/ConnectionIndicator';
 
 import { DeviceList } from './DeviceList';
 
@@ -80,6 +81,7 @@ export const SerialMonitorStatus: React.FC = () => {
 
   return (
     <span className="h2-header">
+      <ConnectionIndicator status={connectionStatus} />
       Статус:{' '}
       <span className="text-primary">{getCurrentDeviceDisplay(device, connectionStatus)}</span>
     </span>
