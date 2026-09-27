@@ -181,7 +181,7 @@ export const EventsHierarchy: React.FC<EventsHierarchyProps> = ({
                               <div
                                 key={actionIndex}
                                 className={twMerge(
-                                  'mt-1.5 flex cursor-pointer select-none flex-row items-center gap-1 truncate rounded-lg py-0.5 pl-[68px] pr-2 text-text-primary hover:bg-bg-hover',
+                                  'mt-1.5 flex cursor-pointer select-none flex-row items-center gap-1 truncate rounded-lg py-0.5 pl-12 pr-2 text-text-primary hover:bg-bg-hover',
                                   selectedEventIndex === eventIndex &&
                                     selectedActionIndex === actionIndex &&
                                     'bg-bg-active hover:bg-bg-active'
