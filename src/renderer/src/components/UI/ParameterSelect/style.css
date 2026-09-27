@@ -47,6 +47,14 @@
   @apply w-full cursor-pointer whitespace-nowrap rounded-lg px-3 py-1.5 text-left text-xs text-text-primary outline-none transition-colors !important;
 }
 
+.ParameterSelect__option:first-child {
+  @apply pt-3 !important;
+}
+
+.ParameterSelect__option:last-child {
+  @apply pb-3 !important;
+}
+
 .ParameterSelect__option--is-focused {
   @apply bg-bg-hover text-text-primary !important;
 }
