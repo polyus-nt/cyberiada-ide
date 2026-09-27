@@ -92,8 +92,8 @@ export const ComponentAddModal: React.FC<ComponentAddModalProps> = ({
               type="button"
               key={entry.idx}
               className={twMerge(
-                'flex h-[42px] w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-[#E6F4FF]',
-                entry.idx === cursor?.idx && 'bg-[#E6F4FF]'
+                'flex h-[42px] w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-bg-hover',
+                entry.idx === cursor?.idx && 'bg-bg-active'
               )}
               onClick={() => onCompClick(entry)}
             >

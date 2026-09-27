@@ -136,7 +136,7 @@ const DocumentationSection: React.FC<DocumentationSectionProps> = ({
             <button
               className={twMerge(
                 'rounded-lg bg-[#F1F1F1] px-3 py-[5px]',
-                activeTab === -1 && 'bg-[#E6F4FF] font-medium'
+                activeTab === -1 && 'bg-bg-active font-medium'
               )}
               onClick={() => setActiveTab(-1)}
             >
@@ -145,7 +145,7 @@ const DocumentationSection: React.FC<DocumentationSectionProps> = ({
             <button
               className={twMerge(
                 'rounded-lg bg-[#F1F1F1] px-3 py-[5px]',
-                activeTab === 0 && 'bg-[#E6F4FF] font-medium'
+                activeTab === 0 && 'bg-bg-active font-medium'
               )}
               onClick={() => setActiveTab(0)}
             >
@@ -154,7 +154,7 @@ const DocumentationSection: React.FC<DocumentationSectionProps> = ({
             <button
               className={twMerge(
                 'rounded-lg bg-[#F1F1F1] px-3 py-[5px] disabled:cursor-not-allowed',
-                activeTab === 1 && 'bg-[#E6F4FF] font-medium'
+                activeTab === 1 && 'bg-bg-active font-medium'
               )}
               onClick={() => setActiveTab(1)}
               disabled={!currentItem}

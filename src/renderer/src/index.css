@@ -85,11 +85,11 @@
   }
 
   .dropdown-menu-item {
-    @apply gap-3 focus-visible:bg-[#e6f4ff] enabled:hover:bg-[#e6f4ff] enabled:active:bg-bg-active disabled:cursor-not-allowed disabled:text-text-disabled disabled:opacity-50;
+    @apply gap-3 focus-visible:bg-bg-hover enabled:hover:bg-bg-hover enabled:active:bg-bg-active disabled:cursor-not-allowed disabled:text-text-disabled disabled:opacity-50;
   }
 
   .context-menu-item {
-    @apply cursor-pointer hover:bg-[#e6f4ff] active:bg-bg-active;
+    @apply cursor-pointer hover:bg-bg-hover active:bg-bg-active;
   }
 
   .context-menu-item > svg {

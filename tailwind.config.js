@@ -101,7 +101,7 @@ export default {
           '--bg-p': '#FFFFFF',
           '--bg-s': '#EDEDED',
           '--bg-canvas': '#F1F1F1',
-          '--bg-h': '#E6F4FF',
+          '--bg-h': '#F6FBFF',
           '--bg-a': '#E6F4FF',
           '--bg-c': '#FFFFFF',
           '--inactive-input': '#F9F9F9',
