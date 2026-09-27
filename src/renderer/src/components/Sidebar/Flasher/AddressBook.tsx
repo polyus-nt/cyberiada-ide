@@ -31,6 +31,9 @@ export const AddressBookModal: React.FC<AddressBookModalProps> = ({
   addressEnrtyEdit,
   openAddressEnrtyAdd,
 }) => {
+  const longestAddressLength =
+    addressBookSetting?.reduce((longest, entry) => Math.max(longest, entry.address.length), 0) ?? 0;
+  const modalMaxWidth = `max(820px, calc(${longestAddressLength + 2}ch + 500px))`;
   const [selectedEntry, setSelectedEntry] = useState<number>();
   const [metaDataEntry, setMetaDataEntry] = useState<AddressData>();
   const [isMetaDataOpen, openMetaData, closeMetaData] = useModal(false);
@@ -69,7 +72,7 @@ export const AddressBookModal: React.FC<AddressBookModalProps> = ({
         isOpen={isOpen}
         onRequestClose={handleClose}
         title="Адресная книга"
-        className="max-w-[820px]"
+        style={{ content: { maxWidth: modalMaxWidth } }}
         onSubmit={handleSubmit}
         submitDisabled={selectedEntry === undefined}
         submitLabel="Добавить"
@@ -99,9 +102,9 @@ export const AddressBookModal: React.FC<AddressBookModalProps> = ({
               <table className="w-full table-fixed border-separate border-spacing-0">
                 <colgroup>
                   <col />
-                  <col className="w-40" />
+                  <col style={{ width: `${longestAddressLength + 2}ch` }} />
                   <col />
-                  <col className="w-[78px]" />
+                  <col className="w-[90px]" />
                 </colgroup>
                 <thead className="sticky top-0 z-10 font-medium">
                   <tr>

@@ -54,7 +54,7 @@ export const AddressBookRow: React.FC<AddressBookRowProps> = (props) => {
       </td>
       <td className="pl-3">
         <div
-          className="flex w-[66px] items-center gap-3"
+          className="flex w-[78px] items-center gap-3"
           onClick={(event) => event.stopPropagation()}
           onDoubleClick={(event) => event.stopPropagation()}
         >
@@ -63,11 +63,11 @@ export const AddressBookRow: React.FC<AddressBookRowProps> = (props) => {
               <button
                 {...hintProps}
                 type="button"
-                className="size-[14px] shrink-0 opacity-70 transition-opacity hover:opacity-100"
+                className="size-5 shrink-0 opacity-70 transition-opacity hover:opacity-100"
                 aria-label="Изменить запись"
                 onClick={onEdit}
               >
-                <EditIcon className="size-[14px]" />
+                <EditIcon className="size-5" />
               </button>
             )}
           </WithHint>
@@ -76,11 +76,11 @@ export const AddressBookRow: React.FC<AddressBookRowProps> = (props) => {
               <button
                 {...hintProps}
                 type="button"
-                className="size-[14px] shrink-0 opacity-70 transition-opacity hover:opacity-100"
+                className="size-5 shrink-0 opacity-70 transition-opacity hover:opacity-100"
                 aria-label="Показать метаданные"
                 onClick={onMetaData}
               >
-                <LensIcon className="size-[14px]" />
+                <LensIcon className="size-5" />
               </button>
             )}
           </WithHint>
