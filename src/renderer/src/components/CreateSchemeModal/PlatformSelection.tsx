@@ -92,7 +92,7 @@ export const PlatformSelection: React.FC<PlatformSelectionProps> = ({
   };
 
   const renderPlatformWidthProbe = (withDeleteButton: boolean) => (
-    <div aria-hidden="true" className="invisible h-0 w-max overflow-hidden px-[7px]">
+    <div aria-hidden="true" className="invisible h-0 w-max overflow-hidden px-[17px]">
       {platforms.map(({ idx, name }) => (
         <div key={idx} className="flex w-max items-center gap-3 px-3 py-1.5">
           <span className="whitespace-nowrap">{name}</span>
@@ -112,6 +112,7 @@ export const PlatformSelection: React.FC<PlatformSelectionProps> = ({
             className="h-[220px] w-full rounded-lg border border-border-primary bg-bg-control"
             viewportClassName="px-[7px]"
             verticalOverflowViewportClassName="pr-0"
+            horizontalScroll={false}
             onDragOver={(event) => event.preventDefault()}
             onDrop={() => handleDropStateMachineOnPlatforms()}
           >
@@ -145,6 +146,7 @@ export const PlatformSelection: React.FC<PlatformSelectionProps> = ({
             className="h-[220px] w-full rounded-lg border border-border-primary bg-bg-control"
             viewportClassName="px-[7px]"
             verticalOverflowViewportClassName="pr-0"
+            horizontalScroll={false}
             ref={selectedStateMachinesViewportRef}
           >
             {selectedStateMachines.length > 0 ? (
