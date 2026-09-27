@@ -80,6 +80,7 @@ export const StateMachinesList: React.FC<StateMachinesListProps> = ({
         togglePanel={togglePanel}
         requestAddAction={onRequestAddStateMachine}
         isAddDisabled={isDisabled}
+        addButtonWrapperClassName="ml-5"
       />
       {!collapsed &&
         (isInitialized ? (

@@ -8,6 +8,7 @@ interface PanelHeaderProps {
   togglePanel: () => void;
   requestAddAction?: () => void;
   isAddDisabled?: boolean;
+  addButtonWrapperClassName?: string;
 }
 
 export const PanelHeader: React.FC<PanelHeaderProps> = ({
@@ -16,6 +17,7 @@ export const PanelHeader: React.FC<PanelHeaderProps> = ({
   togglePanel,
   requestAddAction,
   isAddDisabled,
+  addButtonWrapperClassName,
 }) => {
   return (
     <div className="flex shrink-0 items-center py-3">
@@ -27,7 +29,13 @@ export const PanelHeader: React.FC<PanelHeaderProps> = ({
         />
         <h3 className="ml-[9px] text-xs font-medium">{title}</h3>
       </button>
-      {requestAddAction && <AddButton disabled={isAddDisabled} onClick={requestAddAction} />}
+      {requestAddAction && (
+        <AddButton
+          disabled={isAddDisabled}
+          onClick={requestAddAction}
+          wrapperClassName={addButtonWrapperClassName}
+        />
+      )}
     </div>
   );
 };
