@@ -91,10 +91,22 @@ export const PlatformSelection: React.FC<PlatformSelectionProps> = ({
     setDraggedStateMachineIndex(null);
   };
 
+  const renderPlatformWidthProbe = (withDeleteButton: boolean) => (
+    <div aria-hidden="true" className="invisible h-0 w-max overflow-hidden px-[7px]">
+      {platforms.map(({ idx, name }) => (
+        <div key={idx} className="flex w-max items-center gap-3 px-3 py-1.5">
+          <span className="whitespace-nowrap">{name}</span>
+          {withDeleteButton && <span className="size-[14px]" />}
+        </div>
+      ))}
+    </div>
+  );
+
   return (
-    <div className="grid min-h-[360px] w-[618px] grid-cols-[310px_284px] gap-x-6 gap-y-[22px]">
+    <div className="grid min-h-[360px] w-max min-w-[618px] grid-cols-[minmax(310px,max-content)_minmax(284px,max-content)] gap-x-6 gap-y-[22px]">
       <div>
         <h2 className="mb-[11px] font-medium">Платформы</h2>
+        {renderPlatformWidthProbe(false)}
         <ScrollArea
           className="h-[220px] w-full rounded-lg border border-border-primary bg-bg-control"
           viewportClassName="px-[7px]"
@@ -106,7 +118,7 @@ export const PlatformSelection: React.FC<PlatformSelectionProps> = ({
             <div
               key={idx}
               className={twMerge(
-                'flex cursor-pointer select-none items-center rounded-lg px-3 py-[5px] leading-4 transition-colors hover:bg-bg-hover',
+                'flex w-max min-w-full cursor-pointer select-none items-center whitespace-nowrap rounded-lg px-3 py-[5px] leading-4 transition-colors hover:bg-bg-hover',
                 isPlatformSelected(idx) && 'bg-bg-active'
               )}
               onDoubleClick={() => handleAddPlatform(idx)}
@@ -125,6 +137,7 @@ export const PlatformSelection: React.FC<PlatformSelectionProps> = ({
         onDrop={() => handleDropPlatformOnStateMachines()}
       >
         <h2 className="mb-[11px] font-medium">Выбрано</h2>
+        {renderPlatformWidthProbe(true)}
         <ScrollArea
           className="h-[220px] w-full rounded-lg border border-border-primary bg-bg-control"
           viewportClassName="px-[7px]"
