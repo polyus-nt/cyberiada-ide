@@ -2,19 +2,11 @@ import { twMerge } from 'tailwind-merge';
 
 import { ReactComponent as AddIcon } from '@renderer/assets/icons/add.svg';
 
-type AddButtonProps = React.HTMLAttributes<HTMLButtonElement> & {
-  disabled?: boolean;
-  wrapperClassName?: string;
-};
+type AddButtonProps = React.HTMLAttributes<HTMLButtonElement> & { disabled?: boolean };
 
-export const AddButton: React.FC<AddButtonProps> = ({
-  className,
-  disabled,
-  wrapperClassName,
-  ...props
-}) => {
+export const AddButton: React.FC<AddButtonProps> = ({ className, disabled, ...props }) => {
   return (
-    <div className={twMerge('ml-auto flex', wrapperClassName)}>
+    <div className="ml-auto flex">
       <button
         {...props}
         disabled={disabled}
