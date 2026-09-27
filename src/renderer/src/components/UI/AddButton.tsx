@@ -11,7 +11,7 @@ export const AddButton: React.FC<AddButtonProps> = ({ className, disabled, ...pr
         {...props}
         disabled={disabled}
         type="button"
-        className={twMerge('w-5 disabled:opacity-40', className)}
+        className={twMerge('disabled:opacity-40', className)}
       >
         <AddIcon className="shrink-0" />
       </button>
