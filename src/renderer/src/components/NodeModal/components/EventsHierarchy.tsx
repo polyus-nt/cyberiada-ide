@@ -18,8 +18,7 @@ import {
   groupEventsByTrigger,
 } from './eventsHierarchyModel';
 
-// Временный флаг до согласования отображения действий с дизайнерами.
-const SHOW_EVENT_ACTIONS = false;
+const SHOW_EVENT_ACTIONS = true;
 
 interface EventsHierarchyProps {
   platform: PlatformManager;
@@ -146,7 +145,7 @@ export const EventsHierarchy: React.FC<EventsHierarchyProps> = ({
                               'mt-1.5 flex cursor-pointer select-none items-center gap-1 rounded-lg py-0.5 pl-7 pr-2 hover:bg-bg-hover',
                               selectedEventIndex === eventIndex &&
                                 selectedActionIndex === null &&
-                                'bg-bg-active'
+                                'bg-bg-active hover:bg-bg-active'
                             )}
                             onClick={() => onSelectEvent(eventIndex)}
                           >
@@ -185,7 +184,7 @@ export const EventsHierarchy: React.FC<EventsHierarchyProps> = ({
                                   'mt-1.5 flex cursor-pointer select-none flex-row items-center gap-1 truncate rounded-lg py-0.5 pl-14 pr-2 text-text-primary hover:bg-bg-hover',
                                   selectedEventIndex === eventIndex &&
                                     selectedActionIndex === actionIndex &&
-                                    'bg-bg-active'
+                                    'bg-bg-active hover:bg-bg-active'
                                 )}
                                 onClick={() => onSelectAction(eventIndex, actionIndex)}
                                 title={
