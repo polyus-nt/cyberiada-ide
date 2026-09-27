@@ -114,7 +114,7 @@ export const AddressBookModal: React.FC<AddressBookModalProps> = ({
                   <col />
                   <col style={{ width: `${longestAddressLength + 2}ch` }} />
                   <col />
-                  <col className="w-[90px]" />
+                  <col className="w-[96px]" />
                 </colgroup>
                 <thead className="sticky top-0 z-10 font-medium">
                   <tr>

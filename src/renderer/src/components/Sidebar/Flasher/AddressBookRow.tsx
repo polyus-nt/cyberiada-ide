@@ -54,7 +54,7 @@ export const AddressBookRow: React.FC<AddressBookRowProps> = (props) => {
       </td>
       <td className="pl-3">
         <div
-          className="flex w-[78px] items-center gap-3"
+          className="flex w-[84px] items-center gap-3"
           onClick={(event) => event.stopPropagation()}
           onDoubleClick={(event) => event.stopPropagation()}
         >
@@ -86,7 +86,7 @@ export const AddressBookRow: React.FC<AddressBookRowProps> = (props) => {
           </WithHint>
           <WithHint hint="Удалить" placement="top">
             {(hintProps) => (
-              <span {...hintProps} className="size-[14px] shrink-0">
+              <span {...hintProps} className="flex size-5 shrink-0 items-center justify-center">
                 <DeleteButton aria-label="Удалить запись" onClick={onRemove} />
               </span>
             )}
