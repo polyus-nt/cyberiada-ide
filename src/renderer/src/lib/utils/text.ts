@@ -79,7 +79,7 @@ export const prepareText = (text: string, maxWidth: number, font?: Font) => {
   const textHeight = lineHeight * fontSize;
   const textArray: string[] = [];
   const initialTextArray = text.split('\n');
-  const fontString = `${fontSize}px/${lineHeight} '${fontFamily}'`;
+  const fontString = `${fontSize}px '${fontFamily}'`;
 
   const spaceWidth = getTextWidth(' ', fontString);
 
@@ -152,7 +152,7 @@ export const drawText = (
   const prevTextAlign = ctx.textAlign;
   const prevTextBaseline = ctx.textBaseline;
 
-  ctx.font = `${fontWeight} ${fontSize}px/${lineHeight} '${fontFamily}'`;
+  ctx.font = `${fontWeight} ${fontSize}px '${fontFamily}'`;
   ctx.fillStyle = color;
   ctx.textAlign = textAlign;
   ctx.textBaseline = 'bottom';
