@@ -232,5 +232,10 @@ export const getActionText = (
     humanReadable && proto?.methods[action.method]?.alias
       ? proto.methods[action.method].alias
       : action.method;
-  return `${componentName}.${methodName}`;
+  return `${componentName}.${methodName}${getArgsText(
+    action.args,
+    platform,
+    components,
+    humanReadable
+  )}`;
 };
