@@ -81,7 +81,7 @@ export const ComponentAddModal: React.FC<ComponentAddModalProps> = ({
       submitClassName="btn-primary h-8 min-w-[82px] px-3 py-1.5"
       hideCancelButton
     >
-      <div className="grid h-full grid-cols-[254px_minmax(0,1fr)] gap-6">
+      <div className="grid h-full grid-cols-[254px_minmax(0,1fr)] gap-[6px]">
         <ScrollArea
           className="h-full py-0"
           viewportClassName="px-[8px] py-[8px]"
