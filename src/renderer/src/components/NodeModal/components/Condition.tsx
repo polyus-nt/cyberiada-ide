@@ -130,9 +130,13 @@ export const Condition: React.FC<ConditionProps> = memo(function Condition(props
   return (
     <div>
       <div className={twMerge('flex items-center justify-between', show && 'items-end')}>
-        <p className="font-medium">Если</p>
+        <p className={twMerge('font-medium', isElse && 'opacity-50')}>Если</p>
         {!show ? (
-          <AddButton onClick={() => handleChangeConditionShow(!show)} />
+          <AddButton
+            className={twMerge(isElse && 'cursor-default disabled:opacity-50')}
+            disabled={isElse}
+            onClick={() => handleChangeConditionShow(!show)}
+          />
         ) : (
           <SubButton onClick={() => handleChangeConditionShow(!show)} />
         )}
