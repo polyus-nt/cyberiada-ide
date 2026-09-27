@@ -70,9 +70,9 @@ export const Component: React.FC<ComponentProps> = (props) => {
         <button
           type="button"
           className={twMerge(
-            'flex w-full items-center rounded-lg text-left transition-colors',
+            'flex w-full items-center rounded-lg text-left transition-colors hover:bg-bg-hover',
             variant === 'compact' ? 'px-2 py-1.5' : 'h-9 px-4',
-            (isSelected || dragOver) && 'bg-bg-active'
+            (isSelected || dragOver) && 'bg-bg-active hover:bg-bg-active'
           )}
           onClick={onSelect}
           onAuxClick={onDelete}
