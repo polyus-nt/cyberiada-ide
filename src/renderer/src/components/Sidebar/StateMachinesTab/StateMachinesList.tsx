@@ -66,6 +66,7 @@ export const StateMachinesList: React.FC<StateMachinesListProps> = ({
 
   const isDisabled = !isInitialized;
   const collapsed = isCollapsed();
+  const highlightedSm = selectedSm ?? activeSm;
   const listRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -105,12 +106,12 @@ export const StateMachinesList: React.FC<StateMachinesListProps> = ({
                     <Component
                       key={id}
                       name={sm.name || id}
-                      isSelected={id === activeSm || id === selectedSm}
+                      isSelected={id === highlightedSm}
                       icon={
                         <StateMachineIcon
                           className={twMerge(
                             'size-6 [&_*]:stroke-[#6b6b6b]',
-                            (id === activeSm || id === selectedSm) && '[&_*]:stroke-icon-hover'
+                            id === highlightedSm && '[&_*]:stroke-icon-hover'
                           )}
                         />
                       }
