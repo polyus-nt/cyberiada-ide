@@ -41,7 +41,7 @@ export const ComponentFormFieldLabel: React.FC<ComponentFormFieldLabelProps> = (
       >
         <div
           className={twMerge(
-            'flex w-20 items-center gap-1',
+            'flex w-20 items-center gap-2',
             sharedGrid && 'w-auto',
             labelClassName
           )}
