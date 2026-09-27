@@ -33,7 +33,7 @@ export const AddressBookModal: React.FC<AddressBookModalProps> = ({
 }) => {
   const longestAddressLength =
     addressBookSetting?.reduce((longest, entry) => Math.max(longest, entry.address.length), 0) ?? 0;
-  const modalMaxWidth = `max(820px, calc(${longestAddressLength + 2}ch + 500px))`;
+  const modalWidth = `max(820px, calc(${longestAddressLength + 2}ch + 500px))`;
   const [selectedEntry, setSelectedEntry] = useState<number>();
   const [metaDataEntry, setMetaDataEntry] = useState<AddressData>();
   const [isMetaDataOpen, openMetaData, closeMetaData] = useModal(false);
@@ -72,7 +72,12 @@ export const AddressBookModal: React.FC<AddressBookModalProps> = ({
         isOpen={isOpen}
         onRequestClose={handleClose}
         title="Адресная книга"
-        style={{ content: { maxWidth: modalMaxWidth } }}
+        style={{
+          content: {
+            width: modalWidth,
+            maxWidth: 'calc(100vw - 48px)',
+          },
+        }}
         onSubmit={handleSubmit}
         submitDisabled={selectedEntry === undefined}
         submitLabel="Добавить"
@@ -93,7 +98,12 @@ export const AddressBookModal: React.FC<AddressBookModalProps> = ({
             </WithHint>
           </div>
 
-          <ScrollArea className="min-h-0 flex-1 py-0" viewportClassName="mr-[6px]" role="listbox">
+          <ScrollArea
+            className="min-h-0 flex-1 py-0"
+            viewportClassName="mr-[6px]"
+            horizontalScroll={false}
+            role="listbox"
+          >
             {addressBookSetting === null ? (
               <p className="px-3 py-2 text-text-inactive">Адресная книга не загрузилась</p>
             ) : addressBookSetting.length === 0 ? (
