@@ -162,7 +162,6 @@ export const ComponentFormFields: React.FC<ComponentFormFieldsProps> = ({
               hint={param.description}
             >
               <ParameterSelect
-                menuWidth="content"
                 options={options}
                 value={options.find((o) => o.value === value || o.value === Number(value))}
                 onChange={(option) => handleInputChange(idx, String(option?.value ?? ''))}

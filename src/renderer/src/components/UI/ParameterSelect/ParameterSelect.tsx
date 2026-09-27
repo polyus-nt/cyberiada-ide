@@ -93,7 +93,6 @@ type ParameterSelectProps<
   error?: string;
   containerClassName?: string;
   indicatorClassName?: string;
-  menuWidth?: 'content' | 'full';
 };
 
 /** Compact select used for parameters with a fixed set of allowed values. */
@@ -105,7 +104,6 @@ export function ParameterSelect<
   containerClassName,
   className,
   indicatorClassName = 'text-black',
-  menuWidth = 'full',
   components: customComponents,
   ...props
 }: ParameterSelectProps<Option, Group>) {
@@ -123,10 +121,7 @@ export function ParameterSelect<
         menuPosition="fixed"
         styles={{
           menuPortal: (base) => ({ ...base, zIndex }),
-          menu: (base) =>
-            menuWidth === 'content'
-              ? { ...base, right: 0, left: 'auto', width: 'max-content' }
-              : base,
+          menu: (base) => ({ ...base, right: 0, left: 'auto', width: 'max-content' }),
           control: (base) => ({ ...base, minHeight: '32px', height: '32px' }),
         }}
         components={{
