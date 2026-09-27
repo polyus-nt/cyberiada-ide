@@ -96,6 +96,7 @@ export const ComponentAddModal: React.FC<ComponentAddModalProps> = ({
                 entry.idx === cursor?.idx && 'bg-bg-active'
               )}
               onClick={() => onCompClick(entry)}
+              title={entry.name}
             >
               <img
                 className="h-[25px] w-[25px] shrink-0 object-contain"
