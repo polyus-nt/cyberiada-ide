@@ -15,7 +15,6 @@ import { useAddressBook } from '@renderer/hooks/useAddressBook';
 import { useModal } from '@renderer/hooks/useModal';
 import { useSettings } from '@renderer/hooks/useSettings';
 import { useFlasher } from '@renderer/store/useFlasher';
-import { ConnectionIndicator } from '@renderer/components/UI/ConnectionIndicator';
 import { useManagerMS } from '@renderer/store/useManagerMS';
 import {
   AddressData,
@@ -44,7 +43,6 @@ export const FlasherStatus: React.FC = () => {
 
   return (
     <span className="font-normal">
-      <ConnectionIndicator status={connectionStatus} />
       <span className="font-medium">Статус: </span>
       <span className="text-primary">{connectionStatus}</span>
       {secondsUntilReconnect !== null && (

@@ -226,10 +226,10 @@ export const Header: React.FC<HeaderProps> = ({ fileMenuItems, initialSimulation
       <MovingModal
         id="simulator"
         title={
-          <div className="flex items-center gap-11">
+          <div className="flex items-center gap-2">
             <span>Симулятор</span>
-            <span className="font-normal">
-              <ConnectionIndicator status={simulatorStatus} />
+            <ConnectionIndicator status={simulatorStatus} />
+            <span className="ml-10 font-normal">
               <span className="font-medium">Статус: </span>
               <span className="text-primary">{simulatorStatus}</span>
             </span>
