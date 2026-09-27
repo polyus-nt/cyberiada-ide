@@ -5,6 +5,9 @@ import { getColor } from '@renderer/theme';
 import { Note as DataNote } from '@renderer/types/diagram';
 
 const placeholder = 'Придумайте заметку';
+const baseWidth = 200;
+const baseFontSize = 16;
+const basePadding = 10;
 
 /**
  * Класс который отрисовывает данные заметки
@@ -34,7 +37,7 @@ export class Note extends Shape {
   }
 
   get bounds() {
-    return { ...this.data.position, width: 200, height: 10 * 2 + this.textData.height };
+    return { ...this.data.position, width: this.noteWidth, height: basePadding * 2 + this.textData.height };
   }
 
   set bounds(value) {
@@ -49,7 +52,7 @@ export class Note extends Shape {
     this.data.position = value;
   }
   get dimensions() {
-    return { width: 200, height: 10 * 2 + this.textData.height };
+    return { width: this.noteWidth, height: basePadding * 2 + this.textData.height };
   }
   set dimensions(_value) {
     throw new Error('Note dimensions are immutable');
@@ -59,13 +62,17 @@ export class Note extends Shape {
     const scale = this.app.controller.scale;
 
     return {
-      padding: 10 / scale,
+      padding: basePadding / scale,
       fontSize: (this.data.fontSize ?? 16) / scale,
       borderRadius: 6 / scale,
       color: this.textData.hasText
         ? this.data?.textColor ?? getColor('text-primary')
         : getColor('border-primary'),
     };
+  }
+
+  private get noteWidth() {
+    return baseWidth * ((this.data.fontSize ?? baseFontSize) / baseFontSize);
   }
 
   setIsSelected(value: boolean) {
@@ -85,7 +92,7 @@ export class Note extends Shape {
     const hasText = Boolean(this.data.text);
 
     this.textData = {
-      ...prepareText(this.data.text || placeholder, 200 - 2 * 10, {
+      ...prepareText(this.data.text || placeholder, this.noteWidth - 2 * basePadding, {
         fontSize: this.data.fontSize ?? 16,
         lineHeight: hasText ? 1.2 : 1,
         fontFamily: 'Fira Sans',
