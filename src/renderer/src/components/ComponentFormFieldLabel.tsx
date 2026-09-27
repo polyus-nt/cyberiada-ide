@@ -47,7 +47,7 @@ export const ComponentFormFieldLabel: React.FC<ComponentFormFieldLabelProps> = (
           )}
         >
           {leadingContent}
-          <span className="self-center">{label}</span>
+          <span className="self-center text-medium">{label}</span>
           {hint && (
             <WithHint hint={hint}>
               {(props) => (
