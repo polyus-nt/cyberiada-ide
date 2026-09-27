@@ -120,7 +120,7 @@ export const EventsHierarchy: React.FC<EventsHierarchyProps> = ({
                       <CollapseIcon />
                     </span>
                     <div className="flex min-w-0 flex-1 flex-row items-center gap-2">
-                      <EventIcon className="size-5 flex-shrink-0" />
+                      <EventIcon className="flex-shrink-0" />
                       <span className="min-w-0 truncate leading-5">{triggerText}</span>
                     </div>
                   </div>
@@ -194,7 +194,7 @@ export const EventsHierarchy: React.FC<EventsHierarchyProps> = ({
                                     : `${actionText} (${technicalActionText})`
                                 }
                               >
-                                <ActionIcon className="size-5" />
+                                <ActionIcon />
                                 {actionText}
                               </div>
                             );
