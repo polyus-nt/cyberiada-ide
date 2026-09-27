@@ -35,16 +35,8 @@ interface EventsHierarchyProps {
 const getEventActions = (event: EventData): Action[] =>
   event.do && typeof event.do !== 'string' ? event.do : [];
 
-const Hint: React.FC<{ visibleText: string; technicalText: string; children: React.ReactNode }> = ({
-  visibleText,
-  technicalText,
-  children,
-}) => (
-  <WithHint
-    hint={visibleText === technicalText ? technicalText : `${visibleText} (${technicalText})`}
-  >
-    {(hintProps) => <div {...hintProps}>{children}</div>}
-  </WithHint>
+const Hint: React.FC<{ text: string; children: React.ReactNode }> = ({ text, children }) => (
+  <WithHint hint={text}>{(hintProps) => <div {...hintProps}>{children}</div>}</WithHint>
 );
 
 // Левая панель трёхуровневой иерархии: триггер → условие → действие.
@@ -101,11 +93,10 @@ export const EventsHierarchy: React.FC<EventsHierarchyProps> = ({
             const groupId = group.events[0].eventIndex;
             const isGroupCollapsed = collapsedGroups.has(group.trigger);
             const triggerText = getTriggerText(group.trigger, platform, components);
-            const technicalTriggerText = getTriggerText(group.trigger, platform, components, false);
 
             return (
               <div key={groupId}>
-                <Hint visibleText={triggerText} technicalText={technicalTriggerText}>
+                <Hint text={triggerText}>
                   <div
                     className="mt-1.5 flex cursor-pointer select-none items-center gap-1 rounded-lg px-1 hover:bg-bg-hover"
                     onClick={() => toggleSetItem(setCollapsedGroups, group.trigger)}
@@ -129,17 +120,11 @@ export const EventsHierarchy: React.FC<EventsHierarchyProps> = ({
                   group.events.map(({ event, eventIndex }) => {
                     const actions = getEventActions(event);
                     const conditionText = getConditionText(event.condition, platform, components);
-                    const technicalConditionText = getConditionText(
-                      event.condition,
-                      platform,
-                      components,
-                      false
-                    );
                     const isConditionCollapsed = collapsedConditions.has(event);
 
                     return (
                       <div key={eventIndex}>
-                        <Hint visibleText={conditionText} technicalText={technicalConditionText}>
+                        <Hint text={conditionText}>
                           <div
                             className={twMerge(
                               'mt-1.5 flex cursor-pointer select-none items-center gap-1 rounded-lg py-0.5 pl-7 pr-2 hover:bg-bg-hover',
@@ -171,17 +156,10 @@ export const EventsHierarchy: React.FC<EventsHierarchyProps> = ({
                           !isConditionCollapsed &&
                           actions.map((action, actionIndex) => {
                             const actionText = getActionText(action, platform, components);
-                            const technicalActionText = getActionText(
-                              action,
-                              platform,
-                              components,
-                              false
-                            );
                             return (
                               <Hint
                                 key={actionIndex}
-                                visibleText={actionText}
-                                technicalText={technicalActionText}
+                                text={actionText}
                               >
                                 <div
                                   className={twMerge(
