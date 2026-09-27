@@ -154,7 +154,7 @@ export const PlatformSelection: React.FC<PlatformSelectionProps> = ({
               onDelete={handleOnDeletePlatform}
             />
           ) : (
-            <div className="px-px py-[3px] leading-[15px] text-text-inactive">
+            <div className="w-[284px] min-w-full px-px py-[3px] leading-[15px] text-text-inactive">
               <p>
                 Чтобы добавить платформу для документа, выберите её из списка слева и перетащите её
                 сюда, либо дважды нажмите на неё левой кнопкой мыши.
