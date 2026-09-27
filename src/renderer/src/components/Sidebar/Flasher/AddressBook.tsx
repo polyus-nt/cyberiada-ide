@@ -69,6 +69,7 @@ export const AddressBookModal: React.FC<AddressBookModalProps> = ({
         isOpen={isOpen}
         onRequestClose={handleClose}
         title="Адресная книга"
+        className="max-w-[820px]"
         onSubmit={handleSubmit}
         submitDisabled={selectedEntry === undefined}
         submitLabel="Добавить"
