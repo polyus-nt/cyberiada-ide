@@ -35,7 +35,7 @@ export const ComponentFormFieldLabel: React.FC<ComponentFormFieldLabelProps> = (
     <div className={twMerge('w-full', sharedGrid && 'contents')}>
       <Component
         className={twMerge(
-          'grid w-full min-w-0 grid-cols-[max-content,minmax(0,1fr)] items-center justify-start gap-x-3 gap-y-2',
+          'grid w-full min-w-0 grid-cols-[max-content,minmax(0,1fr)] items-center justify-start gap-2',
           sharedGrid && 'contents'
         )}
       >
