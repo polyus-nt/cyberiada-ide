@@ -150,16 +150,6 @@ export const Condition: React.FC<ConditionProps> = memo(function Condition(props
       <div className={twMerge('mt-2', !show && 'hidden')}>
         <TabPanel value={0} tabValue={tabValue}>
           <div className="flex flex-col gap-2">
-            {visual && (
-              <div className={twMerge('flex flex-row', !show && 'hidden')}>
-                <AttributeConstSwitch
-                  hint="Если не выполняются другие условия для данного триггера"
-                  checked={isElse}
-                  onCheckedChange={handleElseChange}
-                />
-                <span className="ml-2">else</span>
-              </div>
-            )}
             <div className="flex items-start">
               <div className="ml-[37px]">
                 {isParamOneInput1 ? (
@@ -297,6 +287,17 @@ export const Condition: React.FC<ConditionProps> = memo(function Condition(props
           </TabPanel>
         )}
       </div>
+
+      {visual && (
+        <div className="mt-2 flex flex-row">
+          <AttributeConstSwitch
+            hint="Если не выполняются другие условия для данного триггера"
+            checked={isElse}
+            onCheckedChange={handleElseChange}
+          />
+          <span className="ml-2">else</span>
+        </div>
+      )}
     </div>
   );
 });

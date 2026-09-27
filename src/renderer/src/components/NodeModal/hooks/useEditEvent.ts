@@ -153,8 +153,9 @@ export const useEditEvent = (
 
   // Собирает условие в том же формате, в котором оно хранится в state.data.events, чтобы можно было сравнивать
   const getCondition = () => {
-    if (!show || !showCondition) return undefined;
+    if (!showCondition) return undefined;
     if (isElse) return 'else';
+    if (!show) return undefined;
     if (condition.tabValue === 0) {
       // Тут много as string потому что проверка на null в checkForErrors
       return {

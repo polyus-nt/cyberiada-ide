@@ -132,9 +132,8 @@ export const TransitionModal: React.FC<TransitionModalProps> = ({ smId, controll
     }
 
     const getCondition = () => {
-      if (!show) return undefined;
-
       if (isElse) return 'else';
+      if (!show) return undefined;
 
       if (condition.tabValue === 0) {
         // Тут много as string потому что проверка на null в checkForErrors
@@ -346,12 +345,7 @@ export const TransitionModal: React.FC<TransitionModalProps> = ({ smId, controll
             )}
             {!isInitialTransition && <Condition {...condition} />}
             {!isInitialTransition && (
-              <Actions
-                ref={actionsRef}
-                event={actionEvent}
-                {...actions}
-                inlineEditing
-              />
+              <Actions ref={actionsRef} event={actionEvent} {...actions} inlineEditing />
             )}
             {error && <div className="text-xs text-error">{error}</div>}
           </div>
