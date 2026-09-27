@@ -85,7 +85,7 @@
   }
 
   .dropdown-menu-item {
-    @apply focus-visible:bg-[#e6f4ff] enabled:hover:bg-[#e6f4ff] enabled:active:bg-bg-active disabled:cursor-not-allowed disabled:text-text-disabled disabled:opacity-50;
+    @apply gap-3 focus-visible:bg-[#e6f4ff] enabled:hover:bg-[#e6f4ff] enabled:active:bg-bg-active disabled:cursor-not-allowed disabled:text-text-disabled disabled:opacity-50;
   }
 
   .context-menu-item {
