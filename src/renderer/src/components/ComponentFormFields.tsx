@@ -88,6 +88,7 @@ export const ComponentFormFields: React.FC<ComponentFormFieldsProps> = ({
         <>
           <ComponentFormFieldLabel
             label="Название"
+            labelClassName="gap-2 font-medium"
             sharedGrid
             placeholder="Введите название..."
             maxLength={20}
@@ -100,6 +101,7 @@ export const ComponentFormFields: React.FC<ComponentFormFieldsProps> = ({
           <ComponentFormFieldLabel
             placeholder="Введите идентификатор..."
             label="Тех. название"
+            labelClassName="gap-2 font-medium"
             sharedGrid
             maxLength={20}
             hint="Уникальное техническое название, которое будет использоваться в коде. До 20 символов, среди которых – латинские буквы, цифры и знаки подчёркивания. Не должно начинаться с цифры."
@@ -111,6 +113,7 @@ export const ComponentFormFields: React.FC<ComponentFormFieldsProps> = ({
 
           <ComponentFormFieldLabel
             label="Подпись"
+            labelClassName="gap-2 font-medium"
             sharedGrid
             hint="До 3-х символов. Подпись нужна для различения иконок разных компонентов одного типа на схеме."
             as="div"
@@ -157,7 +160,7 @@ export const ComponentFormFields: React.FC<ComponentFormFieldsProps> = ({
               key={idx}
               error={error}
               label={name}
-              labelClassName="whitespace-pre"
+              labelClassName="gap-2 whitespace-pre font-medium"
               sharedGrid
               hint={param.description}
             >
@@ -174,7 +177,7 @@ export const ComponentFormFields: React.FC<ComponentFormFieldsProps> = ({
           <ComponentFormFieldLabel
             key={idx}
             label={name}
-            labelClassName="whitespace-pre"
+            labelClassName="gap-2 whitespace-pre font-medium"
             sharedGrid
             hint={param.description + (type ? `\nТип: ${formatArgType(type)}` : '')}
             error={error}
