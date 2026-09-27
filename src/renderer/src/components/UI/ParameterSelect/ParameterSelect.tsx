@@ -121,7 +121,13 @@ export function ParameterSelect<
         menuPosition="fixed"
         styles={{
           menuPortal: (base) => ({ ...base, zIndex }),
-          menu: (base) => ({ ...base, right: 0, left: 'auto', width: 'max-content' }),
+          menu: (base) => ({
+            ...base,
+            right: 0,
+            left: 'auto',
+            width: 'max-content',
+            minWidth: '100%',
+          }),
           control: (base) => ({ ...base, minHeight: '32px', height: '32px' }),
         }}
         components={{
