@@ -38,7 +38,9 @@ const ParameterOption = <Value extends string | number>({
       {({ ref, ...hintProps }) => (
         <components.Option innerRef={mergeRefs([innerRef, ref])} {...props} {...hintProps}>
           <div className="flex items-center">
-            {icon}
+            {icon && <span className="mr-1 flex size-5 shrink-0 items-center [&>*]:max-h-full [&>*]:max-w-full">
+              {icon}
+            </span>}
             {label}
           </div>
         </components.Option>
@@ -55,7 +57,9 @@ const ParameterSingleValue = <Value extends string | number>(
   return (
     <components.SingleValue {...props}>
       <div className="flex items-center">
-        {icon}
+        {icon && <span className="mr-1 flex size-5 shrink-0 items-center [&>*]:max-h-full [&>*]:max-w-full">
+          {icon}
+        </span>}
         {label}
       </div>
     </components.SingleValue>
