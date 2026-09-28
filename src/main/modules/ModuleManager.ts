@@ -287,7 +287,9 @@ export class ModuleManager {
       (directory) => !pathEntries.includes(directory)
     );
     if (missingDirectories.length > 0) {
-      process.env.PATH = `${missingDirectories.join(path.delimiter)}${path.delimiter}${currentPath}`;
+      process.env.PATH = `${missingDirectories.join(path.delimiter)}${
+        path.delimiter
+      }${currentPath}`;
     }
   }
 
@@ -300,7 +302,7 @@ export class ModuleManager {
   private static async prepareArduinoCliData(): Promise<void> {
     const bundledDataPath = path.join(basePath, 'arduino-cli-data', process.platform);
     const markerName = '.lapki-arduino-avr-core-version';
-    const bundledMarkerPath = path.join(bundledDataPath, markerName);
+    const isWindows = process.platform === 'win32';
 
     if (process.platform === 'win32') {
       const arduinoCliDirectory = path.join(this.getOsPath(), 'arduino-cli');
@@ -313,27 +315,35 @@ export class ModuleManager {
       }
     }
 
-    if (!existsSync(bundledMarkerPath)) return;
+    const bundledMarkerPath = path.join(bundledDataPath, markerName);
+    let localDataPath: string;
+    if (isWindows) {
+      const dataPathFile = path.join(basePath, 'arduino-cli-data', 'win32.path');
+      if (!existsSync(dataPathFile)) return;
+      localDataPath = (await readFile(dataPathFile, 'utf8')).trim();
+    } else {
+      if (!existsSync(bundledMarkerPath)) return;
+      const coreVersion = (await readFile(bundledMarkerPath, 'utf8')).trim();
+      if (!coreVersion) return;
+      const localCoreDirectory = coreVersion.replace(/[^a-zA-Z0-9._-]/g, '_');
+      localDataPath = path.join(app.getPath('userData'), 'arduino-cli', localCoreDirectory);
+    }
 
-    const coreVersion = (await readFile(bundledMarkerPath, 'utf8')).trim();
-    if (!coreVersion) return;
-
-    const localCoreDirectory = coreVersion.replace(/[^a-zA-Z0-9._-]/g, '_');
-    const localDataPath = path.join(app.getPath('userData'), 'arduino-cli', localCoreDirectory);
     const localMarkerPath = path.join(localDataPath, markerName);
     if (!existsSync(localMarkerPath)) {
-      // Arduino AVR GCC uses relative symlinks for its LTO plugin. Preserve
-      // them verbatim: resolving them here would point user data at the
-      // temporary AppImage mount (or a particular DEB installation path).
-      await cp(bundledDataPath, localDataPath, {
-        recursive: true,
-        force: true,
-        verbatimSymlinks: true,
-      });
+      if (!isWindows) {
+        // Arduino AVR GCC uses relative symlinks for its LTO plugin. Preserve
+        // them verbatim: resolving them here would point user data at the
+        // temporary AppImage mount (or a particular DEB installation path).
+        await cp(bundledDataPath, localDataPath, {
+          recursive: true,
+          force: true,
+          verbatimSymlinks: true,
+        });
+      }
     }
 
     process.env.ARDUINO_DIRECTORIES_DATA = localDataPath;
-
   }
 
   /**

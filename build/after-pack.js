@@ -15,7 +15,6 @@ exports.default = async (context) => {
       'resources/app.asar.unpacked/resources/modules/win32/lapki-compiler/fullgraphmlparser/templates',
       'resources/app.asar.unpacked/resources/modules/win32/gcc-arm-none-eabi/bin/arm-none-eabi-gcc.exe',
       'resources/app.asar.unpacked/resources/modules/win32/arduino-cli/arduino-cli.exe',
-      'resources/app.asar.unpacked/resources/arduino-cli-data/win32/packages/arduino/hardware/avr/1.8.8',
       'resources/app.asar.unpacked/resources/modules/win32/irpcb/bin/make.exe',
       'resources/app.asar.unpacked/resources/modules/win32/irpcb/bin/msys-2.0.dll',
     ]) {
@@ -25,6 +24,19 @@ exports.default = async (context) => {
           `Required Windows compiler resource is missing from package: ${resourcePath}`
         );
       }
+    }
+    const packedWindowsCore = path.join(
+      context.appOutDir,
+      'resources/app.asar.unpacked/resources/arduino-cli-data/win32'
+    );
+    if (existsSync(packedWindowsCore)) {
+      throw new Error(
+        `Windows package contains an expanded Arduino AVR core: ${packedWindowsCore}`
+      );
+    }
+    const archivePath = path.join(context.packager.projectDir, 'build/arduino-cli-data-win32.zip');
+    if (!existsSync(archivePath)) {
+      throw new Error(`Windows Arduino AVR archive is missing: ${archivePath}`);
     }
     return;
   }

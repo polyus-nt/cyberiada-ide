@@ -17,6 +17,8 @@ core="arduino:avr@1.8.8"
 marker_content="${core}:4"
 data_root="resources/arduino-cli-data/$platform"
 marker="$data_root/.lapki-arduino-avr-core-version"
+windows_archive="build/arduino-cli-data-win32.zip"
+windows_archive_path="$PWD/$windows_archive"
 cli_data_dir="${ARDUINO_CLI_DATA_DIR:-$PWD/$data_root}"
 # This mirror rewrites archive URLs too, so Arduino CLI never contacts
 # downloads.arduino.cc while installing the core. Set this to an internal
@@ -29,7 +31,9 @@ case "$platform" in
 esac
 
 if [[ -f "$marker" ]] && [[ "$(<"$marker")" == "$marker_content" ]]; then
-  exit 0
+  if [[ "$platform" != 'win32' || -f "$windows_archive_path" ]]; then
+    exit 0
+  fi
 fi
 
 rm -rf -- "$data_root"
@@ -67,3 +71,14 @@ env "${cli_environment[@]}" "${cli[@]}" core install "$core"
 printf '%s\n' "$marker_content" > "$marker"
 # Download archives are not needed by the installed core and inflate releases.
 rm -rf -- "$data_root/staging"
+
+# The expanded Windows core contains paths longer than the limit used by the
+# NSIS updater while it moves an old installation aside. Keep it as one short
+# input for the NSIS installer, which expands it into a user data directory.
+if [[ "$platform" == 'win32' ]]; then
+  rm -f -- "$windows_archive_path"
+  (
+    cd "$data_root"
+    zip -qry "$windows_archive_path" .
+  )
+fi
