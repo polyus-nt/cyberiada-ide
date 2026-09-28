@@ -241,7 +241,7 @@ export const StateModal: React.FC<StateModalProps> = ({ smId, controller }) => {
       submitLabel="Сохранить"
       cancelLabel="Отмена"
       hideCancelButton
-      className="min-h-[440px] w-[830px]"
+      className="min-h-[440px] w-[900px]"
     >
       <div className="flex h-full gap-4">
         {/* Левая панель: иерархия событий */}
