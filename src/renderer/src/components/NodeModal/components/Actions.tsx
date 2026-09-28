@@ -246,8 +246,10 @@ export const Actions = forwardRef<ActionsHandle, ActionsProps>((props, ref) => {
       className={
         inlineEditing
           ? `flex min-h-[290px] ${
-              hasExpandedMatrixAction || fillHeight ? 'max-h-[580px]' : 'max-h-[290px]'
-            } ${fillHeight ? 'h-[290px]' : ''} grow flex-col`
+              hasExpandedMatrixAction ? 'max-h-[580px]' : 'max-h-[290px]'
+            } ${
+              fillHeight ? (hasExpandedMatrixAction ? 'h-[580px]' : 'h-[290px]') : ''
+            } grow flex-col`
           : 'flex h-[290px] min-h-0 grow flex-col'
       }
     >
