@@ -197,7 +197,7 @@ export const InlineAction = forwardRef<InlineActionHandle, InlineActionProps>(
           <div className={twMerge('ml-2', expanded && 'self-start')}>
             <DeleteButton
               onClick={onDelete}
-              className="shrink-0 p-2"
+              className="flex shrink-0 items-center justify-center"
               aria-label="Удалить действие"
             />
           </div>
