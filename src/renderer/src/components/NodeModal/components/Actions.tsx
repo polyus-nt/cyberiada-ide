@@ -27,6 +27,7 @@ type ActionsProps = ReturnType<typeof useActions> & {
   onAddAction?: () => void;
   onChangeAction?: (action: ActionData) => void;
   inlineEditing?: boolean;
+  fillHeight?: boolean;
   expandedActionRequest?: { index: number; requestId: number } | null;
 };
 
@@ -62,6 +63,7 @@ export const Actions = forwardRef<ActionsHandle, ActionsProps>((props, ref) => {
     parse,
     disabled,
     inlineEditing = false,
+    fillHeight = false,
     expandedActionRequest,
   } = props;
   const visual = controller.useData('visual');
@@ -244,7 +246,7 @@ export const Actions = forwardRef<ActionsHandle, ActionsProps>((props, ref) => {
       className={
         inlineEditing
           ? `flex min-h-[290px] ${
-              hasExpandedMatrixAction ? 'max-h-[580px]' : 'max-h-[290px]'
+              hasExpandedMatrixAction || fillHeight ? 'max-h-[580px]' : 'max-h-[290px]'
             } grow flex-col`
           : 'flex h-[290px] min-h-0 grow flex-col'
       }
