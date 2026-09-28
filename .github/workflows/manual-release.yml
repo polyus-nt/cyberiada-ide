@@ -67,6 +67,8 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm run bundle:mac
+        env:
+          USE_HARD_LINKS: 'false'
 
       - name: Save dmg artifact
         uses: actions/upload-artifact@v4
