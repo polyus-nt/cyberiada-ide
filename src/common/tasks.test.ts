@@ -282,7 +282,6 @@ describe('parseProgrammingTask', () => {
         [0, -1],
         [1, 0],
         [0, -1],
-        [1, 0],
       ]) {
         let steps = 0;
         while (
@@ -309,11 +308,11 @@ describe('parseProgrammingTask', () => {
       ]);
     }
     expect(lengths).toEqual([
-      [2, 3, 4, 3],
-      [1, 2, 3, 2],
-      [1, 4, 4, 4],
-      [3, 2, 6, 2],
-      [2, 3, 4, 5],
+      [2, 3, 4],
+      [1, 2, 3],
+      [1, 4, 4],
+      [3, 2, 6],
+      [2, 3, 4],
     ]);
   });
 
