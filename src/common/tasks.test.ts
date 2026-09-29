@@ -127,7 +127,8 @@ describe('parseProgrammingTask', () => {
       readFileSync('resources/tasks/gardener-cornflower-path.task.json', 'utf8')
     );
     raw.tests[0].hiddenCells = Array.from({ length: 7 }, () => Array(7).fill(false));
-    raw.tests[0].hiddenCells[0][0] = true;
+    const { x, y } = raw.tests[0].input.position;
+    raw.tests[0].hiddenCells[y][x] = true;
 
     expect(() => parseProgrammingTask(raw)).toThrow('не может скрывать стартовую клетку');
   });
