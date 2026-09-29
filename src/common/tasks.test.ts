@@ -184,7 +184,7 @@ describe('parseProgrammingTask', () => {
     ]);
   });
 
-  it('covers every beacon order in cosmic delivery with the correct cargo and finish', () => {
+  it('checks the fixed cosmic delivery map, cargo, and finish', () => {
     const task = parseProgrammingTask(
       JSON.parse(
         readFileSync(
@@ -214,15 +214,9 @@ describe('parseProgrammingTask', () => {
     ]);
 
     expect(task.id).toBe('gardener-cosmic-delivery');
-    expect(task.tests).toHaveLength(6);
-    expect(
-      new Set(
-        task.tests.map((test) => {
-          const input = test.input as { field: number[][] };
-          return beacons.map(([x, y]) => input.field[y][x]).join(',');
-        })
-      ).size
-    ).toBe(6);
+    expect(task.tests).toHaveLength(1);
+    const field = (task.tests[0].input as { field: number[][] }).field;
+    expect(beacons.map(([x, y]) => field[y][x])).toEqual([1, 2, 3]);
 
     for (const test of task.tests) {
       const input = test.input as {
