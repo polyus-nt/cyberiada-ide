@@ -336,19 +336,17 @@ export const TransitionModal: React.FC<TransitionModalProps> = ({ smId, controll
         submitLabel="Сохранить"
         cancelLabel="Отмена"
         hideCancelButton
-        className="min-h-[440px] w-[546px]"
+        className="min-h-[440px] w-[600px]"
       >
-        <div className="min-h-[290px]">
-          <div className="flex h-full min-h-0 flex-col gap-4">
-            {!isInitialTransition && showTrigger && (
-              <Trigger event={(transition?.label as EventData) ?? null} {...trigger} />
-            )}
-            {!isInitialTransition && <Condition {...condition} />}
-            {!isInitialTransition && (
-              <Actions ref={actionsRef} event={actionEvent} {...actions} inlineEditing />
-            )}
-            {error && <div className="text-xs text-error">{error}</div>}
-          </div>
+        <div className="flex h-full min-h-[290px] flex-col gap-4">
+          {!isInitialTransition && showTrigger && (
+            <Trigger event={(transition?.label as EventData) ?? null} {...trigger} />
+          )}
+          {!isInitialTransition && <Condition {...condition} />}
+          {!isInitialTransition && (
+            <Actions ref={actionsRef} event={actionEvent} {...actions} inlineEditing fillHeight />
+          )}
+          {error && <div className="text-xs text-error">{error}</div>}
         </div>
       </MovingModal>
     </>

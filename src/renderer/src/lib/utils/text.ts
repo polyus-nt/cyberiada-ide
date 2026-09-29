@@ -4,6 +4,10 @@ canvas.height = 1000;
 const measureCtx = canvas.getContext('2d') as CanvasRenderingContext2D;
 const textMap = new Map<string, Map<string, number>>();
 
+export const clearTextMeasurements = () => {
+  textMap.clear();
+};
+
 export const getTextWidth = (text: string, font: string): number => {
   if (textMap.has(font)) {
     const cache = textMap.get(font)!;

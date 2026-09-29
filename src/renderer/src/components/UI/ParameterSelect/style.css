@@ -3,11 +3,11 @@
 }
 
 .ParameterSelect__value-container {
-  @apply h-8 px-2 py-0 !important;
+  @apply h-full px-2 py-0 !important;
 }
 
 .ParameterSelect__indicators {
-  @apply h-8 !important;
+  @apply h-full !important;
 }
 
 .ParameterSelect__indicator {
