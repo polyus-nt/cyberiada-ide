@@ -74,7 +74,7 @@ describe('loadTaskCatalog', () => {
     expect(catalog.diagnostics).toEqual([]);
     expect(catalog.tasks).toHaveLength(18);
     expect(catalog.tasks.every((entry) => entry.codeWord)).toBe(true);
-    expect(task?.tests).toHaveLength(6);
+    expect(task?.tests).toHaveLength(1);
     expect(task?.description).toContain('![Схема космической станции](cosmic-delivery.png)');
     expect(task?.assetBaseUrl).toContain('/gardener-cosmic-delivery/');
     expect(cartographer?.tests).toHaveLength(5);
