@@ -92,16 +92,14 @@ export const CyberBearSimulator: React.FC<CyberBearSimulatorProps> = ({
             aria-label="КиберМишка: глаза RGBK и матрица 5 на 7"
           >
             <path
-              d="M99 43 C65 4 25 30 49 75 C47 113 64 135 94 147 L89 170 L55 141 L39 111 C25 91 3 106 13 129 L27 162 L81 208 L82 311 L66 391 C61 421 93 434 111 410 L145 354 L175 354 L209 410 C227 434 259 421 254 391 L238 311 L239 208 L293 162 L307 129 C317 106 295 91 281 111 L265 141 L231 170 L226 147 C256 135 273 113 271 75 C295 30 255 4 221 43 C186 20 134 20 99 43 Z"
+              d="M97 44 C81 9 38 18 40 49 C41 68 52 78 71 78 C62 112 77 146 106 166 L98 180 Q79 182 65 157 L50 130 C38 107 10 112 10 134 Q10 148 21 164 L57 208 Q67 220 82 224 L82 311 L66 391 C61 421 93 434 111 410 L145 354 L175 354 L209 410 C227 434 259 421 254 391 L238 311 L238 224 Q253 220 263 208 L299 164 Q310 148 310 134 C310 112 282 107 270 130 L255 157 Q241 182 222 180 L214 166 C243 146 258 112 249 78 C268 78 279 68 280 49 C282 18 239 9 223 44 C194 9 126 9 97 44 Z"
               fill="var(--color-bg-primary, #f5f5f4)"
               stroke="#a8a29e"
               strokeWidth="2"
             />
             <g fill="#44403c">
-              <circle cx="70" cy="57" r="12" />
-              <circle cx="250" cy="57" r="12" />
-              <rect x="23" y="112" width="25" height="25" rx="6" />
-              <rect x="272" y="112" width="25" height="25" rx="6" />
+              <circle cx="66" cy="49" r="12" />
+              <circle cx="254" cy="49" r="12" />
               <path d="M149 109 Q160 100 171 109 L169 120 L151 120 Z" />
             </g>
             <path
@@ -134,7 +132,6 @@ export const CyberBearSimulator: React.FC<CyberBearSimulatorProps> = ({
                 />
               </g>
             ))}
-            <rect x="108" y="198" width="104" height="144" rx="10" fill="#1c1917" />
             {state.matrix.flatMap((row, y) =>
               row.map((brightness, x) => (
                 <g key={`${x}:${y}`}>
