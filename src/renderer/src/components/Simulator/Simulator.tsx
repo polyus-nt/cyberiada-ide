@@ -799,7 +799,7 @@ export const Simulator: React.FC<SimulatorProps> = ({
             referenceError ??
             interpreter.error ??
             (interpreter.ready && !interpreter.supportsCyberBear
-              ? 'Обновите интерпретатор: эта версия не поддерживает КиберМишку в реальном времени.'
+              ? 'Обновите интерпретатор: эта версия не поддерживает входную последовательность КиберМишки.'
               : undefined)
           }
           machineSelector={

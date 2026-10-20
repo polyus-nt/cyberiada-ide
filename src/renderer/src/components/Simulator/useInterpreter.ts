@@ -18,6 +18,10 @@ import { applyRunState, finishRunState } from './liveState';
 import { InterpreterClient } from '../Modules/Interpreter';
 import { ClientStatus } from '../Modules/Websocket/ClientStatus';
 
+const hasCyberBearSupport = () =>
+  InterpreterClient.capabilities.has('cyberbear.live') &&
+  InterpreterClient.capabilities.has('cyberbear.input-sequence');
+
 export const useInterpreter = () => {
   const [settings] = useSettings('interpreter');
   const [status, setStatus] = useState(
@@ -29,16 +33,14 @@ export const useInterpreter = () => {
   const activeTaskXml = useRef<string>();
   const [result, setResult] = useState<SimulationResult>();
   const liveResult = useRef<SimulationResult>();
-  const [supportsCyberBear, setSupportsCyberBear] = useState(
-    InterpreterClient.capabilities.has('cyberbear.live')
-  );
+  const [supportsCyberBear, setSupportsCyberBear] = useState(hasCyberBearSupport());
   const [error, setError] = useState<string>();
 
   useEffect(() => {
     InterpreterClient.bind(
       (nextStatus) => {
         setStatus(nextStatus);
-        setSupportsCyberBear(InterpreterClient.capabilities.has('cyberbear.live'));
+        setSupportsCyberBear(hasCyberBearSupport());
         if (nextStatus === ClientStatus.NO_CONNECTION) {
           setActiveRunId(undefined);
           setOperationKind(undefined);

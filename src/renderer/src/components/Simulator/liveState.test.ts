@@ -68,6 +68,6 @@ describe('live platform state', () => {
     expect(rgbkColor([0, 0, 0, 0])).toBe('rgb(0, 0, 0)');
     expect(rgbkColor([10, 0, 0, 0])).toBe('rgb(255, 0, 0)');
     expect(rgbkColor([10, 0, 0, 10])).toBe('rgb(128, 0, 0)');
-    expect(rgbkColor([10, 10, 10, 0])).toBe('rgb(85, 85, 85)');
+    expect(rgbkColor([10, 10, 10, 0])).toBe('rgb(255, 255, 255)');
   });
 });

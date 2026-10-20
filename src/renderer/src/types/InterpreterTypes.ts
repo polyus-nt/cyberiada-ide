@@ -21,7 +21,12 @@ export type ReaderParameters = {
   message: string;
 };
 
-export type CyberBearParameters = { message: string; channel: 'ir' | 'ears' };
+export type CyberBearChannel = 'ir' | 'ears';
+export type CyberBearInput = { channel: CyberBearChannel } & (
+  | { byte: number }
+  | { symbol: string }
+);
+export type CyberBearParameters = { inputs: CyberBearInput[] };
 export type RGBK = [number, number, number, number];
 export type CyberBearState = {
   eyes: { right: RGBK; left: RGBK };

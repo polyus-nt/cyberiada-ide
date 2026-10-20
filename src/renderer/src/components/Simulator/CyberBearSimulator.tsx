@@ -7,8 +7,14 @@ import type {
   SimulationResult,
 } from '@renderer/types/InterpreterTypes';
 
-import { createCyberBearState, rgbkColor } from './cyberBearModel';
-import { limitUnicodeCharacters } from './readerModel';
+import { CyberBearInputs } from './CyberBearInputs';
+import {
+  CyberBearInputDraft,
+  createCyberBearState,
+  cyberBearInputError,
+  cyberBearInputValue,
+  rgbkColor,
+} from './cyberBearModel';
 import { SimulationMode, SimulationRunPanel } from './SimulationRunPanel';
 
 interface CyberBearSimulatorProps {
@@ -57,24 +63,23 @@ export const CyberBearSimulator: React.FC<CyberBearSimulatorProps> = ({
 }) => {
   const [mode, setMode] = useState<SimulationMode>('finite');
   const [timeout, setTimeoutValue] = useState(10);
-  const [message, setMessage] = useState('');
-  const [channel, setChannel] = useState<'ir' | 'ears'>('ir');
+  const [inputs, setInputs] = useState<CyberBearInputDraft[]>([]);
   const state = cyberBear ?? createCyberBearState();
 
   return (
-    <div className="grid min-h-0 flex-1 grid-cols-[205px_minmax(260px,1fr)_205px] gap-6 overflow-auto text-sm max-[983px]:grid-cols-[205px_minmax(260px,1fr)] max-[729px]:grid-cols-1">
+    <div className="grid min-h-0 flex-1 grid-cols-[205px_minmax(260px,1fr)_260px] gap-6 overflow-auto text-sm max-[983px]:grid-cols-[205px_minmax(260px,1fr)] max-[729px]:grid-cols-1">
       <SimulationRunPanel
         machineSelector={machineSelector}
         mode={mode}
         timeout={timeout}
-        ready={ready}
+        ready={ready && inputs.every((input) => !cyberBearInputError(input))}
         active={active}
         error={error}
         message={result?.message}
         stale={stale}
         onModeChange={setMode}
         onTimeoutChange={setTimeoutValue}
-        onStart={() => onStart(mode, timeout, { message, channel })}
+        onStart={() => onStart(mode, timeout, { inputs: inputs.map(cyberBearInputValue) })}
         onCancel={onCancel}
       />
       <section className="min-w-0">
@@ -92,7 +97,7 @@ export const CyberBearSimulator: React.FC<CyberBearSimulatorProps> = ({
             aria-label="КиберМишка: глаза RGBK и матрица 5 на 7"
           >
             <path
-              d="M97 44 C81 9 38 18 40 49 C41 68 52 78 71 78 C62 112 77 146 106 166 L98 180 Q79 182 65 157 L50 130 C38 107 10 112 10 134 Q10 148 21 164 L57 208 Q67 220 82 224 L82 311 L66 391 C61 421 93 434 111 410 L145 354 L175 354 L209 410 C227 434 259 421 254 391 L238 311 L238 224 Q253 220 263 208 L299 164 Q310 148 310 134 C310 112 282 107 270 130 L255 157 Q241 182 222 180 L214 166 C243 146 258 112 249 78 C268 78 279 68 280 49 C282 18 239 9 223 44 C194 9 126 9 97 44 Z"
+              d="M97 44 C81 9 38 18 40 49 C41 68 52 78 71 78 C62 112 77 146 106 166 L98 180 Q88 186 78 159 L62 132 C48 100 8 108 8 134 Q8 150 20 168 L54 213 Q66 228 82 233 L82 311 L66 391 C61 421 93 434 111 410 L145 354 L175 354 L209 410 C227 434 259 421 254 391 L238 311 L238 233 Q254 228 266 213 L300 168 Q312 150 312 134 C312 108 272 100 258 132 L242 159 Q232 186 222 180 L214 166 C243 146 258 112 249 78 C268 78 279 68 280 49 C282 18 239 9 223 44 C194 9 126 9 97 44 Z"
               fill="var(--color-bg-primary, #f5f5f4)"
               stroke="#a8a29e"
               strokeWidth="2"
@@ -158,42 +163,9 @@ export const CyberBearSimulator: React.FC<CyberBearSimulatorProps> = ({
         <EyeValues label="Правый глаз" value={state.eyes.right} />
         <EyeValues label="Левый глаз" value={state.eyes.left} />
         <p className="text-xs leading-4 text-text-inactive">
-          R, G, B — длительности свечения. K — длительность выключения, уменьшающая яркость. Правый
-          и левый глаз указаны со стороны Мишки.
-        </p>
-        <p className="text-xs leading-4 text-text-inactive">
           Матрица: 5 × 7, яркость от 0 до 100%.
         </p>
-        <section className="border-t border-border-primary pt-3">
-          <h2 className="h2-header mb-3">Входное сообщение</h2>
-          <label className="grid gap-2 text-xs" htmlFor="cyberbear-channel">
-            Канал
-            <select
-              id="cyberbear-channel"
-              className="h-8 rounded-lg border border-border-primary bg-bg-primary px-2 disabled:text-text-inactive"
-              value={channel}
-              disabled={active}
-              onChange={(event) => setChannel(event.target.value as 'ir' | 'ears')}
-            >
-              <option value="ir">ИК-нос</option>
-              <option value="ears">Уши</option>
-            </select>
-          </label>
-          <label className="mt-3 grid gap-2 text-xs" htmlFor="cyberbear-message">
-            Строка
-            <textarea
-              id="cyberbear-message"
-              className="h-24 w-full resize-y rounded-lg border border-border-primary bg-bg-primary p-2 disabled:text-text-inactive"
-              value={message}
-              disabled={active}
-              placeholder="Например, МЕДОСАСОН"
-              onChange={(event) => setMessage(limitUnicodeCharacters(event.target.value, 10_000))}
-            />
-          </label>
-          <p className="mt-2 text-xs leading-4 text-text-inactive">
-            Строка передаётся побайтно в Windows-1251. До 10 000 символов.
-          </p>
-        </section>
+        <CyberBearInputs inputs={inputs} active={active} onChange={setInputs} />
       </div>
     </div>
   );

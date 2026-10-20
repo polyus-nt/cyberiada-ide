@@ -3,7 +3,32 @@ import { act, Simulate } from 'react-dom/test-utils';
 import { describe, expect, it, vi } from 'vitest';
 
 vi.mock('@renderer/components/UI', () => ({
-  ParameterSelect: () => <select aria-label="Режим" />,
+  ParameterSelect: ({
+    inputId,
+    options,
+    value,
+    isDisabled,
+    onChange,
+  }: {
+    inputId: string;
+    options: { value: string; label: string }[];
+    value?: { value: string };
+    isDisabled?: boolean;
+    onChange: (option: { value: string; label: string } | undefined) => void;
+  }) => (
+    <select
+      id={inputId}
+      value={value?.value}
+      disabled={isDisabled}
+      onChange={(event) => onChange(options.find((option) => option.value === event.target.value))}
+    >
+      {options.map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </select>
+  ),
 }));
 
 import { createCyberBearState } from './cyberBearModel';
@@ -25,19 +50,59 @@ describe('CyberBear simulator', () => {
     };
     try {
       act(() => root.render(<CyberBearSimulator {...props} />));
-      const channel = container.querySelector<HTMLSelectElement>('#cyberbear-channel');
-      const message = container.querySelector<HTMLTextAreaElement>('#cyberbear-message');
-      if (!channel || !message) throw new Error('Missing CyberBear input controls');
-      act(() => {
-        channel.value = 'ears';
-        Simulate.change(channel);
-        message.value = 'МЁД';
-        Simulate.change(message);
-      });
+      const add = () => {
+        const button = Array.from(container.querySelectorAll('button')).find(
+          (item) => item.textContent === 'Добавить элемент'
+        );
+        if (!button) throw new Error('Missing add input button');
+        act(() => button.click());
+      };
+      const change = (prefix: string, index: number, value: string) => {
+        const control = container.querySelectorAll<HTMLInputElement | HTMLSelectElement>(
+          `[id^="${prefix}"]`
+        )[index];
+        if (!control) throw new Error('Missing sequence control');
+        act(() => {
+          control.value = value;
+          Simulate.change(control);
+        });
+      };
+      add();
+      change('cyberbear-value-', 0, 'М');
+      add();
+      change('cyberbear-channel-', 1, 'ears');
+      change('cyberbear-kind-', 1, 'byte');
+      change('cyberbear-value-', 1, '0x2A');
+      add();
+      change('cyberbear-channel-', 2, 'ir');
+      change('cyberbear-value-', 2, 'Ё');
+      const moveDown = container.querySelector<HTMLButtonElement>(
+        '[aria-label="Опустить элемент 2"]'
+      );
+      if (!moveDown) throw new Error('Missing reorder button');
+      act(() => moveDown.click());
+      expect(
+        Array.from(container.querySelectorAll<HTMLInputElement>('[id^="cyberbear-value-"]')).map(
+          (input) => input.value
+        )
+      ).toEqual(['М', 'Ё', '0x2A']);
+      const moveUp = container.querySelector<HTMLButtonElement>('[aria-label="Поднять элемент 3"]');
+      if (!moveUp) throw new Error('Missing reorder button');
+      act(() => moveUp.click());
+      add();
+      const remove = container.querySelector<HTMLButtonElement>('[aria-label="Удалить элемент 4"]');
+      if (!remove) throw new Error('Missing remove button');
+      act(() => remove.click());
       const start = container.querySelector('button');
       if (!start) throw new Error('Missing start button');
       act(() => start.click());
-      expect(onStart).toHaveBeenCalledWith('finite', 10, { channel: 'ears', message: 'МЁД' });
+      expect(onStart).toHaveBeenCalledWith('finite', 10, {
+        inputs: [
+          { channel: 'ir', symbol: 'М' },
+          { channel: 'ears', byte: 42 },
+          { channel: 'ir', symbol: 'Ё' },
+        ],
+      });
       const state = createCyberBearState();
       state.eyes.right = [10, 0, 0, 10];
       state.matrix[6][4] = 75;
@@ -45,8 +110,17 @@ describe('CyberBear simulator', () => {
       expect(container.textContent).toContain('Выполняется');
       expect(container.querySelector('svg')?.textContent).toContain('Правый глаз: 10, 0, 0, 10');
       expect(container.querySelector('svg')?.textContent).toContain('Строка 7, столбец 5: 75%');
-      expect(channel.disabled).toBe(true);
-      expect(message.disabled).toBe(true);
+      expect(container.textContent).not.toContain('длительности свечения');
+      expect(
+        Array.from(container.querySelectorAll<HTMLInputElement>('[id^="cyberbear-value-"]')).every(
+          (input) => input.disabled
+        )
+      ).toBe(true);
+      expect(
+        Array.from(
+          container.querySelectorAll<HTMLSelectElement>('[id^="cyberbear-channel-"]')
+        ).every((select) => select.disabled)
+      ).toBe(true);
     } finally {
       act(() => root.unmount());
       vi.unstubAllGlobals();
