@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Давление XGZP6859D</title>
+  <g stroke="#5b6b70" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M26 45v13h12V45" fill="#5b6b70"/>
+    <circle cx="32" cy="27" r="22" fill="#eaf3dd"/>
+    <path d="M18 30a14 14 0 0 1 28 0" fill="none" stroke="#f5c345" stroke-width="6"/>
+    <path d="M32 11v4M18 17l3 3M46 17l-3 3"/>
+    <path d="m32 30 10-11"/>
+    <circle cx="32" cy="30" r="4" fill="#5b6b70"/>
+    <path d="M7 55h12m-4-4 4 4-4 4M45 55h12m-8-4-4 4 4 4" fill="none" stroke="#65b8df"/>
+  </g>
+</svg>

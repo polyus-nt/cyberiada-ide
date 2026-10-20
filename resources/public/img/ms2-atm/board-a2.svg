@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Атмосферная плата A2</title>
+  <g stroke="#5b6b70" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="8" y="7" width="48" height="50" rx="6" fill="#9bcb64"/>
+    <path d="M3 20h5M3 32h5M3 44h5M56 20h5M56 32h5M56 44h5"/>
+    <rect x="15" y="17" width="8" height="8" rx="2" fill="#eaf3dd"/>
+    <rect x="28" y="17" width="8" height="8" rx="2" fill="#f5c345"/>
+    <rect x="41" y="17" width="8" height="8" rx="2" fill="#eaf3dd"/>
+    <path d="M15 48h9m16 0h9" stroke="#fff"/>
+    <text x="32" y="51" text-anchor="middle" stroke="none" fill="#5b6b70" font-family="sans-serif" font-weight="700" font-size="12">A2</text>
+  </g>
+</svg>

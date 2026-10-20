@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Температура</title>
+  <g stroke="#5b6b70" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M25 39V14a7 7 0 0 1 14 0v25a13 13 0 1 1-14 0Z" fill="#eaf3dd"/>
+    <path d="M32 21v22" stroke="#df6c6c" stroke-width="6"/>
+    <circle cx="32" cy="49" r="6" fill="#df6c6c" stroke="none"/>
+    <path d="M45 16h8M45 25h5M45 34h8"/>
+  </g>
+</svg>

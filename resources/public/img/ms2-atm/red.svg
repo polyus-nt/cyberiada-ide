@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Красный канал RGB</title>
+  <g stroke="#5b6b70" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="32" cy="32" r="23" fill="#df6c6c"/>
+    <text x="32" y="40" text-anchor="middle" fill="#fff" stroke="none" font-family="sans-serif" font-weight="700" font-size="25">R</text>
+  </g>
+</svg>

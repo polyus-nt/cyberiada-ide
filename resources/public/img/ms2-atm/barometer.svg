@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Атмосферное давление HP203B</title>
+  <g stroke="#5b6b70" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="32" cy="34" r="23" fill="#eaf3dd"/>
+    <path d="M17 36a15 15 0 0 1 30 0" fill="none" stroke="#9bcb64" stroke-width="6"/>
+    <path d="M32 16v5M17 23l4 4M47 23l-4 4"/>
+    <path d="m32 37 10-13"/>
+    <circle cx="32" cy="37" r="4" fill="#5b6b70"/>
+    <path d="M24 48h16" stroke="#65b8df" stroke-width="4"/>
+    <path d="M16 5h11m10 0h11" stroke="#65b8df"/>
+    <path d="M32 2v6" stroke="#65b8df"/>
+  </g>
+</svg>
