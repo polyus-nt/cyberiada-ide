@@ -52,8 +52,8 @@ describe('MS2 atmospheric platform catalog', () => {
     );
     expect(a1.components.SHT30.constructorParameters?.position.type).toEqual(['4', '5']);
     expect(a1.components.SHT30.constructorParameters?.position.valueAlias).toEqual([
-      'S4 · NSHT30-CLAR',
-      'S5 · SHT30',
+      'NSHT30-CLAR',
+      'SHT30',
     ]);
     expect(a2.components.SHT30.constructorParameters?.position.type).toEqual(['5']);
   });
