@@ -1,6 +1,10 @@
 import { StateMachine } from '@renderer/types/diagram';
 
-export const SUPPORTED_SIMULATION_PLATFORMS = new Set(['junior-gardener', 'junior-reader']);
+export const SUPPORTED_SIMULATION_PLATFORMS = new Set([
+  'junior-gardener',
+  'junior-reader',
+  'blg-mb-junior',
+]);
 
 export type SimulationMachineOption = {
   id: string;

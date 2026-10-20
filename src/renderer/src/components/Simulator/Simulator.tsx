@@ -12,9 +12,11 @@ import { StateMachine } from '@renderer/types/diagram';
 import {
   GardenerParameters,
   ReaderParameters,
+  CyberBearParameters,
   SimulationResult,
 } from '@renderer/types/InterpreterTypes';
 
+import { CyberBearSimulator } from './CyberBearSimulator';
 import { ExecutionHistory } from './ExecutionHistory';
 import { GardenerMarker, gardenerCellStyles } from './GardenerField';
 import {
@@ -48,7 +50,7 @@ interface SimulatorProps {
 }
 
 type GardenerTool = GardenerCell | 'position';
-type SimulationParameters = GardenerParameters | ReaderParameters;
+type SimulationParameters = GardenerParameters | ReaderParameters | CyberBearParameters;
 
 interface RuntimeProps {
   ready: boolean;
@@ -163,13 +165,15 @@ const GardenerSimulator: React.FC<GardenerRuntimeProps> = ({
   const [timeout, setTimeoutValue] = useState(10);
   const [historyIndex, setHistoryIndex] = useState(0);
   const [reviewingHistory, setReviewingHistory] = useState(false);
+  const [showCurrentState, setShowCurrentState] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const resultSteps = result?.steps;
   const steps = resultSteps ?? [];
   const historyStep = reviewingHistory ? steps[historyIndex] : undefined;
-  const displayedField = historyStep?.field ?? field;
-  const displayedPosition = historyStep?.position ?? position;
-  const displayedOrientation = historyStep?.orientation ?? orientation;
+  const displayedStep = active || showCurrentState ? result?.result?.environment : historyStep;
+  const displayedField = displayedStep?.field ?? field;
+  const displayedPosition = displayedStep?.position ?? position;
+  const displayedOrientation = displayedStep?.orientation ?? orientation;
 
   useEffect(() => {
     const handleMouseUp = () => {
@@ -198,7 +202,8 @@ const GardenerSimulator: React.FC<GardenerRuntimeProps> = ({
 
   useLayoutEffect(() => {
     setHistoryIndex(Math.max(0, steps.length - 1));
-    setReviewingHistory(steps.length > 0);
+    setReviewingHistory(false);
+    setShowCurrentState(true);
     setIsPlaying(false);
   }, [resultSteps, steps.length]);
 
@@ -216,6 +221,7 @@ const GardenerSimulator: React.FC<GardenerRuntimeProps> = ({
 
   const selectHistoryStep = (index: number) => {
     setIsPlaying(false);
+    setShowCurrentState(false);
     setReviewingHistory(true);
     setHistoryIndex(index);
   };
@@ -223,6 +229,7 @@ const GardenerSimulator: React.FC<GardenerRuntimeProps> = ({
   const togglePlayback = () => {
     if (steps.length === 0) return;
     setReviewingHistory(true);
+    setShowCurrentState(false);
     if (!isPlaying && historyIndex === steps.length - 1) setHistoryIndex(0);
     setIsPlaying((current) => !current);
   };
@@ -230,6 +237,7 @@ const GardenerSimulator: React.FC<GardenerRuntimeProps> = ({
   const stopHistoryPlayback = () => {
     setIsPlaying(false);
     setReviewingHistory(false);
+    setShowCurrentState(false);
   };
 
   const updateWidth = (value: number) => {
@@ -268,6 +276,7 @@ const GardenerSimulator: React.FC<GardenerRuntimeProps> = ({
 
   const handleCellMouseDown = (event: React.MouseEvent, x: number, y: number) => {
     event.preventDefault();
+    if (active) return;
 
     if (event.button === 0) {
       applySelectedTool(x, y);
@@ -278,6 +287,7 @@ const GardenerSimulator: React.FC<GardenerRuntimeProps> = ({
 
   const handleCellMouseEnter = (event: React.MouseEvent, x: number, y: number) => {
     event.preventDefault();
+    if (active) return;
 
     if (isRightMouseDown) {
       eraseCell(x, y);
@@ -319,14 +329,29 @@ const GardenerSimulator: React.FC<GardenerRuntimeProps> = ({
           onCancel={onCancel}
         />
 
-        <ExecutionHistory
-          steps={steps}
-          historyIndex={historyIndex}
-          isPlaying={isPlaying}
-          isTruncated={result?.warnings?.includes('EXECUTION_HISTORY_TRUNCATED') ?? false}
-          onSelectStep={selectHistoryStep}
-          onTogglePlayback={togglePlayback}
-        />
+        <fieldset disabled={active}>
+          <ExecutionHistory
+            steps={steps}
+            historyIndex={historyIndex}
+            isPlaying={isPlaying}
+            isTruncated={result?.warnings?.includes('EXECUTION_HISTORY_TRUNCATED') ?? false}
+            onSelectStep={selectHistoryStep}
+            onTogglePlayback={togglePlayback}
+          />
+        </fieldset>
+        {result?.result?.environment && (
+          <button
+            type="button"
+            className="mt-3 h-8 w-full rounded-lg border border-border-primary px-3 text-xs"
+            onClick={() => {
+              setIsPlaying(false);
+              setReviewingHistory(false);
+              setShowCurrentState(true);
+            }}
+          >
+            Текущее состояние
+          </button>
+        )}
       </div>
 
       <section className="min-w-0">
@@ -368,7 +393,9 @@ const GardenerSimulator: React.FC<GardenerRuntimeProps> = ({
           </div>
         </div>
         <p className="mt-6 max-w-[398px] text-xs leading-4 text-text-inactive">
-          {reviewingHistory
+          {active
+            ? 'Выполняется. Поле обновляется в реальном времени.'
+            : reviewingHistory
             ? `Просмотр шага ${historyIndex + 1} из ${steps.length}.`
             : 'Выберите инструмент и нажмите на клетку. Кнопка “Старт” переносит начальную позицию.'}
         </p>
@@ -641,7 +668,9 @@ export const Simulator: React.FC<SimulatorProps> = ({
     onAutoSizeChange?.(
       activeTask?.platformId === 'junior-gardener' ||
         (!activeTask &&
-          (machine?.platform === 'junior-reader' || machine?.platform === 'junior-gardener'))
+          (machine?.platform === 'junior-reader' ||
+            machine?.platform === 'junior-gardener' ||
+            machine?.platform === 'blg-mb-junior'))
     );
   }, [activeTask, machine?.platform, onAutoSizeChange]);
 
@@ -735,7 +764,9 @@ export const Simulator: React.FC<SimulatorProps> = ({
         </div>
       )}
       {(activeTask ||
-        (machine?.platform !== 'junior-gardener' && machine?.platform !== 'junior-reader')) && (
+        (machine?.platform !== 'junior-gardener' &&
+          machine?.platform !== 'junior-reader' &&
+          machine?.platform !== 'blg-mb-junior')) && (
         <div className="mb-4 w-64 max-w-full">
           <MachineSelector
             options={options}
@@ -751,11 +782,37 @@ export const Simulator: React.FC<SimulatorProps> = ({
           ready={interpreter.ready && !referenceError}
           active={interpreter.active}
           operationKind={interpreter.operationKind}
+          liveTestId={interpreter.activeTestId}
+          liveExecution={interpreter.operationKind === 'test' ? interpreter.result : undefined}
           error={referenceError ?? interpreter.error}
           hasSolution={machine !== undefined}
           onRunTest={runTaskTest}
           onCancel={interpreter.cancel}
           onSubmit={submitTask}
+        />
+      )}
+      {!activeTask && machine?.platform === 'blg-mb-junior' && (
+        <CyberBearSimulator
+          {...interpreter}
+          ready={interpreter.ready && interpreter.supportsCyberBear && !referenceError}
+          error={
+            referenceError ??
+            interpreter.error ??
+            (interpreter.ready && !interpreter.supportsCyberBear
+              ? 'Обновите интерпретатор: эта версия не поддерживает КиберМишку в реальном времени.'
+              : undefined)
+          }
+          machineSelector={
+            <MachineSelector
+              options={options}
+              selectedSmId={selectedSmId}
+              active={interpreter.active}
+              onSelect={selectMachine}
+            />
+          }
+          stale={resultStale}
+          onStart={start}
+          onCancel={interpreter.cancel}
         />
       )}
       {!activeTask && machine?.platform === 'junior-gardener' && (

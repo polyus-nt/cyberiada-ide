@@ -68,10 +68,10 @@ describe('ReaderResult', () => {
     expect(html).toContain('Импульсы появятся после запуска');
   });
 
-  it('explains that impulses will appear when the active run finishes', () => {
+  it('waits for live impulses during an active run', () => {
     const html = renderToStaticMarkup(<ReaderResult stale={false} active />);
 
-    expect(html).toContain('Импульсы появятся после окончания работы');
+    expect(html).toContain('Ожидание выходных импульсов');
     expect(html).not.toContain('Импульсы появятся после запуска');
   });
 

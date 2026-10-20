@@ -134,10 +134,12 @@ const GardenerDetails: React.FC<{
   const steps = execution?.steps ?? [];
   const [stepIndex, setStepIndex] = useState(Math.max(steps.length - 1, 0));
   const [playing, setPlaying] = useState(false);
+  const [showCurrentState, setShowCurrentState] = useState(true);
 
   useEffect(() => {
     setStepIndex(Math.max(steps.length - 1, 0));
     setPlaying(false);
+    setShowCurrentState(true);
   }, [execution, steps.length]);
 
   useEffect(() => {
@@ -156,7 +158,8 @@ const GardenerDetails: React.FC<{
 
   const step = steps[stepIndex];
   const environment = execution?.result?.environment;
-  const visible = step ?? environment;
+  const visible =
+    execution?.status === 'running' || showCurrentState ? environment ?? step : step ?? environment;
 
   const emptyField = input.field.map((row) => row.map(() => 0 as const));
 
@@ -177,7 +180,11 @@ const GardenerDetails: React.FC<{
             <h3 className="h2-header">Фактическое поле</h3>
           </div>
           <span className="shrink-0 rounded-full bg-bg-secondary px-1.5 text-[14px] leading-4 text-text-inactive">
-            {steps.length > 0
+            {execution?.status === 'running'
+              ? 'Выполняется'
+              : showCurrentState && execution
+              ? 'Итог'
+              : steps.length > 0
               ? `${stepIndex + 1} / ${steps.length}`
               : execution
               ? 'Итог'
@@ -216,8 +223,10 @@ const GardenerDetails: React.FC<{
             <div className="mb-2 flex items-center justify-between gap-3">
               <button
                 type="button"
+                disabled={execution?.status === 'running'}
                 className="h-8 rounded-lg px-3 text-xs transition-colors enabled:bg-primary enabled:text-text-secondary disabled:cursor-not-allowed disabled:bg-bg-active disabled:text-text-disabled"
                 onClick={() => {
+                  setShowCurrentState(false);
                   if (stepIndex >= steps.length - 1) setStepIndex(0);
                   setPlaying((current) => !current);
                 }}
@@ -230,16 +239,28 @@ const GardenerDetails: React.FC<{
             </div>
             <input
               type="range"
+              disabled={execution?.status === 'running'}
               min={0}
               max={Math.max(steps.length - 1, 0)}
               value={stepIndex}
               aria-label="Шаг выполнения"
               onChange={(event) => {
                 setPlaying(false);
+                setShowCurrentState(false);
                 setStepIndex(Number(event.target.value));
               }}
               className="w-full accent-primary"
             />
+            <button
+              type="button"
+              className="mt-2 h-8 rounded-lg border border-border-primary px-3 text-xs"
+              onClick={() => {
+                setPlaying(false);
+                setShowCurrentState(true);
+              }}
+            >
+              Текущее состояние
+            </button>
           </div>
         )}
       </section>
@@ -274,6 +295,8 @@ interface TaskModeProps {
   ready: boolean;
   active: boolean;
   operationKind?: 'run' | 'test' | 'submission';
+  liveTestId?: string;
+  liveExecution?: SimulationResult;
   error?: string;
   hasSolution: boolean;
   onRunTest: (testId: string) => void;
@@ -286,6 +309,8 @@ export const TaskMode: React.FC<TaskModeProps> = ({
   ready,
   active,
   operationKind,
+  liveTestId,
+  liveExecution,
   error,
   hasSolution,
   onRunTest,
@@ -303,7 +328,9 @@ export const TaskMode: React.FC<TaskModeProps> = ({
   const selectedTest = task.tests.find((test) => test.id === selectedTestId) ?? task.tests[0];
   const selectedState = selectedTest ? testStates[selectedTest.id] : undefined;
   const detailedExecution =
-    detailedResult?.testId === selectedTest?.id
+    liveTestId === selectedTest?.id && liveExecution
+      ? liveExecution
+      : detailedResult?.testId === selectedTest?.id
       ? detailedResult.execution
       : selectedState?.source === 'submission'
       ? (selectedState.verdict?.outcome as SimulationResult | undefined)

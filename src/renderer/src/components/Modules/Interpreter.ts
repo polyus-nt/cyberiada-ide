@@ -14,6 +14,7 @@ import { ClientWS } from './Websocket/ClientWS';
 
 export class InterpreterClient extends ClientWS {
   static ready = false;
+  static capabilities = new Set<string>();
   static activeRunId: string | undefined;
   static activeKind: 'run' | 'test' | 'submission' | undefined;
 
@@ -23,7 +24,10 @@ export class InterpreterClient extends ClientWS {
       this.connection !== undefined &&
       (this.connection.readyState === Websocket.OPEN ||
         this.connection.readyState === Websocket.CONNECTING);
-    if (!hasActiveConnection) this.ready = false;
+    if (!hasActiveConnection) {
+      this.ready = false;
+      this.capabilities.clear();
+    }
     return super.connect(host, port, autoReconnect);
   }
 
@@ -38,6 +42,7 @@ export class InterpreterClient extends ClientWS {
 
   static closeHandler(host: string, port: number, event: Websocket.CloseEvent): void {
     this.ready = false;
+    this.capabilities.clear();
     this.activeRunId = undefined;
     this.activeKind = undefined;
     super.closeHandler(host, port, event);
@@ -45,6 +50,7 @@ export class InterpreterClient extends ClientWS {
 
   static errorHandler(error: unknown): void {
     this.ready = false;
+    this.capabilities.clear();
     this.activeRunId = undefined;
     this.activeKind = undefined;
     super.errorHandler(error);
@@ -55,7 +61,14 @@ export class InterpreterClient extends ClientWS {
     try {
       const envelope = JSON.parse(message.data) as InterpreterEnvelope;
       if (envelope.protocolVersion !== INTERPRETER_PROTOCOL_VERSION) return;
+      if (envelope.runId && envelope.runId !== this.activeRunId) return;
       if (envelope.type === 'connection.ready') {
+        const capabilities = (envelope.payload as { capabilities?: unknown }).capabilities;
+        this.capabilities = new Set(
+          Array.isArray(capabilities)
+            ? capabilities.filter((value) => typeof value === 'string')
+            : []
+        );
         this.ready = true;
         this.onStatusChange(ClientStatus.CONNECTED);
       }
@@ -86,7 +99,7 @@ export class InterpreterClient extends ClientWS {
       type: 'run.start',
       requestId: nanoid(),
       runId,
-      payload,
+      payload: { ...payload, live: true },
     };
     if (!this.sendJson(envelope)) return;
     this.activeRunId = runId;
@@ -106,7 +119,7 @@ export class InterpreterClient extends ClientWS {
         type,
         requestId: nanoid(),
         runId,
-        payload,
+        payload: { ...payload, live: true },
       } satisfies InterpreterEnvelope<TestStartPayload | TaskStartPayload>)
     ) {
       return;

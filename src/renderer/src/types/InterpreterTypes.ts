@@ -21,15 +21,34 @@ export type ReaderParameters = {
   message: string;
 };
 
+export type CyberBearParameters = { message: string; channel: 'ir' | 'ears' };
+export type RGBK = [number, number, number, number];
+export type CyberBearState = {
+  eyes: { right: RGBK; left: RGBK };
+  matrix: number[][];
+};
+
+export type RunStatePayload =
+  | { platform: 'blg-mb-junior'; cyberBear: CyberBearState }
+  | {
+      platform: 'junior-gardener';
+      environment: GardenerStep;
+      steps: GardenerStep[];
+      historyTruncated: boolean;
+    }
+  | { platform: 'junior-reader'; impulses: string[] };
+
 export type RunStartPayload = {
   xml: string;
   machineId: string;
   mode: SimulationMode;
+  live?: boolean;
   timeoutSeconds?: number;
-  parameters: GardenerParameters | ReaderParameters;
+  parameters: GardenerParameters | ReaderParameters | CyberBearParameters;
 };
 
 export type TaskStartPayload = {
+  live?: boolean;
   xml: string;
   machineId: string;
   task: ProgrammingTask;
@@ -58,6 +77,7 @@ export type InterpreterRequestType = 'run.start' | 'run.cancel' | 'test.start' |
 export type InterpreterResponseType =
   | 'connection.ready'
   | 'run.started'
+  | 'run.state'
   | 'run.cancel.accepted'
   | 'run.completed'
   | 'run.cancelled'
@@ -87,7 +107,7 @@ export type GardenerStep = {
 };
 
 export type SimulationResult = {
-  status: 'success' | 'timeout' | 'cancelled' | 'crash' | 'error';
+  status: 'running' | 'success' | 'timeout' | 'cancelled' | 'crash' | 'error';
   message?: string;
   steps?: GardenerStep[];
   warnings?: string[];
@@ -96,6 +116,7 @@ export type SimulationResult = {
     calledSignals: string[];
     timeout?: boolean;
     environment?: GardenerStep;
+    cyberBear?: CyberBearState;
   };
   code?: string;
 };

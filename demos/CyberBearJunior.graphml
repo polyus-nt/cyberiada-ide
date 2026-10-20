@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns">
+  <key id="gFormat" for="graphml" attr.name="format" attr.type="string"/>
+  <key id="dStateMachine" for="graph" attr.name="stateMachine" attr.type="string"/>
+  <key id="dName" for="node" attr.name="name" attr.type="string"/>
+  <key id="dNote" for="node" attr.name="note" attr.type="string"/>
+  <key id="dVertex" for="node" attr.name="vertex" attr.type="string"/>
+  <key id="dData" for="node" attr.name="data" attr.type="string"/>
+  <key id="dData" for="edge" attr.name="data" attr.type="string"/>
+  <key id="dGeometry" for="node" attr.name="geometry"/>
+  <data key="gFormat">Cyberiada-GraphML-1.0</data>
+  <graph id="CyberBearJunior" edgedefault="directed">
+    <data key="dStateMachine"/>
+    <node id="meta">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_META</data>
+      <data key="dData">platform/ blg-mb-junior
+
+standardVersion/ 1.0
+
+name/ КиберМишка: глаза и сердце
+
+description/ При запуске показывает сердце. Каждый байт от ИК-носа или ушей задаёт яркость красного правого глаза.</data>
+    </node>
+    <node id="component-right">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT</data>
+      <data key="dData">id/ right
+
+type/ Eyes
+
+name/ Правый глаз
+
+pin/ 1</data>
+    </node>
+    <node id="component-left">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT</data>
+      <data key="dData">id/ left
+
+type/ Eyes
+
+name/ Левый глаз
+
+pin/ 2</data>
+    </node>
+    <node id="component-matrix">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT</data>
+      <data key="dData">id/ matrix
+
+type/ Matrix
+
+name/ Матрица</data>
+    </node>
+    <node id="component-ir">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT</data>
+      <data key="dData">id/ ir
+
+type/ PhotoDiodeBytes
+
+name/ ИК-нос</data>
+    </node>
+    <node id="component-ears">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT</data>
+      <data key="dData">id/ ears
+
+type/ EarsBytes
+
+name/ Уши</data>
+    </node>
+    <node id="initial">
+      <data key="dVertex">initial</data>
+      <data key="dGeometry"><point x="60" y="180"/></data>
+    </node>
+    <node id="main">
+      <data key="dName">Слушает сообщение</data>
+      <data key="dGeometry"><rect x="140" y="100" width="350" height="220"/></data>
+      <data key="dData">entry/
+right.setColorPalette(&amp;ColorRed)
+left.setColorPalette(&amp;ColorBlue)
+matrix.setPattern({0, 0, 0, 0, 0, 0, 100, 0, 100, 0, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 0, 100, 100, 100, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0})
+
+ir.isByteReceived/
+right.setColor(ir.value, 0, 0, 100)
+
+ears.isByteReceived/
+right.setColor(ears.value, 0, 0, 100)</data>
+    </node>
+    <edge id="start" source="initial" target="main"/>
+    <edge id="right-meta" source="meta" target="component-right"/>
+    <edge id="left-meta" source="meta" target="component-left"/>
+    <edge id="matrix-meta" source="meta" target="component-matrix"/>
+    <edge id="ir-meta" source="meta" target="component-ir"/>
+    <edge id="ears-meta" source="meta" target="component-ears"/>
+  </graph>
+</graphml>

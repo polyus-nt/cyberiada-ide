@@ -28,6 +28,7 @@ describe('InterpreterClient', () => {
   afterEach(() => {
     InterpreterClient.connection = undefined;
     InterpreterClient.ready = false;
+    InterpreterClient.capabilities.clear();
     InterpreterClient.activeRunId = undefined;
     InterpreterClient.activeKind = undefined;
   });
@@ -98,6 +99,27 @@ describe('InterpreterClient', () => {
 
     expect(InterpreterClient.activeRunId).toBeUndefined();
     expect(InterpreterClient.activeKind).toBeUndefined();
+  });
+
+  it('streams matching updates and discards late messages from another run', () => {
+    InterpreterClient.activeRunId = 'current';
+    InterpreterClient.activeKind = 'run';
+    const listener = vi.fn();
+    const unsubscribe = InterpreterClient.subscribeMessages(listener);
+    for (const runId of ['old', 'current']) {
+      InterpreterClient.messageHandler({
+        data: JSON.stringify({
+          protocolVersion: 2,
+          type: 'run.state',
+          requestId: 'request',
+          runId,
+          payload: { platform: 'junior-reader', impulses: ['impulseA'] },
+        }),
+      } as Websocket.MessageEvent);
+    }
+    expect(listener).toHaveBeenCalledTimes(1);
+    expect(InterpreterClient.activeRunId).toBe('current');
+    unsubscribe();
   });
 
   it('starts a correlated test operation and allows cancellation', () => {
