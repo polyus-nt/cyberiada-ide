@@ -290,8 +290,13 @@ export const FlasherTab: React.FC = () => {
     setFlashTableData(
       flashTableData.filter((item) => {
         switch (item.targetType) {
-          case FirmwareTargetType.dev:
-            return devices.has(item.targetId as string);
+          case FirmwareTargetType.dev: {
+            const device = devices.get(item.targetId as string);
+            return (
+              !!device &&
+              (device.isArduinoDevice() || device.isMSDevice() || device.isBlgMbDevice())
+            );
+          }
           default:
             return true;
         }
@@ -568,7 +573,7 @@ export const FlasherTab: React.FC = () => {
   const handleAddDevice = (deviceIds: string[]) => {
     for (const devId of deviceIds) {
       const dev = devices.get(devId);
-      if (!dev) continue;
+      if (!dev || (!dev.isArduinoDevice() && !dev.isMSDevice() && !dev.isBlgMbDevice())) continue;
       if (dev.isMSDevice()) {
         handleGetAddressAndMeta();
         continue;

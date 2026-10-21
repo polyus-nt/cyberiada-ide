@@ -11,11 +11,15 @@ export const SupportedOperations = new Map<devType, OperationType[]>([
 export class Device {
   deviceID: string;
   name: string;
+  profileID?: number;
+  manuallyAssigned?: boolean;
   private type: devType;
 
   constructor(device: Device, type: devType) {
     this.deviceID = device.deviceID;
     this.name = device.name;
+    this.profileID = device.profileID;
+    this.manuallyAssigned = device.manuallyAssigned;
     this.type = type;
   }
 
@@ -101,5 +105,28 @@ export class BlgMbDevice extends Device {
     super(device, 'blg-mb');
     this.serialID = device.serialID;
     this.version = device.version;
+  }
+}
+
+export class UnknownDevice extends Device {
+  portName: string;
+  serialID: string;
+  vendorID: string;
+  productID: string;
+
+  constructor(device: UnknownDevice) {
+    super(device, 'common');
+    this.portName = device.portName;
+    this.serialID = device.serialID;
+    this.vendorID = device.vendorID;
+    this.productID = device.productID;
+  }
+
+  displayName(): string {
+    return `${this.name} (${this.portName})`;
+  }
+
+  getSerialPort(): string {
+    return this.portName;
   }
 }

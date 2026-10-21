@@ -444,6 +444,7 @@ export const SerialMonitorTab: React.FC<SerialMonitorTabProps> = ({
       </div>
 
       <DeviceList
+        allowUnknownSelection
         isOpen={isDeviceListOpen}
         onClose={closeDeviceList}
         onSubmit={handleAddDevice}

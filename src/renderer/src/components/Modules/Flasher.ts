@@ -3,8 +3,15 @@ import Websocket from 'isomorphic-ws';
 import { Buffer } from 'buffer';
 
 import { Device, ArduinoDevice } from '@renderer/components/Modules/Device';
+import { useFlasher } from '@renderer/store/useFlasher';
 import { Binary } from '@renderer/types/CompilerTypes';
-import { FlasherMessage, FlasherPayload, FlasherType } from '@renderer/types/FlasherTypes';
+import {
+  BoardProfile,
+  DeviceCommentCode,
+  FlasherMessage,
+  FlasherPayload,
+  FlasherType,
+} from '@renderer/types/FlasherTypes';
 
 import { SerialMonitor, SERIAL_MONITOR_CONNECTED } from './SerialMonitor';
 import { ClientWS } from './Websocket/ClientWS';
@@ -54,6 +61,31 @@ export class Flasher extends ClientWS {
     super.bind(setFlasherConnectionStatus, setSecondsUntilReconnect);
     this.setFlasherMessage = setFlasherMessage;
     this.setErrorMessage = setErrorMessage;
+  }
+
+  static async setBoardProfile(deviceID: string, profileID: number | null): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const cleanup = () => {
+        clearTimeout(timeout);
+        unsubscribe();
+      };
+      const unsubscribe = this.subscribeMessages<FlasherMessage>((message) => {
+        if (message.type !== 'board-profile-result') return;
+        const result = message.payload as DeviceCommentCode;
+        if (result.deviceID !== deviceID) return;
+        cleanup();
+        if (result.code === 0) resolve();
+        else reject(new Error(result.comment));
+      });
+      const timeout = setTimeout(() => {
+        cleanup();
+        reject(new Error('Загрузчик не ответил на запрос выбора платы. Проверьте соединение.'));
+      }, 10000);
+      if (!this.sendJson({ type: 'set-board-profile', payload: { deviceID, profileID } })) {
+        cleanup();
+        reject(new Error('Отсутствует подключение к загрузчику.'));
+      }
+    });
   }
 
   static getList(): void {
@@ -129,6 +161,9 @@ export class Flasher extends ClientWS {
     serialMonitorDevice: Device | undefined = undefined,
     serialConnectionStatus: string = ''
   ) {
+    if (!device.isArduinoDevice() && !device.isMSDevice() && !device.isBlgMbDevice()) {
+      throw new Error('Выберите плату для неизвестного порта перед прошивкой.');
+    }
     if (!Flasher.binary) {
       throw new Error('Отсутствуют бинарные данные');
     }
@@ -188,6 +223,7 @@ export class Flasher extends ClientWS {
     super.onOpenHandler();
     console.log(`Flasher: connected to ${Flasher.host}:${Flasher.port}!`);
     this.setErrorMessage(undefined);
+    this.send('get-board-profiles', undefined);
   }
 
   static closeHandler(host: string, port: number, event: Websocket.CloseEvent) {
@@ -207,6 +243,12 @@ export class Flasher extends ClientWS {
   static async messageHandler(msg: Websocket.MessageEvent) {
     if (typeof msg.data === 'string') {
       const flasherMessage = JSON.parse(msg.data as string) as FlasherMessage;
+      this.emitMessage(flasherMessage);
+      if (flasherMessage.type === 'board-profiles') {
+        useFlasher.getState().setBoardProfiles(flasherMessage.payload as BoardProfile[]);
+        return;
+      }
+      if (flasherMessage.type === 'board-profile-result') return;
       this.setFlasherMessage(flasherMessage);
     } else {
       // бинарные данные

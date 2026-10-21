@@ -8,7 +8,9 @@ import { Flasher } from '@renderer/components/Modules/Flasher';
 import { Modal, ScrollArea } from '@renderer/components/UI';
 import { useFlasher } from '@renderer/store/useFlasher';
 
-import { ArduinoDevice, BlgMbDevice, Device, MSDevice } from '../../Modules/Device';
+import { BoardProfileSelector } from './BoardProfileSelector';
+
+import { ArduinoDevice, BlgMbDevice, Device, MSDevice, UnknownDevice } from '../../Modules/Device';
 import { ClientStatus } from '../../Modules/Websocket/ClientStatus';
 
 interface DeviceListProps {
@@ -17,6 +19,7 @@ interface DeviceListProps {
   onSubmit: (deviceIds: string[]) => void;
   submitLabel: string;
   devices: Map<string, Device>;
+  allowUnknownSelection?: boolean;
 }
 
 export const DeviceList: React.FC<DeviceListProps> = ({
@@ -25,6 +28,7 @@ export const DeviceList: React.FC<DeviceListProps> = ({
   onSubmit,
   submitLabel,
   devices,
+  allowUnknownSelection = false,
   ...props
 }) => {
   const { handleSubmit: hookHandleSubmit } = useForm();
@@ -46,8 +50,27 @@ export const DeviceList: React.FC<DeviceListProps> = ({
     Flasher.getList();
   };
 
+  const selectedDevice = currentDeviceID ? devices.get(currentDeviceID) : undefined;
+  const canSelect =
+    !!selectedDevice && (allowUnknownSelection || !(selectedDevice instanceof UnknownDevice));
+
   const deviceInfoDisplay = (device: Device | undefined) => {
     if (!device) return;
+    if (device instanceof UnknownDevice) {
+      return (
+        <div>
+          <p>Неизвестная плата</p>
+          <p>Порт: {device.portName}</p>
+          {device.serialID && <p>Серийный номер: {device.serialID}</p>}
+          {device.vendorID && (
+            <p>
+              VID/PID: {device.vendorID}:{device.productID}
+            </p>
+          )}
+          <p>Выберите плату для прошивки.</p>
+        </div>
+      );
+    }
     if (device.isMSDevice()) {
       const MSDevice = device as MSDevice;
       let portNames = MSDevice.portNames[0];
@@ -85,7 +108,7 @@ export const DeviceList: React.FC<DeviceListProps> = ({
   };
 
   const handleSubmit = hookHandleSubmit(() => {
-    if (!currentDeviceID) {
+    if (!currentDeviceID || !canSelect) {
       onClose();
       return;
     }
@@ -151,6 +174,9 @@ export const DeviceList: React.FC<DeviceListProps> = ({
                 <p>Выберите устройство из списка, чтобы посмотреть информацию о нем</p>
               )}
             </ScrollArea>
+            {selectedDevice && (
+              <BoardProfileSelector key={selectedDevice.deviceID} device={selectedDevice} />
+            )}
           </div>
         </div>
       );
@@ -172,7 +198,7 @@ export const DeviceList: React.FC<DeviceListProps> = ({
       submitLabel={submitLabel}
       onSubmit={handleSubmit}
       hideCancelButton
-      submitDisabled={!currentDeviceID}
+      submitDisabled={!canSelect}
     >
       {renderContent()}
     </Modal>

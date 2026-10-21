@@ -2,10 +2,17 @@ import { create } from 'zustand';
 
 import { Device } from '@renderer/components/Modules/Device';
 import { ClientStatus } from '@renderer/components/Modules/Websocket/ClientStatus';
-import { FlasherMessage, FlashResult, FlashTableItem } from '@renderer/types/FlasherTypes';
+import {
+  BoardProfile,
+  FlasherMessage,
+  FlashResult,
+  FlashTableItem,
+} from '@renderer/types/FlasherTypes';
 
 // TODO: объединить с useManagerMS
 interface FlasherState {
+  boardProfiles: BoardProfile[];
+  setBoardProfiles: (profiles: BoardProfile[]) => void;
   isFlashing: boolean;
   setIsFlashing: (flashing: boolean) => void;
   connectionStatus: string;
@@ -38,6 +45,8 @@ interface FlasherState {
 }
 
 export const useFlasher = create<FlasherState>((set) => ({
+  boardProfiles: [],
+  setBoardProfiles: (boardProfiles) => set({ boardProfiles }),
   isFlashing: false,
   setIsFlashing: (newFlashing) => set({ isFlashing: newFlashing }),
   connectionStatus: ClientStatus.NO_CONNECTION,
