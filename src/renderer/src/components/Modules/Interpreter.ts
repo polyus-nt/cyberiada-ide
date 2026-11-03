@@ -93,6 +93,7 @@ export class InterpreterClient extends ClientWS {
 
   static start(payload: RunStartPayload): string | undefined {
     if (!this.ready || this.activeRunId) return;
+    if (payload.machines && !this.capabilities.has('run.session')) return;
     const runId = nanoid();
     const envelope: InterpreterEnvelope<RunStartPayload> = {
       protocolVersion: INTERPRETER_PROTOCOL_VERSION,

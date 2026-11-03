@@ -71,3 +71,51 @@ describe('live platform state', () => {
     expect(rgbkColor([10, 10, 10, 0])).toBe('rgb(255, 255, 255)');
   });
 });
+
+it('keeps session participants separate and preserves their history on completion', () => {
+  let state = applyRunState(undefined, {
+    platform: 'session',
+    machines: {
+      reader: { platform: 'junior-reader', impulses: ['impulseA', 'impulseB'] },
+      gardener: {
+        platform: 'junior-gardener',
+        environment: step(1),
+        steps: [step(0), step(1)],
+        historyTruncated: false,
+      },
+    },
+  });
+  state = applyRunState(state, {
+    platform: 'session',
+    machines: {
+      reader: { platform: 'junior-reader', impulses: ['impulseC'] },
+      gardener: {
+        platform: 'junior-gardener',
+        environment: step(2),
+        steps: [step(2)],
+        historyTruncated: false,
+      },
+    },
+  });
+  const final = finishRunState(state, {
+    status: 'success',
+    machines: {
+      reader: {
+        status: 'success',
+        result: { signals: [], calledSignals: ['impulseA', 'impulseB', 'impulseC'] },
+      },
+      gardener: {
+        status: 'success',
+        result: { signals: [], calledSignals: [], environment: step(2) },
+      },
+    },
+  });
+  expect(final.machines?.reader.result?.calledSignals).toEqual([
+    'impulseA',
+    'impulseB',
+    'impulseC',
+  ]);
+  expect(final.machines?.gardener.steps).toEqual([step(0), step(1), step(2)]);
+  expect(final.machines?.gardener.result?.environment).toEqual(step(2));
+  expect(final.machines?.reader.steps).toBeUndefined();
+});

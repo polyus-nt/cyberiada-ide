@@ -30,7 +30,13 @@ export type CyberBearState = {
   matrix: number[][];
 };
 
+export type SessionStatePayload = {
+  platform: 'session';
+  machines: Record<string, RunStatePayload>;
+};
+
 export type RunStatePayload =
+  | SessionStatePayload
   | { platform: 'blg-mb-junior'; cyberBear: CyberBearState }
   | {
       platform: 'junior-gardener';
@@ -40,14 +46,21 @@ export type RunStatePayload =
     }
   | { platform: 'junior-reader'; impulses: string[] };
 
+export type MachineParameters = GardenerParameters | ReaderParameters | CyberBearParameters;
+
 export type RunStartPayload = {
   xml: string;
-  machineId: string;
   mode: SimulationMode;
   live?: boolean;
   timeoutSeconds?: number;
-  parameters: GardenerParameters | ReaderParameters | CyberBearParameters;
-};
+} & (
+  | { machineId: string; parameters: MachineParameters; machines?: never }
+  | {
+      machines: { machineId: string; parameters: MachineParameters }[];
+      machineId?: never;
+      parameters?: never;
+    }
+);
 
 export type TaskStartPayload = {
   live?: boolean;
@@ -111,6 +124,7 @@ export type GardenerStep = {
 export type SimulationResult = {
   status: 'running' | 'success' | 'timeout' | 'cancelled' | 'crash' | 'error';
   message?: string;
+  machines?: Record<string, SimulationResult>;
   steps?: GardenerStep[];
   warnings?: string[];
   result?: {

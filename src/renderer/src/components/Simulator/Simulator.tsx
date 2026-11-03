@@ -4,7 +4,7 @@ import { twMerge } from 'tailwind-merge';
 
 import { ParameterSelect } from '@renderer/components/UI';
 import { getMissingComponentReferences } from '@renderer/lib/data/ComponentReferences';
-import { exportStateMachineCGML } from '@renderer/lib/data/GraphmlBuilder';
+import { exportCGML, exportStateMachineCGML } from '@renderer/lib/data/GraphmlBuilder';
 import { getPlatform } from '@renderer/lib/data/PlatformLoader';
 import { useModelContext } from '@renderer/store/ModelContext';
 import { getActiveTask, useTasks } from '@renderer/store/useTasks';
@@ -64,6 +64,8 @@ interface RuntimeProps {
 
 interface GardenerRuntimeProps extends RuntimeProps {
   machineSelector: React.ReactNode;
+  hideRunPanel?: boolean;
+  onParametersChange?: (parameters: GardenerParameters) => void;
 }
 
 type ReaderRuntimeProps = GardenerRuntimeProps;
@@ -145,6 +147,8 @@ const MachineSelector: React.FC<{
 
 const GardenerSimulator: React.FC<GardenerRuntimeProps> = ({
   machineSelector,
+  hideRunPanel,
+  onParametersChange,
   ready,
   active,
   result,
@@ -158,6 +162,15 @@ const GardenerSimulator: React.FC<GardenerRuntimeProps> = ({
   const [field, setField] = useState(() => createField(width, height));
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [orientation, setOrientation] = useState<GardenerOrientation>('east');
+  useEffect(() => {
+    onParametersChange?.({
+      width,
+      height,
+      field,
+      position,
+      orientation: orientation.toUpperCase() as Uppercase<GardenerOrientation>,
+    });
+  }, [width, height, field, position, orientation, onParametersChange]);
   const [selectedTool, setSelectedTool] = useState<GardenerTool>(0);
   const [isMouseDown, setIsMouseDown] = useState(false);
   const [isRightMouseDown, setIsRightMouseDown] = useState(false);
@@ -299,35 +312,37 @@ const GardenerSimulator: React.FC<GardenerRuntimeProps> = ({
   return (
     <div className="grid min-h-0 flex-1 grid-cols-[205px_minmax(398px,1fr)_228px] gap-x-6 gap-y-5 overflow-auto text-sm max-[983px]:grid-cols-[205px_minmax(398px,1fr)] max-[729px]:grid-cols-1">
       <div className="min-w-0">
-        <SimulationRunPanel
-          machineSelector={machineSelector}
-          mode={mode}
-          timeout={timeout}
-          ready={ready}
-          active={active}
-          error={error}
-          message={result?.message}
-          stale={stale}
-          reserveFeedbackSpace
-          onModeChange={(nextMode) => {
-            stopHistoryPlayback();
-            setMode(nextMode);
-          }}
-          onTimeoutChange={(nextTimeout) => {
-            stopHistoryPlayback();
-            setTimeoutValue(nextTimeout);
-          }}
-          onStart={() =>
-            onStart(mode, timeout, {
-              width,
-              height,
-              field,
-              position,
-              orientation: orientation.toUpperCase() as Uppercase<GardenerOrientation>,
-            })
-          }
-          onCancel={onCancel}
-        />
+        {!hideRunPanel && (
+          <SimulationRunPanel
+            machineSelector={machineSelector}
+            mode={mode}
+            timeout={timeout}
+            ready={ready}
+            active={active}
+            error={error}
+            message={result?.message}
+            stale={stale}
+            reserveFeedbackSpace
+            onModeChange={(nextMode) => {
+              stopHistoryPlayback();
+              setMode(nextMode);
+            }}
+            onTimeoutChange={(nextTimeout) => {
+              stopHistoryPlayback();
+              setTimeoutValue(nextTimeout);
+            }}
+            onStart={() =>
+              onStart(mode, timeout, {
+                width,
+                height,
+                field,
+                position,
+                orientation: orientation.toUpperCase() as Uppercase<GardenerOrientation>,
+              })
+            }
+            onCancel={onCancel}
+          />
+        )}
 
         <fieldset disabled={active}>
           <ExecutionHistory
@@ -401,7 +416,7 @@ const GardenerSimulator: React.FC<GardenerRuntimeProps> = ({
         </p>
       </section>
 
-      <div className="min-w-0 max-[983px]:col-span-2 max-[729px]:col-span-1">
+      <fieldset disabled={active} className="min-w-0 max-[983px]:col-span-2 max-[729px]:col-span-1">
         <section>
           <h2 className="h2-header mb-2">Настройки поля</h2>
           <div className="rounded-lg border border-border-primary p-3">
@@ -519,7 +534,7 @@ const GardenerSimulator: React.FC<GardenerRuntimeProps> = ({
             </button>
           </div>
         </section>
-      </div>
+      </fieldset>
     </div>
   );
 };
@@ -580,6 +595,199 @@ const ReaderSimulator: React.FC<ReaderRuntimeProps> = ({
   );
 };
 
+const useJointMachineRevision = (model: ReturnType<typeof useModelContext>, id: string) => {
+  model.model.useData(id, 'elements.states');
+  model.model.useData(id, 'elements.transitions');
+  model.model.useData(id, 'elements.components');
+  model.model.useData(id, 'elements.initialStates');
+  model.model.useData(id, 'elements.finalStates');
+  model.model.useData(id, 'elements.choiceStates');
+  model.model.useData(id, 'elements.shallowHistory');
+  model.model.useData(id, 'elements.name');
+};
+
+type JointSimulatorProps = {
+  options: SimulationMachineOption[];
+  interpreter: ReturnType<typeof useInterpreter>;
+  onStart: (
+    readerId: string,
+    gardenerId: string,
+    message: string,
+    parameters: GardenerParameters,
+    mode: SimulationMode,
+    timeout: number
+  ) => void;
+};
+
+export const JointSimulator: React.FC<JointSimulatorProps> = ({
+  options,
+  interpreter,
+  onStart,
+}) => {
+  const readers = options.filter(({ machine }) => machine.platform === 'junior-reader');
+  const gardeners = options.filter(({ machine }) => machine.platform === 'junior-gardener');
+  const [selectedReaderId, setReaderId] = useState(readers[0]?.id ?? '');
+  const [selectedGardenerId, setGardenerId] = useState(gardeners[0]?.id ?? '');
+  const readerId = readers.some(({ id }) => id === selectedReaderId)
+    ? selectedReaderId
+    : readers[0]?.id ?? '';
+  const gardenerId = gardeners.some(({ id }) => id === selectedGardenerId)
+    ? selectedGardenerId
+    : gardeners[0]?.id ?? '';
+  const [tab, setTab] = useState('reader');
+  const [message, setMessage] = useState('');
+  const [parameters, setParameters] = useState<GardenerParameters>();
+  const [mode, setMode] = useState<SimulationMode>('finite');
+  const [timeout, setTimeoutValue] = useState(10);
+  const model = useModelContext();
+  useJointMachineRevision(model, readerId);
+  useJointMachineRevision(model, gardenerId);
+  const [runRevision, setRunRevision] = useState<string>();
+  const currentRevision = JSON.stringify([
+    model.model.data.elements.stateMachines[readerId],
+    model.model.data.elements.stateMachines[gardenerId],
+    message,
+    parameters,
+  ]);
+  const stale = Boolean(interpreter.result && runRevision !== currentRevision);
+  const referenceError = [readerId, gardenerId].flatMap((id) => {
+    const machine = options.find((option) => option.id === id)?.machine;
+    const platform = machine && getPlatform(machine.platform);
+    return machine && platform ? getMissingComponentReferences(machine, platform) : [];
+  });
+  const valid =
+    readers.some(({ id }) => id === readerId) && gardeners.some(({ id }) => id === gardenerId);
+  const error = !valid
+    ? 'Добавьте в документ Строчника и Садовника.'
+    : referenceError.length
+    ? `В схемах отсутствуют компоненты: ${referenceError.join(', ')}`
+    : interpreter.ready && !interpreter.supportsSession
+    ? 'Обновите интерпретатор для совместного запуска.'
+    : interpreter.error;
+  const readerResult = interpreter.result?.machines?.[readerId];
+  const gardenerResult = interpreter.result?.machines?.[gardenerId];
+  return (
+    <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-auto">
+      <div className="flex flex-wrap gap-4">
+        {[
+          { label: 'Строчник', value: readerId, options: readers, select: setReaderId },
+          { label: 'Садовник', value: gardenerId, options: gardeners, select: setGardenerId },
+        ].map((selector) => (
+          <label key={selector.label} className="grid gap-2 text-xs">
+            {selector.label}
+            <select
+              aria-label={selector.label}
+              className={controlClassName}
+              value={selector.value}
+              disabled={interpreter.active}
+              onChange={(event) => {
+                selector.select(event.target.value);
+                interpreter.clear();
+              }}
+            >
+              <option value="" disabled>
+                Выберите машину
+              </option>
+              {selector.options.map(({ id, machine }) => (
+                <option key={id} value={id}>
+                  {machine.name || id}
+                </option>
+              ))}
+            </select>
+          </label>
+        ))}
+      </div>
+      <div className="flex flex-wrap gap-6">
+        <div className="w-52 shrink-0">
+          <SimulationRunPanel
+            machineSelector={null}
+            mode={mode}
+            timeout={timeout}
+            ready={
+              interpreter.ready &&
+              interpreter.supportsSession &&
+              valid &&
+              referenceError.length === 0 &&
+              Boolean(parameters)
+            }
+            active={interpreter.active}
+            error={error}
+            message={interpreter.result?.message}
+            stale={stale}
+            onModeChange={setMode}
+            onTimeoutChange={setTimeoutValue}
+            onCancel={interpreter.cancel}
+            onStart={() => {
+              if (parameters) {
+                setRunRevision(currentRevision);
+                onStart(readerId, gardenerId, message, parameters, mode, timeout);
+              }
+            }}
+          />
+        </div>
+        <section className="min-w-52 flex-1" aria-label="Общая лента импульсов">
+          <h2 className="h2-header mb-2">Строчник → Садовник · Импульсы</h2>
+          <ReaderResult result={readerResult} stale={stale} active={interpreter.active} />
+        </section>
+      </div>
+      <div
+        role="tablist"
+        aria-label="Участники симуляции"
+        className="flex gap-2 border-b border-border-primary"
+      >
+        {['reader', 'gardener'].map((id) => (
+          <button
+            key={id}
+            role="tab"
+            id={`joint-tab-${id}`}
+            aria-selected={tab === id}
+            aria-controls={`joint-panel-${id}`}
+            className={twMerge('rounded-t-lg px-4 py-2 text-sm', tab === id && 'bg-bg-active')}
+            onClick={() => setTab(id)}
+          >
+            {id === 'reader' ? 'Строчник' : 'Садовник'}
+          </button>
+        ))}
+      </div>
+      <div
+        role="tabpanel"
+        id="joint-panel-reader"
+        aria-labelledby="joint-tab-reader"
+        hidden={tab !== 'reader'}
+      >
+        <FieldInput label="Входная строка" htmlFor="joint-reader-message">
+          <textarea
+            id="joint-reader-message"
+            className={twMerge(controlClassName, 'h-32 py-2')}
+            value={message}
+            disabled={interpreter.active}
+            onChange={(event) => setMessage(limitUnicodeCharacters(event.target.value, 10_000))}
+          />
+        </FieldInput>
+      </div>
+      <div
+        role="tabpanel"
+        id="joint-panel-gardener"
+        aria-labelledby="joint-tab-gardener"
+        hidden={tab !== 'gardener'}
+      >
+        <GardenerSimulator
+          key={gardenerId}
+          machineSelector={null}
+          hideRunPanel
+          onParametersChange={setParameters}
+          ready={false}
+          active={interpreter.active}
+          result={gardenerResult}
+          stale={stale}
+          onStart={() => undefined}
+          onCancel={interpreter.cancel}
+        />
+      </div>
+    </div>
+  );
+};
+
 export const Simulator: React.FC<SimulatorProps> = ({
   initialSmId,
   onStatusChange,
@@ -587,6 +795,7 @@ export const Simulator: React.FC<SimulatorProps> = ({
 }) => {
   const modelController = useModelContext();
   const interpreter = useInterpreter();
+  const [joint, setJoint] = useState(false);
   const [activeTask, solutionMachineId, selectSolution] = useTasks((state) => [
     getActiveTask(state),
     state.solutionMachineId,
@@ -668,11 +877,12 @@ export const Simulator: React.FC<SimulatorProps> = ({
     onAutoSizeChange?.(
       activeTask?.platformId === 'junior-gardener' ||
         (!activeTask &&
-          (machine?.platform === 'junior-reader' ||
+          (joint ||
+            machine?.platform === 'junior-reader' ||
             machine?.platform === 'junior-gardener' ||
             machine?.platform === 'blg-mb-junior'))
     );
-  }, [activeTask, machine?.platform, onAutoSizeChange]);
+  }, [activeTask, joint, machine?.platform, onAutoSizeChange]);
 
   useEffect(() => {
     if (!activeTask) return;
@@ -763,8 +973,64 @@ export const Simulator: React.FC<SimulatorProps> = ({
           </span>
         </div>
       )}
+      {!activeTask && (
+        <div className="mb-4 flex gap-2">
+          <button
+            className={twMerge(
+              'rounded-lg border border-border-primary px-3 py-2 text-xs',
+              !joint && 'bg-bg-active'
+            )}
+            disabled={interpreter.active}
+            onClick={() => {
+              setJoint(false);
+              interpreter.clear();
+            }}
+          >
+            Одна машина
+          </button>
+          <button
+            className={twMerge(
+              'rounded-lg border border-border-primary px-3 py-2 text-xs',
+              joint && 'bg-bg-active'
+            )}
+            disabled={interpreter.active}
+            onClick={() => {
+              setJoint(true);
+              interpreter.clear();
+            }}
+          >
+            Строчник + Садовник
+          </button>
+        </div>
+      )}
+      {!activeTask && joint && (
+        <JointSimulator
+          options={allOptions}
+          interpreter={interpreter}
+          onStart={(readerId, gardenerId, message, parameters, mode, timeout) => {
+            const elements = modelController.model.data.elements;
+            const xml = exportCGML({
+              parameters: elements.parameters,
+              stateMachines: {
+                [readerId]: elements.stateMachines[readerId],
+                [gardenerId]: elements.stateMachines[gardenerId],
+              },
+            });
+            interpreter.start({
+              xml,
+              mode,
+              ...(mode === 'finite' ? { timeoutSeconds: timeout } : {}),
+              machines: [
+                { machineId: readerId, parameters: { message } },
+                { machineId: gardenerId, parameters },
+              ],
+            });
+          }}
+        />
+      )}
       {(activeTask ||
-        (machine?.platform !== 'junior-gardener' &&
+        (!joint &&
+          machine?.platform !== 'junior-gardener' &&
           machine?.platform !== 'junior-reader' &&
           machine?.platform !== 'blg-mb-junior')) && (
         <div className="mb-4 w-64 max-w-full">
@@ -791,7 +1057,7 @@ export const Simulator: React.FC<SimulatorProps> = ({
           onSubmit={submitTask}
         />
       )}
-      {!activeTask && machine?.platform === 'blg-mb-junior' && (
+      {!activeTask && !joint && machine?.platform === 'blg-mb-junior' && (
         <CyberBearSimulator
           {...interpreter}
           ready={interpreter.ready && interpreter.supportsCyberBear && !referenceError}
@@ -815,7 +1081,7 @@ export const Simulator: React.FC<SimulatorProps> = ({
           onCancel={interpreter.cancel}
         />
       )}
-      {!activeTask && machine?.platform === 'junior-gardener' && (
+      {!activeTask && !joint && machine?.platform === 'junior-gardener' && (
         <GardenerSimulator
           {...interpreter}
           ready={interpreter.ready && !referenceError}
@@ -833,7 +1099,7 @@ export const Simulator: React.FC<SimulatorProps> = ({
           onCancel={interpreter.cancel}
         />
       )}
-      {!activeTask && machine?.platform === 'junior-reader' && (
+      {!activeTask && !joint && machine?.platform === 'junior-reader' && (
         <ReaderSimulator
           {...interpreter}
           ready={interpreter.ready && !referenceError}

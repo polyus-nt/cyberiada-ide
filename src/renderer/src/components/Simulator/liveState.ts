@@ -8,6 +8,14 @@ export const applyRunState = (
   previous: SimulationResult | undefined,
   update: RunStatePayload
 ): SimulationResult | undefined => {
+  if (update.platform === 'session') {
+    const machines = { ...previous?.machines };
+    for (const [id, state] of Object.entries(update.machines)) {
+      const next = applyRunState(machines[id], state);
+      if (next) machines[id] = next;
+    }
+    return { ...previous, status: 'running', machines };
+  }
   const current: SimulationResult = previous ?? {
     status: 'running',
     result: { signals: [], calledSignals: [] },
@@ -42,6 +50,16 @@ export const finishRunState = (
   terminal: SimulationResult
 ): SimulationResult => ({
   ...terminal,
+  ...(terminal.machines
+    ? {
+        machines: Object.fromEntries(
+          Object.entries(terminal.machines).map(([id, result]) => [
+            id,
+            finishRunState(current?.machines?.[id], result),
+          ])
+        ),
+      }
+    : {}),
   ...(terminal.steps === undefined && current?.steps ? { steps: current.steps } : {}),
   warnings: [...new Set([...(current?.warnings ?? []), ...(terminal.warnings ?? [])])],
   result: terminal.result ?? current?.result,
