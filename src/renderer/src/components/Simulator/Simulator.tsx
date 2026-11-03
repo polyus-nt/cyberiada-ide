@@ -738,6 +738,7 @@ export const JointSimulator: React.FC<JointSimulatorProps> = ({
         {['reader', 'gardener'].map((id) => (
           <button
             key={id}
+            type="button"
             role="tab"
             id={`joint-tab-${id}`}
             aria-selected={tab === id}
@@ -976,6 +977,7 @@ export const Simulator: React.FC<SimulatorProps> = ({
       {!activeTask && (
         <div className="mb-4 flex gap-2">
           <button
+            type="button"
             className={twMerge(
               'rounded-lg border border-border-primary px-3 py-2 text-xs',
               !joint && 'bg-bg-active'
@@ -989,6 +991,7 @@ export const Simulator: React.FC<SimulatorProps> = ({
             Одна машина
           </button>
           <button
+            type="button"
             className={twMerge(
               'rounded-lg border border-border-primary px-3 py-2 text-xs',
               joint && 'bg-bg-active'
