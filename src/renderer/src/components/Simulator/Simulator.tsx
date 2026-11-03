@@ -858,12 +858,22 @@ export const Simulator: React.FC<SimulatorProps> = ({
   const platform = machine ? getPlatform(machine.platform) : undefined;
   const missingComponentReferences =
     machine && platform ? getMissingComponentReferences(machine, platform) : [];
+  const componentRuntimeError =
+    machine?.platform === 'blg-mb-junior' &&
+    interpreter.ready &&
+    !interpreter.supportsTaskChecker &&
+    Object.values(machine.components).some((component) =>
+      ['Timer', 'Random', 'MatrixPicture'].includes(component.type)
+    )
+      ? 'Обновите интерпретатор для таймера, генератора случайностей и готовых рисунков КиберМишки.'
+      : undefined;
   const referenceError =
-    missingComponentReferences.length > 0
+    componentRuntimeError ??
+    (missingComponentReferences.length > 0
       ? `Нельзя запустить симуляцию: отсутствуют компоненты, на которые ссылается схема: ${missingComponentReferences.join(
           ', '
         )}. Восстановите компоненты или удалите ссылки.`
-      : undefined;
+      : undefined);
   const resultStale = isSimulationResultStale(
     interpreter.result !== undefined,
     lastRunRevision,
@@ -1048,12 +1058,22 @@ export const Simulator: React.FC<SimulatorProps> = ({
       {activeTask && (
         <TaskMode
           task={activeTask}
-          ready={interpreter.ready && !referenceError}
+          ready={
+            interpreter.ready &&
+            !referenceError &&
+            (!activeTask.checker || interpreter.supportsTaskChecker)
+          }
           active={interpreter.active}
           operationKind={interpreter.operationKind}
           liveTestId={interpreter.activeTestId}
           liveExecution={interpreter.operationKind === 'test' ? interpreter.result : undefined}
-          error={referenceError ?? interpreter.error}
+          error={
+            referenceError ??
+            interpreter.error ??
+            (activeTask.checker && interpreter.ready && !interpreter.supportsTaskChecker
+              ? 'Обновите интерпретатор для проверки задач КиберМишки.'
+              : undefined)
+          }
           hasSolution={machine !== undefined}
           onRunTest={runTaskTest}
           onCancel={interpreter.cancel}

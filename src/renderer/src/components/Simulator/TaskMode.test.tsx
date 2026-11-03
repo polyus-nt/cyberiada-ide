@@ -233,3 +233,28 @@ describe('TaskMode Reader result', () => {
     expect(html).toContain('Импульсы ещё не получены.');
   });
 });
+
+describe('Task checker diagnostics', () => {
+  it('shows a checker error as a task error rather than a wrong student answer', () => {
+    const verdict = {
+      testId: 'first',
+      status: 'failed',
+      reasonCode: 'CHECKER_ERROR',
+      failedCheckType: 'python',
+      message: 'ValueError: broken checker',
+    };
+    taskState.testStates = { first: { phase: 'failed', verdict } };
+    taskState.detailedResult = undefined;
+    taskState.submissionResult = {
+      status: 'not-accepted',
+      passed: 0,
+      total: 1,
+      verdicts: [verdict],
+    };
+    const html = renderTaskMode();
+    expect(html).toContain('Ошибка задачи');
+    expect(html).toContain('Ошибка проверяющего модуля задачи: ValueError: broken checker');
+    expect(html).toContain('Проверка не завершена');
+    expect(html).not.toContain('Решение не принято');
+  });
+});

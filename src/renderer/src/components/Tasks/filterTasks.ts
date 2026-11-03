@@ -3,6 +3,7 @@ import type { CatalogTask } from '../../../../common/tasks';
 const platformNames: Record<CatalogTask['platformId'], string> = {
   'junior-gardener': 'Садовник',
   'junior-reader': 'Строчник',
+  'blg-mb-junior': 'КиберМишка',
 };
 
 export const filterTasks = <Task extends Pick<CatalogTask, 'title' | 'summary' | 'platformId'>>(

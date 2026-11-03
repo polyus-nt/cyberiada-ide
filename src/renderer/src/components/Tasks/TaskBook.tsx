@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { twMerge } from 'tailwind-merge';
 
 import { ReactComponent as ArrowIcon } from '@renderer/assets/icons/arrow-down.svg';
+import { ReactComponent as CyberBearIcon } from '@renderer/assets/icons/cyberbear.svg';
 import { ReactComponent as GardenerIcon } from '@renderer/assets/icons/gardener.svg';
 import { ReactComponent as ReaderIcon } from '@renderer/assets/icons/reader.svg';
 import { Filter } from '@renderer/components/Hierarchy/Filter';
@@ -19,6 +20,7 @@ import type { CatalogTask } from '../../../../common/tasks';
 const platformIcons = {
   'junior-gardener': GardenerIcon,
   'junior-reader': ReaderIcon,
+  'blg-mb-junior': CyberBearIcon,
 };
 
 const inlineText = (text: string): React.ReactNode[] =>

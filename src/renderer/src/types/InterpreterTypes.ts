@@ -71,13 +71,20 @@ export type TaskStartPayload = {
 
 export type TestStartPayload = TaskStartPayload & { testId: string };
 
-export type TestFailureCode = 'CHECK_FAILED' | 'TIMEOUT' | 'GARDENER_CRASH' | 'EXECUTION_ERROR';
+export type TestFailureCode =
+  | 'CHECK_FAILED'
+  | 'TIMEOUT'
+  | 'GARDENER_CRASH'
+  | 'EXECUTION_ERROR'
+  | 'CHECKER_ERROR';
 
 export type TestVerdict = {
   testId: string;
   status: 'passed' | 'failed';
   reasonCode?: TestFailureCode;
   failedCheckType?: VerificationCheck['type'];
+  message?: string;
+  timeMs?: number;
   outcome: Omit<SimulationResult, 'steps'>;
 };
 
@@ -133,6 +140,7 @@ export type SimulationResult = {
     timeout?: boolean;
     environment?: GardenerStep;
     cyberBear?: CyberBearState;
+    trace?: { timeMs: number; kind: string; state?: CyberBearState; [key: string]: unknown }[];
   };
   code?: string;
 };

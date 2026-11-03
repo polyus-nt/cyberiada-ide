@@ -331,3 +331,32 @@ describe('parseProgrammingTask', () => {
     ]);
   });
 });
+
+it('validates CyberBear task packages and rejects malformed checker inputs', () => {
+  const task = JSON.parse(readFileSync('resources/tasks/bear-dice/bear-dice.task.json', 'utf8'));
+  expect(parseProgrammingTask(task).checker?.file).toBe('checker.py');
+  for (const mutate of [
+    (value: typeof task) => {
+      value.schemaVersion = 1;
+    },
+    (value: typeof task) => {
+      value.checker.apiVersion = 2;
+    },
+    (value: typeof task) => {
+      value.checker.source = 'also inline';
+    },
+    (value: typeof task) => {
+      value.tests[0].input.durationMs = 0;
+    },
+    (value: typeof task) => {
+      value.tests[0].input.random.values = [-1];
+    },
+    (value: typeof task) => {
+      value.tests[0].input.inputs = [{ channel: 'ir', byte: 256, timeMs: 0 }];
+    },
+  ]) {
+    const invalid = structuredClone(task);
+    mutate(invalid);
+    expect(() => parseProgrammingTask(invalid)).toThrow();
+  }
+});

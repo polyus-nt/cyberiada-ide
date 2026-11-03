@@ -218,6 +218,7 @@ export const useInterpreter = () => {
     cyberBear: result?.result?.cyberBear,
     supportsCyberBear,
     supportsSession: InterpreterClient.capabilities.has('run.session'),
+    supportsTaskChecker: InterpreterClient.capabilities.has('task.python-checker.v1'),
     error,
     start,
     startTest,

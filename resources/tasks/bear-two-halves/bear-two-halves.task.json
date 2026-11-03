@@ -1,0 +1,194 @@
+{
+  "schemaVersion": 2,
+  "id": "bear-two-halves",
+  "version": 1,
+  "title": "9.2-Б · Две половинки",
+  "summary": "Соберите секретное слово из двух независимых каналов.",
+  "description": "Номер строки таблицы приходит по ИК: 1 — квадрат, 2 — сердечко, 3 — улыбка, 4 — треугольник. Номер столбца приходит по акустике: 1 — красные глаза, 2 — зелёные, 3 — голубые, 4 — жёлтые. По ИК-нулю гасите глаза и живот. Половинки приходят в любом порядке.\n\nЗапишите готовые пары из запуска «Секретное сообщение» и расшифруйте слово по таблице:\n\n| | Красный | Зелёный | Голубой | Жёлтый |\n|---|---|---|---|---|\n| Квадрат | А | Б | В | Г |\n| Сердце | Д | Е | Ж | З |\n| Улыбка | И | К | Л | М |\n| Треугольник | Н | О | П | Р |\n\nОтвет вводится на курсе.",
+  "platformId": "blg-mb-junior",
+  "checker": {
+    "apiVersion": 1,
+    "file": "checker.py"
+  },
+  "tests": [
+    {
+      "id": "channels",
+      "title": "Оба порядка прихода",
+      "input": {
+        "durationMs": 1000,
+        "inputs": [
+          {
+            "channel": "ir",
+            "byte": 0,
+            "timeMs": 0
+          },
+          {
+            "channel": "ears",
+            "byte": 2,
+            "timeMs": 100
+          },
+          {
+            "channel": "ir",
+            "byte": 3,
+            "timeMs": 200
+          },
+          {
+            "channel": "ir",
+            "byte": 0,
+            "timeMs": 300
+          },
+          {
+            "channel": "ir",
+            "byte": 2,
+            "timeMs": 400
+          },
+          {
+            "channel": "ears",
+            "byte": 1,
+            "timeMs": 500
+          },
+          {
+            "channel": "ir",
+            "byte": 0,
+            "timeMs": 600
+          },
+          {
+            "channel": "ears",
+            "byte": 4,
+            "timeMs": 700
+          },
+          {
+            "channel": "ir",
+            "byte": 4,
+            "timeMs": 800
+          }
+        ]
+      },
+      "checks": [
+        {
+          "type": "python"
+        }
+      ]
+    },
+    {
+      "id": "message",
+      "title": "Секретное сообщение",
+      "input": {
+        "durationMs": 19600,
+        "inputs": [
+          {
+            "channel": "ir",
+            "byte": 0,
+            "timeMs": 0
+          },
+          {
+            "channel": "ir",
+            "byte": 1,
+            "timeMs": 700
+          },
+          {
+            "channel": "ears",
+            "byte": 2,
+            "timeMs": 1400
+          },
+          {
+            "channel": "ir",
+            "byte": 0,
+            "timeMs": 2800
+          },
+          {
+            "channel": "ears",
+            "byte": 2,
+            "timeMs": 3500
+          },
+          {
+            "channel": "ir",
+            "byte": 2,
+            "timeMs": 4200
+          },
+          {
+            "channel": "ir",
+            "byte": 0,
+            "timeMs": 5600
+          },
+          {
+            "channel": "ir",
+            "byte": 4,
+            "timeMs": 6300
+          },
+          {
+            "channel": "ears",
+            "byte": 4,
+            "timeMs": 7000
+          },
+          {
+            "channel": "ir",
+            "byte": 0,
+            "timeMs": 8400
+          },
+          {
+            "channel": "ears",
+            "byte": 3,
+            "timeMs": 9100
+          },
+          {
+            "channel": "ir",
+            "byte": 3,
+            "timeMs": 9800
+          },
+          {
+            "channel": "ir",
+            "byte": 0,
+            "timeMs": 11200
+          },
+          {
+            "channel": "ir",
+            "byte": 4,
+            "timeMs": 11900
+          },
+          {
+            "channel": "ears",
+            "byte": 2,
+            "timeMs": 12600
+          },
+          {
+            "channel": "ir",
+            "byte": 0,
+            "timeMs": 14000
+          },
+          {
+            "channel": "ears",
+            "byte": 4,
+            "timeMs": 14700
+          },
+          {
+            "channel": "ir",
+            "byte": 1,
+            "timeMs": 15400
+          },
+          {
+            "channel": "ir",
+            "byte": 0,
+            "timeMs": 16800
+          },
+          {
+            "channel": "ir",
+            "byte": 1,
+            "timeMs": 17500
+          },
+          {
+            "channel": "ears",
+            "byte": 1,
+            "timeMs": 18200
+          }
+        ]
+      },
+      "checks": [
+        {
+          "type": "python"
+        }
+      ],
+      "hideInputs": true
+    }
+  ]
+}

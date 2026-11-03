@@ -45,6 +45,19 @@ export const loadTaskCatalog = (root = path.join(basePath, 'tasks')): TaskCatalo
         }
         const task = parseProgrammingTask(JSON.parse(readFileSync(filePath, 'utf8')));
         validateTaskImages(task.description, filePath, root);
+        if (task.checker?.file) {
+          const directory = realpathSync(path.dirname(filePath));
+          if (path.isAbsolute(task.checker.file))
+            throw new Error('Путь checker.file должен быть относительным');
+          const checkerPath = realpathSync(path.resolve(directory, task.checker.file));
+          if (!checkerPath.startsWith(directory + path.sep) || !statSync(checkerPath).isFile())
+            throw new Error('Проверяющий модуль выходит за пределы каталога задачи');
+          if (statSync(checkerPath).size > 256000)
+            throw new Error('Проверяющий модуль превышает 256 КБ');
+          const source = readFileSync(checkerPath, 'utf8');
+          if (!source.trim()) throw new Error('Проверяющий модуль пуст');
+          task.checker = { apiVersion: 1, source };
+        }
         let assetBaseUrl = pathToFileURL(path.dirname(filePath) + path.sep).toString();
         if (!assetBaseUrl.endsWith('/')) assetBaseUrl += '/';
         const catalogTask = { ...task, assetBaseUrl };

@@ -113,6 +113,7 @@ export class InterpreterClient extends ClientWS {
     payload: TestStartPayload | TaskStartPayload
   ): string | undefined {
     if (!this.ready || this.activeRunId) return;
+    if (payload.task.checker && !this.capabilities.has('task.python-checker.v1')) return;
     const runId = nanoid();
     if (
       !this.sendJson({

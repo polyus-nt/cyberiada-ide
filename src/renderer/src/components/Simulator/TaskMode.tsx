@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
+import { CyberBearTaskDetails } from './CyberBearTaskDetails';
 import { GardenerMarker, type GardenerFieldOrientation, gardenerCellStyles } from './GardenerField';
 import { ReaderImpulseList } from './ReaderResult';
 
@@ -25,12 +26,14 @@ const reasonLabels = {
   TIMEOUT: 'Превышено время выполнения',
   GARDENER_CRASH: 'Садовник столкнулся с препятствием',
   EXECUTION_ERROR: 'Ошибка выполнения',
+  CHECKER_ERROR: 'Ошибка проверяющего модуля задачи',
 };
 
 const checkLabels = {
   'gardener.field.equals': 'Итоговое поле не совпадает',
   'gardener.position.equals': 'Итоговая позиция не совпадает',
   'reader.impulses.equals': 'Последовательность выходных импульсов не совпадает',
+  python: 'Поведение не соответствует условию',
 };
 
 const phaseStyles: Record<TaskTestPhase, { dot: string; label: string; text: string }> = {
@@ -338,6 +341,8 @@ export const TaskMode: React.FC<TaskModeProps> = ({
 
   const summary = useMemo(() => {
     if (!submissionResult) return undefined;
+    if (submissionResult.verdicts?.some((verdict) => verdict.reasonCode === 'CHECKER_ERROR'))
+      return 'Проверка не завершена: ошибка проверяющего модуля задачи';
     return submissionResult.status === 'accepted'
       ? `Решение принято: ${submissionResult.passed} из ${submissionResult.total}`
       : `Решение не принято: ${submissionResult.passed} из ${submissionResult.total}`;
@@ -350,10 +355,18 @@ export const TaskMode: React.FC<TaskModeProps> = ({
     return phase === 'passed' || phase === 'failed';
   }).length;
   const passedTests = task.tests.filter((test) => testStates[test.id]?.phase === 'passed').length;
-  const failedMessage = selectedState?.verdict?.reasonCode
-    ? selectedState.verdict.failedCheckType
-      ? checkLabels[selectedState.verdict.failedCheckType]
-      : reasonLabels[selectedState.verdict.reasonCode]
+  const checkerError = selectedState?.verdict?.reasonCode === 'CHECKER_ERROR';
+  const failedMessage = checkerError
+    ? `${reasonLabels.CHECKER_ERROR}${
+        selectedState?.verdict?.message ? ': ' + selectedState.verdict.message : ''
+      }`
+    : selectedState?.verdict?.status === 'failed'
+    ? selectedState.verdict.message ||
+      (selectedState.verdict.reasonCode
+        ? selectedState.verdict.failedCheckType
+          ? checkLabels[selectedState.verdict.failedCheckType]
+          : reasonLabels[selectedState.verdict.reasonCode]
+        : undefined)
     : undefined;
 
   return (
@@ -372,7 +385,7 @@ export const TaskMode: React.FC<TaskModeProps> = ({
               className={`flex shrink-0 items-center gap-2 px-3 py-1.5 text-xs ${selectedPhaseStyle.text}`}
             >
               <span className={`size-2 rounded-full ${selectedPhaseStyle.dot}`} />
-              {selectedPhaseStyle.label}
+              {checkerError ? 'Ошибка задачи' : selectedPhaseStyle.label}
             </div>
           </div>
           {failedMessage && (
@@ -384,6 +397,9 @@ export const TaskMode: React.FC<TaskModeProps> = ({
         </div>
         {selectedTest && task.platformId === 'junior-gardener' && (
           <GardenerDetails test={selectedTest} execution={detailedExecution} />
+        )}
+        {selectedTest && task.platformId === 'blg-mb-junior' && (
+          <CyberBearTaskDetails test={selectedTest} execution={detailedExecution} />
         )}
         {selectedTest && task.platformId === 'junior-reader' && (
           <ReaderDetails test={selectedTest} execution={detailedExecution} />
@@ -430,7 +446,9 @@ export const TaskMode: React.FC<TaskModeProps> = ({
                   <div className="truncate text-xs font-medium">{test.title}</div>
                   <div className={`mt-1 flex items-center gap-1.5 text-xs ${phaseStyle.text}`}>
                     <span className={`size-2 rounded-full ${phaseStyle.dot}`} />
-                    {phaseStyle.label}
+                    {state.verdict?.reasonCode === 'CHECKER_ERROR'
+                      ? 'Ошибка задачи'
+                      : phaseStyle.label}
                   </div>
                 </button>
                 <button
