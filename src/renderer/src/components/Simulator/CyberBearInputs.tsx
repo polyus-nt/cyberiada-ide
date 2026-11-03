@@ -11,10 +11,6 @@ const channels: { value: CyberBearChannel; label: string }[] = [
   { value: 'ir', label: 'ИК' },
   { value: 'ears', label: 'Акустика' },
 ];
-const kinds: { value: CyberBearInputDraft['kind']; label: string }[] = [
-  { value: 'symbol', label: 'Символ' },
-  { value: 'byte', label: 'Байт' },
-];
 const rowButton =
   'size-7 rounded border border-border-primary text-xs disabled:opacity-40 enabled:hover:bg-bg-hover';
 
@@ -34,6 +30,9 @@ export const CyberBearInputs: React.FC<{
   return (
     <section className="border-t border-border-primary pt-3">
       <h2 className="h2-header mb-3">Входная последовательность</h2>
+      <p className="mb-3 text-xs text-text-inactive">
+        Время от начала симуляции. При одинаковом времени байты отправляются по порядку списка.
+      </p>
       <ol className="max-h-[420px] space-y-3 overflow-y-auto">
         {inputs.map((input, index) => {
           const error = cyberBearInputError(input);
@@ -86,29 +85,29 @@ export const CyberBearInputs: React.FC<{
                 />
               </label>
               <div className="grid grid-cols-[96px_minmax(0,1fr)] gap-2">
-                <label className="grid gap-1 text-xs" htmlFor={`cyberbear-kind-${input.id}`}>
-                  Тип
-                  <ParameterSelect
-                    inputId={`cyberbear-kind-${input.id}`}
-                    options={kinds}
-                    value={kinds.find((option) => option.value === input.kind)}
-                    isDisabled={active}
-                    isSearchable={false}
-                    isClearable={false}
-                    onChange={(option) => {
-                      if (option) update(index, { kind: option.value, value: '' });
-                    }}
+                <label className="grid gap-1 text-xs" htmlFor={`cyberbear-time-${input.id}`}>
+                  Время, мс
+                  <input
+                    id={`cyberbear-time-${input.id}`}
+                    className="h-8 min-w-0 rounded-lg border border-border-primary bg-bg-primary px-2 disabled:text-text-inactive"
+                    inputMode="numeric"
+                    value={input.timeMs}
+                    disabled={active}
+                    placeholder="0"
+                    aria-invalid={Boolean(error)}
+                    aria-describedby={error ? `cyberbear-error-${input.id}` : undefined}
+                    onChange={(event) => update(index, { timeMs: event.target.value })}
                   />
                 </label>
                 <label className="grid gap-1 text-xs" htmlFor={`cyberbear-value-${input.id}`}>
-                  Значение
+                  Байт
                   <input
                     id={`cyberbear-value-${input.id}`}
                     className="h-8 min-w-0 rounded-lg border border-border-primary bg-bg-primary px-2 disabled:text-text-inactive"
                     value={input.value}
-                    maxLength={input.kind === 'byte' ? 10 : 2}
+                    maxLength={10}
                     disabled={active}
-                    placeholder={input.kind === 'byte' ? '0–255' : 'М'}
+                    placeholder="0–255"
                     aria-invalid={Boolean(error)}
                     aria-describedby={error ? `cyberbear-error-${input.id}` : undefined}
                     onChange={(event) => update(index, { value: event.target.value })}
@@ -137,7 +136,7 @@ export const CyberBearInputs: React.FC<{
             {
               id: nanoid(),
               channel: inputs[inputs.length - 1]?.channel ?? 'ir',
-              kind: 'symbol',
+              timeMs: inputs[inputs.length - 1]?.timeMs ?? '0',
               value: '',
             },
           ])

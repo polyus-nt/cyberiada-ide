@@ -20,7 +20,8 @@ import { ClientStatus } from '../Modules/Websocket/ClientStatus';
 
 const hasCyberBearSupport = () =>
   InterpreterClient.capabilities.has('cyberbear.live') &&
-  InterpreterClient.capabilities.has('cyberbear.input-sequence');
+  InterpreterClient.capabilities.has('cyberbear.input-sequence') &&
+  InterpreterClient.capabilities.has('cyberbear.timed-inputs');
 
 export const useInterpreter = () => {
   const [settings] = useSettings('interpreter');

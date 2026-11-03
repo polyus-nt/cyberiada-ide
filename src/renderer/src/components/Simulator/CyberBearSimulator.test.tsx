@@ -68,14 +68,16 @@ describe('CyberBear simulator', () => {
         });
       };
       add();
-      change('cyberbear-value-', 0, 'М');
+      change('cyberbear-value-', 0, '204');
+      change('cyberbear-time-', 0, '0');
       add();
       change('cyberbear-channel-', 1, 'ears');
-      change('cyberbear-kind-', 1, 'byte');
+      change('cyberbear-time-', 1, '500');
       change('cyberbear-value-', 1, '0x2A');
       add();
       change('cyberbear-channel-', 2, 'ir');
-      change('cyberbear-value-', 2, 'Ё');
+      change('cyberbear-value-', 2, '168');
+      change('cyberbear-time-', 2, '1500');
       const moveDown = container.querySelector<HTMLButtonElement>(
         '[aria-label="Опустить элемент 2"]'
       );
@@ -85,7 +87,7 @@ describe('CyberBear simulator', () => {
         Array.from(container.querySelectorAll<HTMLInputElement>('[id^="cyberbear-value-"]')).map(
           (input) => input.value
         )
-      ).toEqual(['М', 'Ё', '0x2A']);
+      ).toEqual(['204', '168', '0x2A']);
       const moveUp = container.querySelector<HTMLButtonElement>('[aria-label="Поднять элемент 3"]');
       if (!moveUp) throw new Error('Missing reorder button');
       act(() => moveUp.click());
@@ -93,14 +95,20 @@ describe('CyberBear simulator', () => {
       const remove = container.querySelector<HTMLButtonElement>('[aria-label="Удалить элемент 4"]');
       if (!remove) throw new Error('Missing remove button');
       act(() => remove.click());
+      expect(container.querySelector('[id^="cyberbear-kind-"]')).toBeNull();
+      expect(
+        Array.from(container.querySelectorAll<HTMLInputElement>('[id^="cyberbear-time-"]')).map(
+          (input) => input.value
+        )
+      ).toEqual(['0', '500', '1500']);
       const start = container.querySelector('button');
       if (!start) throw new Error('Missing start button');
       act(() => start.click());
       expect(onStart).toHaveBeenCalledWith('finite', 10, {
         inputs: [
-          { channel: 'ir', symbol: 'М' },
-          { channel: 'ears', byte: 42 },
-          { channel: 'ir', symbol: 'Ё' },
+          { channel: 'ir', byte: 204, timeMs: 0 },
+          { channel: 'ears', byte: 42, timeMs: 500 },
+          { channel: 'ir', byte: 168, timeMs: 1500 },
         ],
       });
       const state = createCyberBearState();
@@ -108,6 +116,11 @@ describe('CyberBear simulator', () => {
       state.matrix[6][4] = 75;
       act(() => root.render(<CyberBearSimulator {...props} active cyberBear={state} />));
       expect(container.textContent).toContain('Выполняется');
+      expect(
+        Array.from(container.querySelectorAll<HTMLInputElement>('[id^="cyberbear-time-"]')).every(
+          (input) => input.disabled
+        )
+      ).toBe(true);
       expect(container.querySelector('svg')?.textContent).toContain('Правый глаз: 10, 0, 0, 10');
       expect(container.querySelector('svg')?.textContent).toContain('Строка 7, столбец 5: 75%');
       expect(container.textContent).not.toContain('длительности свечения');

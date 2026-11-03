@@ -38,31 +38,26 @@ export const rgbkColor = ([r, g, b, k]: RGBK): string => {
 export type CyberBearInputDraft = {
   id: string;
   channel: CyberBearChannel;
-  kind: 'symbol' | 'byte';
+  timeMs: string;
   value: string;
 };
 
 export const MAX_CYBERBEAR_INPUTS = 10_000;
 
-export const cyberBearInputError = ({ kind, value }: CyberBearInputDraft): string | undefined => {
-  if (kind === 'byte') {
-    const text = value.trim();
-    return /^(?:\d+|0x[0-9a-f]+)$/i.test(text) && Number(text) <= 255
-      ? undefined
-      : 'Укажите байт от 0 до 255 (можно 0xFF).';
-  }
-  if (Array.from(value).length !== 1) return 'Укажите один символ.';
-  if (value.charCodeAt(0) <= 0x7f) return undefined;
-  // Windows-1251 includes ASCII, Cyrillic and the following punctuation/symbols.
-  const supported =
-    /^[\u00a0\u00a4\u00a6-\u00a7\u00a9\u00ab-\u00ae\u00b0-\u00b1\u00b5-\u00b7\u00bb\u0401-\u040c\u040e-\u044f\u0451-\u045c\u045e-\u045f\u0490-\u0491\u2013-\u2014\u2018-\u201a\u201c-\u201e\u2020-\u2022\u2026\u2030\u2039-\u203a\u20ac\u2116\u2122]$/u;
-  return supported.test(value) ? undefined : 'Символ отсутствует в Windows-1251.';
+export const cyberBearInputError = ({ value, timeMs }: CyberBearInputDraft): string | undefined => {
+  const text = value.trim();
+  if (!/^(?:\d+|0x[0-9a-f]+)$/i.test(text) || Number(text) > 255)
+    return 'Укажите байт от 0 до 255 (можно 0xFF).';
+  if (!/^\d+$/.test(timeMs.trim()) || !Number.isSafeInteger(Number(timeMs)))
+    return 'Укажите целое неотрицательное время в миллисекундах.';
+  return undefined;
 };
 
-export const cyberBearInputValue = (draft: CyberBearInputDraft): CyberBearInput =>
-  draft.kind === 'byte'
-    ? { channel: draft.channel, byte: Number(draft.value.trim()) }
-    : { channel: draft.channel, symbol: draft.value };
+export const cyberBearInputValue = (draft: CyberBearInputDraft): CyberBearInput => ({
+  channel: draft.channel,
+  byte: Number(draft.value.trim()),
+  timeMs: Number(draft.timeMs),
+});
 
 export const isCyberBearState = (value: unknown): value is CyberBearState => {
   if (!value || typeof value !== 'object') return false;

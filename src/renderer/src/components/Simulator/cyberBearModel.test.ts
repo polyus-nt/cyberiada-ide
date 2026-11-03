@@ -7,10 +7,10 @@ import {
   rgbkColor,
 } from './cyberBearModel';
 
-const draft = (kind: CyberBearInputDraft['kind'], value: string): CyberBearInputDraft => ({
+const draft = (value: string, timeMs = '0'): CyberBearInputDraft => ({
   id: 'input',
   channel: 'ears',
-  kind,
+  timeMs,
   value,
 });
 
@@ -22,22 +22,27 @@ describe('CyberBear input values', () => {
       ['0xFF', 255],
       ['42', 42],
     ] as const) {
-      expect(cyberBearInputError(draft('byte', text))).toBeUndefined();
-      expect(cyberBearInputValue(draft('byte', text))).toEqual({ channel: 'ears', byte });
+      expect(cyberBearInputError(draft(text))).toBeUndefined();
+      expect(cyberBearInputValue(draft(text))).toEqual({ channel: 'ears', byte, timeMs: 0 });
     }
     for (const text of ['', '-1', '256', '1.5', '1e2', 'text', '0x100']) {
-      expect(cyberBearInputError(draft('byte', text))).toBeTruthy();
+      expect(cyberBearInputError(draft(text))).toBeTruthy();
     }
   });
 
-  it('preserves single Windows-1251 symbols and rejects unsupported or multiple symbols', () => {
-    for (const symbol of ['М', 'Ё', 'ё', ' ', 'A', '€', '№']) {
-      expect(cyberBearInputError(draft('symbol', symbol))).toBeUndefined();
-      expect(cyberBearInputValue(draft('symbol', symbol))).toEqual({ channel: 'ears', symbol });
+  it('validates absolute times and converts them to milliseconds', () => {
+    for (const timeMs of ['0', '500', '1500', '9007199254740991']) {
+      expect(cyberBearInputError(draft('42', timeMs))).toBeUndefined();
+      expect(cyberBearInputValue(draft('42', timeMs))).toEqual({
+        channel: 'ears',
+        byte: 42,
+        timeMs: Number(timeMs),
+      });
     }
-    for (const symbol of ['', 'МЕД', '🐻', 'é']) {
-      expect(cyberBearInputError(draft('symbol', symbol))).toBeTruthy();
+    for (const timeMs of ['', '-1', '1.5', '1e2', 'Infinity', '9007199254740992']) {
+      expect(cyberBearInputError(draft('42', timeMs))).toBeTruthy();
     }
+    expect(cyberBearInputError(draft('М'))).toBeTruthy();
   });
 });
 
