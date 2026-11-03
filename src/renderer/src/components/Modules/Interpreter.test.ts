@@ -180,3 +180,32 @@ describe('InterpreterClient', () => {
     expect(send).toHaveBeenCalledTimes(1);
   });
 });
+
+it('gates a joint session on capability and sends both machines under one run ID', () => {
+  const send = vi.fn();
+  InterpreterClient.connection = { readyState: Websocket.OPEN, send } as unknown as Websocket;
+  InterpreterClient.ready = true;
+  const payload = {
+    xml: '<graphml/>',
+    mode: 'finite' as const,
+    machines: [
+      { machineId: 'reader', parameters: { message: 'АБВ' } },
+      { machineId: 'gardener', parameters: { message: '' } },
+    ],
+  };
+  try {
+    expect(InterpreterClient.start(payload)).toBeUndefined();
+    expect(send).not.toHaveBeenCalled();
+    InterpreterClient.capabilities.add('run.session');
+    const runId = InterpreterClient.start(payload);
+    expect(runId).toBeTruthy();
+    expect(JSON.parse(send.mock.calls[0][0])).toMatchObject({ type: 'run.start', runId, payload });
+    expect(InterpreterClient.start(payload)).toBeUndefined();
+  } finally {
+    InterpreterClient.connection = undefined;
+    InterpreterClient.ready = false;
+    InterpreterClient.capabilities.clear();
+    InterpreterClient.activeRunId = undefined;
+    InterpreterClient.activeKind = undefined;
+  }
+});

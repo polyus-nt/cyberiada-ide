@@ -216,6 +216,7 @@ export const useInterpreter = () => {
     result,
     cyberBear: result?.result?.cyberBear,
     supportsCyberBear,
+    supportsSession: InterpreterClient.capabilities.has('run.session'),
     error,
     start,
     startTest,
