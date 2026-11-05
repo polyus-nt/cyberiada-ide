@@ -90,7 +90,7 @@ export const CyberBearSimulator: React.FC<CyberBearSimulatorProps> = ({
             {active ? 'Выполняется' : cyberBear ? 'Последнее состояние' : 'Готов к запуску'}
           </span>
         </div>
-        <div className="rounded-lg bg-bg-secondary p-3">
+        <div className="rounded-lg border border-border-primary bg-bg-primary px-6 py-2">
           <CyberBearView state={state} />
         </div>
         <p className="mt-3 text-xs leading-4 text-text-inactive">
