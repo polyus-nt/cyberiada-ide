@@ -6,6 +6,7 @@ import { twMerge } from 'tailwind-merge';
 import { ReactComponent as ArrowIcon } from '@renderer/assets/icons/arrow-down.svg';
 import { ReactComponent as CyberBearIcon } from '@renderer/assets/icons/cyberbear.svg';
 import { ReactComponent as GardenerIcon } from '@renderer/assets/icons/gardener.svg';
+import { ReactComponent as ReaderGardenerIcon } from '@renderer/assets/icons/reader-gardener.svg';
 import { ReactComponent as ReaderIcon } from '@renderer/assets/icons/reader.svg';
 import { Filter } from '@renderer/components/Hierarchy/Filter';
 import { InterpreterClient } from '@renderer/components/Modules/Interpreter';
@@ -18,12 +19,7 @@ import { filterTasks } from './filterTasks';
 import type { CatalogTask } from '../../../../common/tasks';
 
 const platformIcons = {
-  'reader-gardener': ({ className }: { className?: string }) => (
-    <span className="flex shrink-0 gap-1" aria-label="Садовник + Строчник">
-      <GardenerIcon className={className} />
-      <ReaderIcon className={className} />
-    </span>
-  ),
+  'reader-gardener': ReaderGardenerIcon,
   'junior-gardener': GardenerIcon,
   'junior-reader': ReaderIcon,
   'blg-mb-junior': CyberBearIcon,
@@ -257,7 +253,12 @@ export const TaskBook: React.FC<TaskBookProps> = ({
                       <PlatformIcon
                         className={twMerge(
                           'size-5 shrink-0 text-icon-secondary',
-                          isHighlighted && 'text-icon-hover'
+                          isHighlighted &&
+                            (task.platformId === 'junior-gardener'
+                              ? '[&_circle]:stroke-icon-hover [&_path]:fill-icon-hover'
+                              : task.platformId === 'junior-reader'
+                              ? '[&_path]:fill-icon-hover [&_path]:stroke-icon-hover'
+                              : 'text-icon-hover')
                         )}
                       />
                       <div className="min-w-0 flex-1">
