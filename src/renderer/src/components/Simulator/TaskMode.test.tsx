@@ -201,12 +201,9 @@ describe('TaskMode Reader result', () => {
   it('shows the input string with an outline and without a filled background', () => {
     const html = renderReaderTaskMode();
 
-    expect(html).toContain(
-      'whitespace-pre-wrap rounded-lg border border-border-primary p-3 text-xs'
-    );
-    expect(html).not.toContain(
-      'whitespace-pre-wrap rounded-lg border border-border-primary bg-bg-secondary'
-    );
+    expect(html).toContain('h-auto max-h-[180px] w-full rounded-lg border border-border-primary');
+    expect(html).toContain('m-0 w-max min-w-full whitespace-pre text-xs');
+    expect(html).not.toContain('rounded-lg border border-border-primary bg-bg-secondary');
   });
 
   it('uses the same impulse list presentation as ReaderResult', () => {
