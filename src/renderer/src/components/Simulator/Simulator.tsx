@@ -1050,15 +1050,8 @@ export const Simulator: React.FC<SimulatorProps> = ({
   }, [interpreter.status, onStatusChange]);
 
   useEffect(() => {
-    onAutoSizeChange?.(
-      activeTask?.platformId === 'junior-gardener' ||
-        (!activeTask &&
-          !joint &&
-          (machine?.platform === 'junior-reader' ||
-            machine?.platform === 'junior-gardener' ||
-            machine?.platform === 'blg-mb-junior'))
-    );
-  }, [activeTask, joint, machine?.platform, onAutoSizeChange]);
+    onAutoSizeChange?.(activeTask?.platformId === 'junior-gardener');
+  }, [activeTask?.platformId, onAutoSizeChange]);
 
   useEffect(() => {
     if (!activeTask) return;

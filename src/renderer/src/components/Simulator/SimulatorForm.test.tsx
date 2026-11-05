@@ -29,6 +29,7 @@ import { Simulator } from './Simulator';
 const stateMachines = {
   reader: { ...emptyStateMachine(), platform: 'junior-reader', name: 'Строчник' },
   gardener: { ...emptyStateMachine(), platform: 'junior-gardener', name: 'Садовник' },
+  bear: { ...emptyStateMachine(), platform: 'blg-mb-junior', name: 'КиберМишка' },
 };
 const model = {
   model: {
@@ -49,45 +50,50 @@ const interpreter = {
   start: vi.fn(),
 };
 
-it('switches simulator modes and participant tabs without submitting the modal form', () => {
-  vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
-  const container = document.createElement('div');
-  document.body.append(container);
-  const root = createRoot(container);
-  const submit = vi.fn((event: React.FormEvent) => event.preventDefault());
-  const onAutoSizeChange = vi.fn();
-  const click = (text: string) => {
-    const button = Array.from(container.querySelectorAll('button')).find(
-      (element) => element.textContent === text
-    );
-    if (!button) throw new Error(`Missing button: ${text}`);
-    act(() => button.click());
-  };
-  try {
-    // MovingModal supplies a form around Simulator in the desktop application.
-    act(() =>
-      root.render(
-        <form onSubmit={submit}>
-          <Simulator initialSmId="reader" onAutoSizeChange={onAutoSizeChange} />
-        </form>
-      )
-    );
-    click('Строчник + Садовник');
-    expect(onAutoSizeChange).toHaveBeenLastCalledWith(false);
-    expect(container.querySelector('[role="tablist"]')).not.toBeNull();
-    expect(submit).not.toHaveBeenCalled();
-    click('Садовник');
-    expect(container.querySelector('#joint-panel-gardener')?.hasAttribute('hidden')).toBe(false);
-    expect(submit).not.toHaveBeenCalled();
-    click('Строчник');
-    expect(container.querySelector('#joint-panel-reader')?.hasAttribute('hidden')).toBe(false);
-    expect(submit).not.toHaveBeenCalled();
-    click('Одна машина');
-    expect(container.querySelector('[role="tablist"]')).toBeNull();
-    expect(submit).not.toHaveBeenCalled();
-  } finally {
-    act(() => root.unmount());
-    container.remove();
-    vi.unstubAllGlobals();
+it.each(['reader', 'gardener', 'bear'])(
+  'keeps window sizing stable when switching modes from %s without submitting the modal form',
+  (initialSmId) => {
+    vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
+    const container = document.createElement('div');
+    document.body.append(container);
+    const root = createRoot(container);
+    const submit = vi.fn((event: React.FormEvent) => event.preventDefault());
+    const onAutoSizeChange = vi.fn();
+    const click = (text: string) => {
+      const button = Array.from(container.querySelectorAll('button')).find(
+        (element) => element.textContent === text
+      );
+      if (!button) throw new Error(`Missing button: ${text}`);
+      act(() => button.click());
+    };
+    try {
+      // MovingModal supplies a form around Simulator in the desktop application.
+      act(() =>
+        root.render(
+          <form onSubmit={submit}>
+            <Simulator initialSmId={initialSmId} onAutoSizeChange={onAutoSizeChange} />
+          </form>
+        )
+      );
+      expect(onAutoSizeChange).toHaveBeenLastCalledWith(false);
+      click('Строчник + Садовник');
+      expect(onAutoSizeChange).toHaveBeenLastCalledWith(false);
+      expect(container.querySelector('[role="tablist"]')).not.toBeNull();
+      expect(submit).not.toHaveBeenCalled();
+      click('Садовник');
+      expect(container.querySelector('#joint-panel-gardener')?.hasAttribute('hidden')).toBe(false);
+      expect(submit).not.toHaveBeenCalled();
+      click('Строчник');
+      expect(container.querySelector('#joint-panel-reader')?.hasAttribute('hidden')).toBe(false);
+      expect(submit).not.toHaveBeenCalled();
+      click('Одна машина');
+      expect(onAutoSizeChange.mock.calls.every(([autoSize]) => autoSize === false)).toBe(true);
+      expect(container.querySelector('[role="tablist"]')).toBeNull();
+      expect(submit).not.toHaveBeenCalled();
+    } finally {
+      act(() => root.unmount());
+      container.remove();
+      vi.unstubAllGlobals();
+    }
   }
-});
+);
