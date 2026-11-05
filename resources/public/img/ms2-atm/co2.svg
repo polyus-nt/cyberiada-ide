@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Датчик CO₂</title>
+  <g stroke="#5b6b70" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M17 48a13 13 0 0 1-2-26 17 17 0 0 1 32-2 14 14 0 0 1 1 28Z" fill="#eaf3dd"/>
+    <circle cx="21" cy="20" r="4" fill="#9bcb64" stroke="#fff" stroke-width="2"/>
+    <text x="32" y="40" text-anchor="middle" fill="#5b6b70" stroke="none" font-family="sans-serif" font-weight="700" font-size="19">CO₂</text>
+  </g>
+</svg>

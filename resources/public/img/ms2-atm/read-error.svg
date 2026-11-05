@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Ошибка чтения</title>
+  <g stroke="#5b6b70" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M28 8a5 5 0 0 1 8 0l23 41a5 5 0 0 1-4 8H9a5 5 0 0 1-4-8Z" fill="#f5c345"/>
+    <path d="M32 23v14" stroke="#5b6b70" stroke-width="5"/>
+    <circle cx="32" cy="46" r="3" fill="#5b6b70" stroke="none"/>
+  </g>
+</svg>

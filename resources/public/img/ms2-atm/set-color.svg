@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Установить цвет RGB</title>
+  <g stroke="#5b6b70" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M30 8a23 23 0 1 0 0 46h5a6 6 0 0 0 3-11l-2-1a4 4 0 0 1 2-7h5A11 11 0 0 0 54 24C54 14 42 8 30 8Z" fill="#eaf3dd"/>
+    <circle cx="18" cy="30" r="5" fill="#df6c6c" stroke="none"/>
+    <circle cx="27" cy="19" r="5" fill="#9bcb64" stroke="none"/>
+    <circle cx="42" cy="23" r="5" fill="#65b8df" stroke="none"/>
+    <path d="m43 52 14-14" stroke="#5b6b70" stroke-width="6"/>
+    <path d="m43 52-3 7 7-3" fill="#f5c345"/>
+  </g>
+</svg>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Влажность SHT30 и NSHT30</title>
+  <g stroke="#5b6b70" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M32 5C26 16 13 28 13 40a19 19 0 0 0 38 0C51 28 38 16 32 5Z" fill="#65b8df"/>
+    <path d="M23 32c-4 5-5 9-2 13" stroke="#fff" stroke-width="4" fill="none"/>
+    <path d="m28 47 13-15" stroke="#fff"/>
+    <circle cx="29" cy="33" r="2.5" stroke="none" fill="#fff"/>
+    <circle cx="40" cy="46" r="2.5" stroke="none" fill="#fff"/>
+  </g>
+</svg>
