@@ -1,0 +1,131 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns">
+  <key id="gFormat" for="graphml" attr.name="format" attr.type="string" />
+  <key id="dStateMachine" for="graph" attr.name="stateMachine" attr.type="string" />
+  <key id="dName" for="node" attr.name="name" attr.type="string" />
+  <key id="dNote" for="node" attr.name="note" attr.type="string" />
+  <key id="dVertex" for="node" attr.name="vertex" attr.type="string" />
+  <key id="dData" for="node" attr.name="data" attr.type="string" />
+  <key id="dData" for="edge" attr.name="data" attr.type="string" />
+  <key id="dGeometry" for="node" attr.name="geometry" />
+  <data key="gFormat">Cyberiada-GraphML-1.0</data>
+  <graph id="reader" edgedefault="directed">
+    <data key="dStateMachine" />
+    <node id="reader-meta">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_META</data>
+      <data key="dData">platform/ junior-reader
+
+standardVersion/ 1.0
+
+name/ Строчник: команды ABC
+
+description/ Совместная симуляция. Введите ABC во входную строку Строчника. А — вперёд, Б — направо, В — вперёд.</data>
+    </node>
+    <node id="reader-component-reader">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT</data>
+      <data key="dData">id/ reader
+
+type/ Reader
+
+name/ reader</data>
+    </node>
+    <edge id="reader-link-reader" source="reader-meta" target="reader-component-reader" />
+    <node id="reader-component-out">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT</data>
+      <data key="dData">id/ out
+
+type/ Impulse
+
+name/ out</data>
+    </node>
+    <edge id="reader-link-out" source="reader-meta" target="reader-component-out" />
+    <node id="reader-initial">
+      <data key="dVertex">initial</data>
+      <data key="dGeometry">
+        <point x="60" y="180" />
+      </data>
+    </node>
+    <node id="reader-main">
+      <data key="dName">Читает команды</data>
+      <data key="dGeometry">
+        <rect x="140" y="80" width="500" height="440" />
+      </data>
+      <data key="dData">entry/
+reader.read();
+
+reader.char_accepted[reader.current_char == 'A']/
+out.impulseA();
+reader.read();
+
+reader.char_accepted[reader.current_char == 'B']/
+out.impulseB();
+reader.read();
+
+reader.char_accepted[reader.current_char == 'C']/
+out.impulseC();
+reader.read();
+
+reader.char_accepted[else]/
+reader.read();</data>
+    </node>
+    <edge id="reader-start" source="reader-initial" target="reader-main" />
+  </graph>
+  <graph id="gardener" edgedefault="directed">
+    <data key="dStateMachine" />
+    <node id="gardener-meta">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_META</data>
+      <data key="dData">platform/ junior-gardener
+
+standardVersion/ 1.0
+
+name/ Садовник: управление импульсами
+
+description/ Совместная симуляция. Введите ABC во входную строку Строчника. А — вперёд, Б — направо, В — вперёд.</data>
+    </node>
+    <node id="gardener-component-receiver">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT</data>
+      <data key="dData">id/ receiver
+
+type/ Receiver
+
+name/ receiver</data>
+    </node>
+    <edge id="gardener-link-receiver" source="gardener-meta" target="gardener-component-receiver" />
+    <node id="gardener-component-mover">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT</data>
+      <data key="dData">id/ mover
+
+type/ Mover
+
+name/ mover</data>
+    </node>
+    <edge id="gardener-link-mover" source="gardener-meta" target="gardener-component-mover" />
+    <node id="gardener-initial">
+      <data key="dVertex">initial</data>
+      <data key="dGeometry">
+        <point x="60" y="180" />
+      </data>
+    </node>
+    <node id="gardener-main">
+      <data key="dName">Ожидает импульсы</data>
+      <data key="dGeometry">
+        <rect x="140" y="80" width="500" height="440" />
+      </data>
+      <data key="dData">receiver.impulse_received[receiver.received_impulse == receiver.impulseA]/
+mover.move_forward();
+
+receiver.impulse_received[receiver.received_impulse == receiver.impulseB]/
+mover.turn_right();
+
+receiver.impulse_received[receiver.received_impulse == receiver.impulseC]/
+mover.move_forward();</data>
+    </node>
+    <edge id="gardener-start" source="gardener-initial" target="gardener-main" />
+  </graph>
+</graphml>

@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "id": "reader-double-signature",
+  "version": 1,
+  "title": "Двойная подпись",
+  "summary": "Отделите целые команды от испорченных пар и обрывов.",
+  "descriptionFile": "reader-double-signature.md",
+  "platformId": "junior-reader",
+  "tests": [
+    {
+      "id": "0",
+      "title": "Пример из условия",
+      "input": {
+        "message": "ВВПРРРЖЖВ"
+      },
+      "checks": [
+        {
+          "type": "reader.impulses.equals",
+          "expected": [
+            "impulseA",
+            "impulseB",
+            "impulseA",
+            "impulseB",
+            "impulseC"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "1",
+      "title": "Все целые команды",
+      "input": {
+        "message": "ВВППРР"
+      },
+      "checks": [
+        {
+          "type": "reader.impulses.equals",
+          "expected": [
+            "impulseA",
+            "impulseA",
+            "impulseA"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "2",
+      "title": "Посторонние и несовпадающие пары",
+      "input": {
+        "message": "ВППВРЖЖЖ"
+      },
+      "checks": [
+        {
+          "type": "reader.impulses.equals",
+          "expected": [
+            "impulseB",
+            "impulseB",
+            "impulseB",
+            "impulseB"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "3",
+      "title": "Обрыв после целой пары",
+      "input": {
+        "message": "РРП"
+      },
+      "checks": [
+        {
+          "type": "reader.impulses.equals",
+          "expected": [
+            "impulseA",
+            "impulseC"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "4",
+      "title": "Один посторонний символ",
+      "input": {
+        "message": "Ж"
+      },
+      "checks": [
+        {
+          "type": "reader.impulses.equals",
+          "expected": [
+            "impulseC"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "5",
+      "title": "Пустая строка",
+      "input": {
+        "message": ""
+      },
+      "checks": [
+        {
+          "type": "reader.impulses.equals",
+          "expected": []
+        }
+      ]
+    }
+  ],
+  "codeWord": "ПОДПИСЬ"
+}

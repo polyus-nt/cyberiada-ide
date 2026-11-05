@@ -28,6 +28,7 @@ describe('InterpreterClient', () => {
   afterEach(() => {
     InterpreterClient.connection = undefined;
     InterpreterClient.ready = false;
+    InterpreterClient.capabilities.clear();
     InterpreterClient.activeRunId = undefined;
     InterpreterClient.activeKind = undefined;
   });
@@ -100,6 +101,27 @@ describe('InterpreterClient', () => {
     expect(InterpreterClient.activeKind).toBeUndefined();
   });
 
+  it('streams matching updates and discards late messages from another run', () => {
+    InterpreterClient.activeRunId = 'current';
+    InterpreterClient.activeKind = 'run';
+    const listener = vi.fn();
+    const unsubscribe = InterpreterClient.subscribeMessages(listener);
+    for (const runId of ['old', 'current']) {
+      InterpreterClient.messageHandler({
+        data: JSON.stringify({
+          protocolVersion: 2,
+          type: 'run.state',
+          requestId: 'request',
+          runId,
+          payload: { platform: 'junior-reader', impulses: ['impulseA'] },
+        }),
+      } as Websocket.MessageEvent);
+    }
+    expect(listener).toHaveBeenCalledTimes(1);
+    expect(InterpreterClient.activeRunId).toBe('current');
+    unsubscribe();
+  });
+
   it('starts a correlated test operation and allows cancellation', () => {
     const send = vi.fn();
     InterpreterClient.connection = {
@@ -157,4 +179,33 @@ describe('InterpreterClient', () => {
     expect(InterpreterClient.cancel(runId)).toBe(false);
     expect(send).toHaveBeenCalledTimes(1);
   });
+});
+
+it('gates a joint session on capability and sends both machines under one run ID', () => {
+  const send = vi.fn();
+  InterpreterClient.connection = { readyState: Websocket.OPEN, send } as unknown as Websocket;
+  InterpreterClient.ready = true;
+  const payload = {
+    xml: '<graphml/>',
+    mode: 'finite' as const,
+    machines: [
+      { machineId: 'reader', parameters: { message: 'АБВ' } },
+      { machineId: 'gardener', parameters: { message: '' } },
+    ],
+  };
+  try {
+    expect(InterpreterClient.start(payload)).toBeUndefined();
+    expect(send).not.toHaveBeenCalled();
+    InterpreterClient.capabilities.add('run.session');
+    const runId = InterpreterClient.start(payload);
+    expect(runId).toBeTruthy();
+    expect(JSON.parse(send.mock.calls[0][0])).toMatchObject({ type: 'run.start', runId, payload });
+    expect(InterpreterClient.start(payload)).toBeUndefined();
+  } finally {
+    InterpreterClient.connection = undefined;
+    InterpreterClient.ready = false;
+    InterpreterClient.capabilities.clear();
+    InterpreterClient.activeRunId = undefined;
+    InterpreterClient.activeKind = undefined;
+  }
 });

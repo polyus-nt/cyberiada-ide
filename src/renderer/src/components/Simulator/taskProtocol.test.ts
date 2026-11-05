@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import type { CatalogTask } from '../../../../common/tasks';
-
 import { taskForProtocol } from './taskProtocol';
+
+import type { CatalogTask } from '../../../../common/tasks';
 
 describe('taskForProtocol', () => {
   it('removes presentation masks before sending tests to the interpreter', () => {
@@ -38,4 +38,35 @@ describe('taskForProtocol', () => {
     expect(protocolTask.tests[0].input).toEqual(task.tests[0].input);
     expect(task.tests[0].hiddenCells).toEqual([[false, true]]);
   });
+});
+
+it('sends checker source and scenario settings while preserving presentation-only secrecy flags', () => {
+  const task = {
+    schemaVersion: 2 as const,
+    id: 'bear',
+    version: 1,
+    title: 'Bear',
+    summary: 'Summary',
+    description: 'Description',
+    platformId: 'blg-mb-junior' as const,
+    assetBaseUrl: 'file:///tasks/bear/',
+    checker: {
+      apiVersion: 1 as const,
+      source: 'def check(case, execution): return {"passed": True}',
+    },
+    tests: [
+      {
+        id: 'first',
+        title: 'First',
+        input: { durationMs: 2000, inputs: [] },
+        checks: [{ type: 'python' as const }],
+        hideInputs: true,
+      },
+    ],
+  };
+  const protocol = taskForProtocol(task);
+  expect(protocol.checker).toEqual(task.checker);
+  expect(protocol.tests[0].input).toEqual(task.tests[0].input);
+  expect(protocol.tests[0].hideInputs).toBe(true);
+  expect(protocol).not.toHaveProperty('assetBaseUrl');
 });

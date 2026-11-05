@@ -3,7 +3,11 @@ export const DEFAULT_TEST_TIMEOUT_SECONDS = 10;
 export const MAX_TASK_TESTS = 32;
 export const MAX_TASK_TOTAL_TIMEOUT_SECONDS = 300;
 
-export type TaskPlatformId = 'junior-gardener' | 'junior-reader';
+export type TaskPlatformId =
+  | 'junior-gardener'
+  | 'junior-reader'
+  | 'blg-mb-junior'
+  | 'reader-gardener';
 export type GardenerCell = -1 | 0 | 1 | 2 | 3;
 export type GardenerOrientation = 'NORTH' | 'EAST' | 'SOUTH' | 'WEST';
 
@@ -17,6 +21,23 @@ export interface GardenerTaskInput {
 
 export interface ReaderTaskInput {
   message: string;
+}
+
+export interface ReaderGardenerTaskInput {
+  reader: ReaderTaskInput;
+  gardener: GardenerTaskInput;
+}
+
+export interface CyberBearTaskInput {
+  durationMs: number;
+  inputs: { channel: 'ir' | 'ears'; byte: number; timeMs: number }[];
+  random?: { seed?: number; values?: number[]; streams?: Record<string, number[]> };
+}
+
+export interface TaskChecker {
+  apiVersion: 1;
+  file?: string;
+  source?: string;
 }
 
 export type GardenerFieldCheck = {
@@ -34,19 +55,26 @@ export type ReaderImpulsesCheck = {
   expected: Array<'impulseA' | 'impulseB' | 'impulseC'>;
 };
 
-export type VerificationCheck = GardenerFieldCheck | GardenerPositionCheck | ReaderImpulsesCheck;
+export type VerificationCheck =
+  | GardenerFieldCheck
+  | GardenerPositionCheck
+  | ReaderImpulsesCheck
+  | { type: 'python' };
 
 export interface VerificationTest {
   id: string;
   title: string;
   timeoutSeconds?: number;
-  input: GardenerTaskInput | ReaderTaskInput;
+  input: GardenerTaskInput | ReaderTaskInput | CyberBearTaskInput | ReaderGardenerTaskInput;
+  parameters?: Record<string, unknown>;
+  hideInputs?: boolean;
   checks: VerificationCheck[];
   hiddenCells?: boolean[][];
 }
 
 export interface ProgrammingTask {
-  schemaVersion: typeof TASK_SCHEMA_VERSION;
+  schemaVersion: 1 | 2;
+  checker?: TaskChecker;
   id: string;
   version: number;
   title: string;
@@ -244,18 +272,119 @@ const parseReaderTest = (
   return { input: { message: input.message }, checks };
 };
 
-export const parseProgrammingTask = (value: unknown): ProgrammingTask => {
+const parseReaderGardenerTest = (
+  rawInput: unknown,
+  rawChecks: unknown[],
+  path: string
+): Pick<VerificationTest, 'input' | 'checks'> => {
+  const input = assertObject(rawInput, `${path}.input`);
+  assertExactKeys(input, ['reader', 'gardener'], [], `${path}.input`);
+  const gardener = parseGardenerTest(input.gardener, [], path);
+  const reader = parseReaderTest(input.reader, [], path);
+  const checks = rawChecks.flatMap((rawCheck) => {
+    const check = assertObject(rawCheck, `${path}.checks`);
+    return check.type === 'reader.impulses.equals'
+      ? parseReaderTest(input.reader, [check], path).checks
+      : parseGardenerTest(input.gardener, [check], path).checks;
+  });
+  return {
+    input: {
+      reader: reader.input as ReaderTaskInput,
+      gardener: gardener.input as GardenerTaskInput,
+    },
+    checks,
+  };
+};
+
+const parseCyberBearTest = (
+  rawInput: unknown,
+  rawChecks: unknown[],
+  path: string
+): Pick<VerificationTest, 'input' | 'checks'> => {
+  const input = assertObject(rawInput, `${path}.input`);
+  assertExactKeys(input, ['durationMs', 'inputs'], ['random'], `${path}.input`);
+  const durationMs = assertInteger(input.durationMs, `${path}.input.durationMs`, 1, 300_000);
+  if (!Array.isArray(input.inputs) || input.inputs.length > 10_000)
+    throw new Error('Ожидается не более 10000 входных байтов');
+  const inputs = input.inputs.map((raw, index) => {
+    const item = assertObject(raw, `${path}.input.inputs[${index}]`);
+    assertExactKeys(item, ['channel', 'byte', 'timeMs'], [], `${path}.input.inputs[${index}]`);
+    if (item.channel !== 'ir' && item.channel !== 'ears')
+      throw new Error('Канал должен быть ir или ears');
+    return {
+      channel: item.channel as 'ir' | 'ears',
+      byte: assertInteger(item.byte, 'byte', 0, 255),
+      timeMs: assertInteger(item.timeMs, 'timeMs', 0, Number.MAX_SAFE_INTEGER),
+    };
+  });
+  let random: CyberBearTaskInput['random'];
+  if (input.random !== undefined) {
+    const config = assertObject(input.random, 'random');
+    assertExactKeys(config, [], ['seed', 'values', 'streams'], 'random');
+    const values = (value: unknown): number[] => {
+      if (!Array.isArray(value) || value.length > 10000)
+        throw new Error('Random ожидает массив до 10000 чисел');
+      return value.map((v) => assertInteger(v, 'random value', 0, 2 ** 32 - 1));
+    };
+    const streams =
+      config.streams === undefined ? undefined : assertObject(config.streams, 'random.streams');
+    if (streams && Object.keys(streams).length > 100)
+      throw new Error('Слишком много потоков Random');
+    random = {
+      ...(config.seed === undefined
+        ? {}
+        : { seed: assertInteger(config.seed, 'random.seed', 0, 2 ** 32 - 1) }),
+      ...(config.values === undefined ? {} : { values: values(config.values) }),
+      ...(streams === undefined
+        ? {}
+        : {
+            streams: Object.fromEntries(
+              Object.entries(streams).map(([key, value]) => [key, values(value)])
+            ),
+          }),
+    };
+  }
+  if (
+    rawChecks.some(
+      (raw) => !isObject(raw) || raw.type !== 'python' || Object.keys(raw).length !== 1
+    )
+  )
+    throw new Error('КиберМишка проверяется модулем Python');
+  return {
+    input: { durationMs, inputs, ...(random ? { random } : {}) },
+    checks: [{ type: 'python' }],
+  };
+};
+
+export const parseProgrammingTask = (
+  value: unknown,
+  loadDescription?: (file: string) => string
+): ProgrammingTask => {
   const task = assertObject(value, 'task');
   assertExactKeys(
     task,
-    ['schemaVersion', 'id', 'version', 'title', 'summary', 'description', 'platformId', 'tests'],
-    ['codeWord'],
+    ['schemaVersion', 'id', 'version', 'title', 'summary', 'platformId', 'tests'],
+    ['description', 'descriptionFile', 'codeWord', 'checker'],
     'task'
   );
-  if (task.schemaVersion !== TASK_SCHEMA_VERSION) {
+  if (task.schemaVersion !== 1 && task.schemaVersion !== 2) {
     throw new Error(`schemaVersion ${String(task.schemaVersion)} не поддерживается`);
   }
-  if (!['junior-gardener', 'junior-reader'].includes(task.platformId as string)) {
+  if ((task.description === undefined) === (task.descriptionFile === undefined)) {
+    throw new Error('Укажите ровно одно поле: task.description или task.descriptionFile');
+  }
+  let description = task.description;
+  if (task.descriptionFile !== undefined) {
+    const file = assertString(task.descriptionFile, 'task.descriptionFile', 1000);
+    if (!loadDescription) throw new Error('Для task.descriptionFile требуется загрузчик Markdown');
+    description = loadDescription(file);
+  }
+  const parsedDescription = assertString(description, 'task.description', 100_000);
+  if (
+    !['junior-gardener', 'junior-reader', 'blg-mb-junior', 'reader-gardener'].includes(
+      task.platformId as string
+    )
+  ) {
     throw new Error('task.platformId не поддерживается задачником');
   }
   if (!Array.isArray(task.tests) || task.tests.length === 0) {
@@ -266,6 +395,21 @@ export const parseProgrammingTask = (value: unknown): ProgrammingTask => {
   }
 
   const platformId = task.platformId as TaskPlatformId;
+  let checker: TaskChecker | undefined;
+  if (platformId === 'blg-mb-junior') {
+    if (task.schemaVersion !== 2) throw new Error('КиберМишке требуется schemaVersion 2');
+    const value = assertObject(task.checker, 'task.checker');
+    assertExactKeys(value, ['apiVersion'], ['file', 'source'], 'task.checker');
+    if (value.apiVersion !== 1 || (value.file === undefined) === (value.source === undefined))
+      throw new Error('Укажите apiVersion 1 и file или source проверяющего модуля');
+    checker = {
+      apiVersion: 1,
+      ...(value.file === undefined
+        ? { source: assertString(value.source, 'checker.source', 256000) }
+        : { file: assertString(value.file, 'checker.file', 1000) }),
+    };
+  } else if (task.checker !== undefined)
+    throw new Error('Python-чекер поддерживается для КиберМишки');
   const testIds = new Set<string>();
   let totalTimeout = 0;
   const tests = task.tests.map((rawTest, index): VerificationTest => {
@@ -274,7 +418,7 @@ export const parseProgrammingTask = (value: unknown): ProgrammingTask => {
     assertExactKeys(
       test,
       ['id', 'title', 'input', 'checks'],
-      ['timeoutSeconds', 'hiddenCells'],
+      ['timeoutSeconds', 'hiddenCells', 'parameters', 'hideInputs'],
       path
     );
     const id = assertString(test.id, `${path}.id`, 128);
@@ -289,10 +433,14 @@ export const parseProgrammingTask = (value: unknown): ProgrammingTask => {
         : assertInteger(test.timeoutSeconds, `${path}.timeoutSeconds`, 1, 30);
     totalTimeout += timeoutSeconds ?? DEFAULT_TEST_TIMEOUT_SECONDS;
     const parsed =
-      platformId === 'junior-gardener'
+      platformId === 'reader-gardener'
+        ? parseReaderGardenerTest(test.input, test.checks, path)
+        : platformId === 'blg-mb-junior'
+        ? parseCyberBearTest(test.input, test.checks, path)
+        : platformId === 'junior-gardener'
         ? parseGardenerTest(test.input, test.checks, path)
         : parseReaderTest(test.input, test.checks, path);
-    if (platformId === 'junior-reader' && test.hiddenCells !== undefined) {
+    if (platformId !== 'junior-gardener' && test.hiddenCells !== undefined) {
       throw new Error(`${path}.hiddenCells не поддерживается платформой junior-reader`);
     }
     const hiddenCells =
@@ -305,8 +453,14 @@ export const parseProgrammingTask = (value: unknown): ProgrammingTask => {
             (parsed.input as GardenerTaskInput).height,
             (parsed.input as GardenerTaskInput).position
           );
+    if (test.hideInputs !== undefined && typeof test.hideInputs !== 'boolean')
+      throw new Error('hideInputs должно быть логическим');
     return {
       id,
+      ...(test.parameters === undefined
+        ? {}
+        : { parameters: assertObject(test.parameters, 'test.parameters') }),
+      ...(test.hideInputs === undefined ? {} : { hideInputs: test.hideInputs }),
       title: assertString(test.title, `${path}.title`, 200),
       ...(timeoutSeconds === undefined ? {} : { timeoutSeconds }),
       ...parsed,
@@ -318,12 +472,13 @@ export const parseProgrammingTask = (value: unknown): ProgrammingTask => {
   }
 
   return {
-    schemaVersion: TASK_SCHEMA_VERSION,
+    schemaVersion: task.schemaVersion as 1 | 2,
+    ...(checker ? { checker } : {}),
     id: assertString(task.id, 'task.id', 128),
     version: assertInteger(task.version, 'task.version', 1, Number.MAX_SAFE_INTEGER),
     title: assertString(task.title, 'task.title', 200),
     summary: assertString(task.summary, 'task.summary', 1000),
-    description: assertString(task.description, 'task.description', 100_000),
+    description: parsedDescription,
     ...(task.codeWord === undefined
       ? {}
       : { codeWord: assertString(task.codeWord, 'task.codeWord', 100) }),

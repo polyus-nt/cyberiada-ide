@@ -1,0 +1,171 @@
+{
+  "schemaVersion": 2,
+  "id": "bear-code-lock",
+  "version": 1,
+  "title": "Кодовый замок",
+  "summary": "Откройте межотсечный люк правильной последовательностью байтов.",
+  "descriptionFile": "bear-code-lock.md",
+  "platformId": "blg-mb-junior",
+  "tests": [
+    {
+      "id": "example",
+      "title": "Правильный код",
+      "input": {
+        "durationMs": 5000,
+        "inputs": [
+          {
+            "channel": "ears",
+            "byte": 3,
+            "timeMs": 1000
+          },
+          {
+            "channel": "ears",
+            "byte": 1,
+            "timeMs": 2000
+          },
+          {
+            "channel": "ears",
+            "byte": 4,
+            "timeMs": 3000
+          },
+          {
+            "channel": "ears",
+            "byte": 9,
+            "timeMs": 4000
+          }
+        ]
+      },
+      "checks": [
+        {
+          "type": "python"
+        }
+      ]
+    },
+    {
+      "id": "restart",
+      "title": "Новая тройка начинает код",
+      "input": {
+        "durationMs": 5000,
+        "inputs": [
+          {
+            "channel": "ears",
+            "byte": 3,
+            "timeMs": 1000
+          },
+          {
+            "channel": "ears",
+            "byte": 3,
+            "timeMs": 2000
+          },
+          {
+            "channel": "ears",
+            "byte": 1,
+            "timeMs": 3000
+          },
+          {
+            "channel": "ears",
+            "byte": 4,
+            "timeMs": 4000
+          }
+        ]
+      },
+      "checks": [
+        {
+          "type": "python"
+        }
+      ]
+    },
+    {
+      "id": "wrong",
+      "title": "Неверное продолжение",
+      "input": {
+        "durationMs": 5000,
+        "inputs": [
+          {
+            "channel": "ears",
+            "byte": 3,
+            "timeMs": 1000
+          },
+          {
+            "channel": "ears",
+            "byte": 1,
+            "timeMs": 2000
+          },
+          {
+            "channel": "ears",
+            "byte": 3,
+            "timeMs": 3000
+          },
+          {
+            "channel": "ears",
+            "byte": 4,
+            "timeMs": 4000
+          }
+        ]
+      },
+      "checks": [
+        {
+          "type": "python"
+        }
+      ]
+    },
+    {
+      "id": "noise",
+      "title": "Помехи и независимый канал",
+      "input": {
+        "durationMs": 5000,
+        "inputs": [
+          {
+            "channel": "ears",
+            "byte": 3,
+            "timeMs": 1000
+          },
+          {
+            "channel": "ir",
+            "byte": 255,
+            "timeMs": 1200
+          },
+          {
+            "channel": "ears",
+            "byte": 1,
+            "timeMs": 2000
+          },
+          {
+            "channel": "ears",
+            "byte": 0,
+            "timeMs": 2500
+          },
+          {
+            "channel": "ears",
+            "byte": 3,
+            "timeMs": 3000
+          },
+          {
+            "channel": "ears",
+            "byte": 1,
+            "timeMs": 3100
+          },
+          {
+            "channel": "ears",
+            "byte": 4,
+            "timeMs": 3200
+          },
+          {
+            "channel": "ears",
+            "byte": 0,
+            "timeMs": 4000
+          }
+        ]
+      },
+      "checks": [
+        {
+          "type": "python"
+        }
+      ]
+    }
+  ],
+  "checker": {
+    "apiVersion": 1,
+    "file": "checker.py"
+  }
+}

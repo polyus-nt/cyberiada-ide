@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 2,
+  "id": "bear-ir-remote",
+  "version": 1,
+  "title": "ИК-пульт",
+  "summary": "Научите Мишку выполнять световые команды инфракрасного пульта.",
+  "descriptionFile": "bear-ir-remote.md",
+  "platformId": "blg-mb-junior",
+  "tests": [
+    {
+      "id": "example",
+      "title": "Команды и чужие значения",
+      "input": {
+        "durationMs": 5000,
+        "inputs": [
+          {
+            "channel": "ir",
+            "byte": 2,
+            "timeMs": 1000
+          },
+          {
+            "channel": "ir",
+            "byte": 9,
+            "timeMs": 2000
+          },
+          {
+            "channel": "ir",
+            "byte": 1,
+            "timeMs": 3000
+          },
+          {
+            "channel": "ir",
+            "byte": 0,
+            "timeMs": 4000
+          }
+        ]
+      },
+      "checks": [
+        {
+          "type": "python"
+        }
+      ]
+    },
+    {
+      "id": "channels",
+      "title": "Все цвета и акустические помехи",
+      "input": {
+        "durationMs": 4000,
+        "inputs": [
+          {
+            "channel": "ir",
+            "byte": 3,
+            "timeMs": 500
+          },
+          {
+            "channel": "ears",
+            "byte": 2,
+            "timeMs": 750
+          },
+          {
+            "channel": "ir",
+            "byte": 255,
+            "timeMs": 1000
+          },
+          {
+            "channel": "ir",
+            "byte": 0,
+            "timeMs": 1500
+          },
+          {
+            "channel": "ears",
+            "byte": 1,
+            "timeMs": 2000
+          },
+          {
+            "channel": "ir",
+            "byte": 1,
+            "timeMs": 2500
+          },
+          {
+            "channel": "ir",
+            "byte": 2,
+            "timeMs": 3000
+          }
+        ]
+      },
+      "checks": [
+        {
+          "type": "python"
+        }
+      ]
+    }
+  ],
+  "checker": {
+    "apiVersion": 1,
+    "file": "checker.py"
+  }
+}

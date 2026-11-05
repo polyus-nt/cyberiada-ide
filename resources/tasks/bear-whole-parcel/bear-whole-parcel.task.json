@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 2,
+  "id": "bear-whole-parcel",
+  "version": 1,
+  "title": "Целая посылка",
+  "summary": "Проверьте повторённые замеры и обнаружьте искажения в подводной связи.",
+  "descriptionFile": "bear-whole-parcel.md",
+  "platformId": "blg-mb-junior",
+  "tests": [
+    {
+      "id": "example",
+      "title": "Целая и испорченная посылки",
+      "input": {
+        "durationMs": 5000,
+        "inputs": [
+          {
+            "channel": "ears",
+            "byte": 40,
+            "timeMs": 1000
+          },
+          {
+            "channel": "ears",
+            "byte": 40,
+            "timeMs": 2000
+          },
+          {
+            "channel": "ears",
+            "byte": 17,
+            "timeMs": 3000
+          },
+          {
+            "channel": "ears",
+            "byte": 71,
+            "timeMs": 4000
+          }
+        ]
+      },
+      "checks": [
+        {
+          "type": "python"
+        }
+      ]
+    },
+    {
+      "id": "pairs",
+      "title": "Границы пар и обрыв",
+      "input": {
+        "durationMs": 10000,
+        "inputs": [
+          {
+            "channel": "ears",
+            "byte": 0,
+            "timeMs": 1000
+          },
+          {
+            "channel": "ears",
+            "byte": 255,
+            "timeMs": 2000
+          },
+          {
+            "channel": "ears",
+            "byte": 255,
+            "timeMs": 3000
+          },
+          {
+            "channel": "ears",
+            "byte": 255,
+            "timeMs": 4000
+          },
+          {
+            "channel": "ears",
+            "byte": 2,
+            "timeMs": 5000
+          },
+          {
+            "channel": "ears",
+            "byte": 3,
+            "timeMs": 6000
+          },
+          {
+            "channel": "ears",
+            "byte": 3,
+            "timeMs": 7000
+          },
+          {
+            "channel": "ears",
+            "byte": 3,
+            "timeMs": 8000
+          },
+          {
+            "channel": "ears",
+            "byte": 9,
+            "timeMs": 9000
+          }
+        ]
+      },
+      "checks": [
+        {
+          "type": "python"
+        }
+      ]
+    },
+    {
+      "id": "channels",
+      "title": "ИК не входит в акустическую пару",
+      "input": {
+        "durationMs": 5000,
+        "inputs": [
+          {
+            "channel": "ears",
+            "byte": 42,
+            "timeMs": 1000
+          },
+          {
+            "channel": "ir",
+            "byte": 99,
+            "timeMs": 1200
+          },
+          {
+            "channel": "ears",
+            "byte": 42,
+            "timeMs": 2000
+          },
+          {
+            "channel": "ears",
+            "byte": 0,
+            "timeMs": 3000
+          },
+          {
+            "channel": "ir",
+            "byte": 0,
+            "timeMs": 3100
+          },
+          {
+            "channel": "ears",
+            "byte": 1,
+            "timeMs": 4000
+          }
+        ]
+      },
+      "checks": [
+        {
+          "type": "python"
+        }
+      ]
+    }
+  ],
+  "checker": {
+    "apiVersion": 1,
+    "file": "checker.py"
+  }
+}

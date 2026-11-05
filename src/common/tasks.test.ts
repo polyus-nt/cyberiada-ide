@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
-import { readFileSync } from 'fs';
-
 import {
   DEFAULT_TEST_TIMEOUT_SECONDS,
   MAX_TASK_TOTAL_TIMEOUT_SECONDS,
   parseProgrammingTask,
 } from './tasks';
+
+import { readTaskFixture } from '../../tests/taskFixtures';
 
 const validTask = () => ({
   schemaVersion: 1,
@@ -34,6 +34,37 @@ describe('parseProgrammingTask', () => {
     expect(task.tests[0].timeoutSeconds).toBeUndefined();
     expect(task.codeWord).toBe('ЭХО');
     expect(DEFAULT_TEST_TIMEOUT_SECONDS).toBe(10);
+  });
+
+  it('resolves a Markdown description to the same runtime task format', () => {
+    const raw = { ...validTask(), description: undefined };
+    const task = parseProgrammingTask({ ...raw, descriptionFile: 'statement.md' }, (file) => {
+      expect(file).toBe('statement.md');
+      return '## Условие\n\n**Текст**';
+    });
+    expect(task.description).toBe('## Условие\n\n**Текст**');
+    expect(task).not.toHaveProperty('descriptionFile');
+  });
+
+  it('requires exactly one description source and validates the loaded content', () => {
+    const raw = { ...validTask(), description: undefined };
+    expect(() => parseProgrammingTask(raw)).toThrow('ровно одно поле');
+    expect(() => parseProgrammingTask({ ...validTask(), descriptionFile: 'a.md' })).toThrow(
+      'ровно одно поле'
+    );
+    for (const file of ['', null, 42]) {
+      expect(() => parseProgrammingTask({ ...raw, descriptionFile: file })).toThrow(
+        'task.descriptionFile должно быть непустой строкой'
+      );
+    }
+    expect(() => parseProgrammingTask({ ...raw, descriptionFile: 'a.md' })).toThrow(
+      'требуется загрузчик'
+    );
+    for (const content of ['  ', 'a'.repeat(100001)]) {
+      expect(() =>
+        parseProgrammingTask({ ...raw, descriptionFile: 'a.md' }, () => content)
+      ).toThrow('task.description');
+    }
   });
 
   it('rejects an empty code word', () => {
@@ -70,7 +101,7 @@ describe('parseProgrammingTask', () => {
 
   it('validates the bundled Gardener letter A task', () => {
     const task = parseProgrammingTask(
-      JSON.parse(readFileSync('resources/tasks/gardener-letter-a.task.json', 'utf8'))
+      readTaskFixture('resources/tasks/gardener-letter-a.task.json')
     );
 
     expect(task.id).toBe('gardener-letter-a');
@@ -79,7 +110,7 @@ describe('parseProgrammingTask', () => {
 
   it('validates the bundled Gardener letter B task', () => {
     const task = parseProgrammingTask(
-      JSON.parse(readFileSync('resources/tasks/gardener-letter-b.task.json', 'utf8'))
+      readTaskFixture('resources/tasks/gardener-letter-b.task.json')
     );
 
     expect(task.id).toBe('gardener-letter-b');
@@ -100,18 +131,14 @@ describe('parseProgrammingTask', () => {
   });
 
   it('validates the bundled Gardener greeting task', () => {
-    const task = parseProgrammingTask(
-      JSON.parse(readFileSync('resources/tasks/gardener-hello.task.json', 'utf8'))
-    );
+    const task = parseProgrammingTask(readTaskFixture('resources/tasks/gardener-hello.task.json'));
 
     expect(task.id).toBe('gardener-hello');
     expect(task.tests).toHaveLength(1);
   });
 
   it('accepts a Gardener visibility mask without changing the field', () => {
-    const raw = JSON.parse(
-      readFileSync('resources/tasks/gardener-cornflower-path.task.json', 'utf8')
-    );
+    const raw = readTaskFixture('resources/tasks/gardener-cornflower-path.task.json');
     raw.tests[0].hiddenCells = Array.from({ length: 7 }, (_, y) =>
       Array.from({ length: 7 }, (_, x) => y === 3 && x > 0)
     );
@@ -123,9 +150,7 @@ describe('parseProgrammingTask', () => {
   });
 
   it('rejects a visibility mask that hides the Gardener starting cell', () => {
-    const raw = JSON.parse(
-      readFileSync('resources/tasks/gardener-cornflower-path.task.json', 'utf8')
-    );
+    const raw = readTaskFixture('resources/tasks/gardener-cornflower-path.task.json');
     raw.tests[0].hiddenCells = Array.from({ length: 7 }, () => Array(7).fill(false));
     const { x, y } = raw.tests[0].input.position;
     raw.tests[0].hiddenCells[y][x] = true;
@@ -144,7 +169,7 @@ describe('parseProgrammingTask', () => {
 
   it('validates the bundled Gardener in fog puzzle', () => {
     const task = parseProgrammingTask(
-      JSON.parse(readFileSync('resources/tasks/gardener-in-fog/gardener-in-fog.task.json', 'utf8'))
+      readTaskFixture('resources/tasks/gardener-in-fog/gardener-in-fog.task.json')
     );
     const test = task.tests[0];
     const input = test.input as {
@@ -168,7 +193,7 @@ describe('parseProgrammingTask', () => {
 
   it('validates the bundled Gardener mint abundance task', () => {
     const task = parseProgrammingTask(
-      JSON.parse(readFileSync('resources/tasks/gardener-mint-abundance.task.json', 'utf8'))
+      readTaskFixture('resources/tasks/gardener-mint-abundance.task.json')
     );
 
     expect(task.id).toBe('gardener-mint-abundance');
@@ -186,12 +211,7 @@ describe('parseProgrammingTask', () => {
 
   it('checks the fixed cosmic delivery map, cargo, and finish', () => {
     const task = parseProgrammingTask(
-      JSON.parse(
-        readFileSync(
-          'resources/tasks/gardener-cosmic-delivery/gardener-cosmic-delivery.task.json',
-          'utf8'
-        )
-      )
+      readTaskFixture('resources/tasks/gardener-cosmic-delivery/gardener-cosmic-delivery.task.json')
     );
     const beacons = [
       [0, 3],
@@ -256,11 +276,8 @@ describe('parseProgrammingTask', () => {
 
   it('keeps the wall-turn route valid across cartographer map sizes', () => {
     const task = parseProgrammingTask(
-      JSON.parse(
-        readFileSync(
-          'resources/tasks/gardener-uncounting-cartographer/gardener-uncounting-cartographer.task.json',
-          'utf8'
-        )
+      readTaskFixture(
+        'resources/tasks/gardener-uncounting-cartographer/gardener-uncounting-cartographer.task.json'
       )
     );
     const lengths: number[][] = [];
@@ -318,7 +335,7 @@ describe('parseProgrammingTask', () => {
 
   it('validates the bundled Reader digits groups task', () => {
     const task = parseProgrammingTask(
-      JSON.parse(readFileSync('resources/tasks/reader-digits-groups-over-33.task.json', 'utf8'))
+      readTaskFixture('resources/tasks/reader-digits-groups-over-33.task.json')
     );
 
     expect(task.id).toBe('reader-digits-groups-over-33');
@@ -330,4 +347,69 @@ describe('parseProgrammingTask', () => {
       '9876-999',
     ]);
   });
+});
+
+it('validates CyberBear task packages and rejects malformed checker inputs', () => {
+  const task = readTaskFixture('resources/tasks/bear-dice/bear-dice.task.json');
+  expect(parseProgrammingTask(task).checker?.file).toBe('checker.py');
+  for (const mutate of [
+    (value: typeof task) => {
+      value.schemaVersion = 1;
+    },
+    (value: typeof task) => {
+      value.checker.apiVersion = 2;
+    },
+    (value: typeof task) => {
+      value.checker.source = 'also inline';
+    },
+    (value: typeof task) => {
+      value.tests[0].input.durationMs = 0;
+    },
+    (value: typeof task) => {
+      value.tests[0].input.random.values = [-1];
+    },
+    (value: typeof task) => {
+      value.tests[0].input.inputs = [{ channel: 'ir', byte: 256, timeMs: 0 }];
+    },
+  ]) {
+    const invalid = structuredClone(task);
+    mutate(invalid);
+    expect(() => parseProgrammingTask(invalid)).toThrow();
+  }
+});
+
+const radioTask = () => readTaskFixture('resources/tasks/reader-gardener-radio-planting.task.json');
+
+it('validates both inputs and the combined checks of the radio planting task', () => {
+  const task = parseProgrammingTask(radioTask());
+  expect(task.platformId).toBe('reader-gardener');
+  expect(task.tests[0].checks).toEqual([
+    {
+      type: 'reader.impulses.equals',
+      expected: ['impulseA', 'impulseB', 'impulseC', 'impulseC', 'impulseB', 'impulseA'],
+    },
+    { type: 'gardener.field.equals', expected: [[1, 2, 3, 3, 2, 1, 0]] },
+    { type: 'gardener.position.equals', expected: { x: 6, y: 0 } },
+  ]);
+  for (const mutate of [
+    (raw: ReturnType<typeof radioTask>) => {
+      raw.tests[0].input.reader.message = 42;
+    },
+    (raw: ReturnType<typeof radioTask>) => {
+      raw.tests[0].input.gardener.position.x = 7;
+    },
+    (raw: ReturnType<typeof radioTask>) => {
+      raw.tests[0].checks[0].expected = ['impulseD'];
+    },
+    (raw: ReturnType<typeof radioTask>) => {
+      raw.tests[0].checks[1].expected = [[1]];
+    },
+    (raw: ReturnType<typeof radioTask>) => {
+      raw.tests[0].checks[0].type = 'unknown';
+    },
+  ]) {
+    const raw = radioTask();
+    mutate(raw);
+    expect(() => parseProgrammingTask(raw)).toThrow();
+  }
 });

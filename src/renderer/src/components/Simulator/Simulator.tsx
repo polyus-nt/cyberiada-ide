@@ -2,9 +2,11 @@ import React, { useEffect, useLayoutEffect, useMemo, useState } from 'react';
 
 import { twMerge } from 'tailwind-merge';
 
+import { ReactComponent as ArrowIcon } from '@renderer/assets/icons/arrow-down.svg';
 import { ParameterSelect } from '@renderer/components/UI';
+import { ScrollArea } from '@renderer/components/UI/ScrollArea';
 import { getMissingComponentReferences } from '@renderer/lib/data/ComponentReferences';
-import { exportStateMachineCGML } from '@renderer/lib/data/GraphmlBuilder';
+import { exportCGML, exportStateMachineCGML } from '@renderer/lib/data/GraphmlBuilder';
 import { getPlatform } from '@renderer/lib/data/PlatformLoader';
 import { useModelContext } from '@renderer/store/ModelContext';
 import { getActiveTask, useTasks } from '@renderer/store/useTasks';
@@ -12,9 +14,11 @@ import { StateMachine } from '@renderer/types/diagram';
 import {
   GardenerParameters,
   ReaderParameters,
+  CyberBearParameters,
   SimulationResult,
 } from '@renderer/types/InterpreterTypes';
 
+import { CyberBearSimulator } from './CyberBearSimulator';
 import { ExecutionHistory } from './ExecutionHistory';
 import { GardenerMarker, gardenerCellStyles } from './GardenerField';
 import {
@@ -28,7 +32,11 @@ import {
   resizeField,
   setFieldCell,
 } from './model';
-import { countUnicodeCharacters, limitUnicodeCharacters } from './readerModel';
+import {
+  countUnicodeCharacters,
+  getReaderImpulseLabel,
+  limitUnicodeCharacters,
+} from './readerModel';
 import { ReaderResult } from './ReaderResult';
 import {
   SimulationMachineOption,
@@ -41,6 +49,10 @@ import { TaskMode } from './TaskMode';
 import { taskForProtocol } from './taskProtocol';
 import { useInterpreter } from './useInterpreter';
 
+import type { CatalogTask } from '../../../../common/tasks';
+
+import './jointSimulator.css';
+
 interface SimulatorProps {
   initialSmId?: string;
   onStatusChange?: (status: string) => void;
@@ -48,7 +60,7 @@ interface SimulatorProps {
 }
 
 type GardenerTool = GardenerCell | 'position';
-type SimulationParameters = GardenerParameters | ReaderParameters;
+type SimulationParameters = GardenerParameters | ReaderParameters | CyberBearParameters;
 
 interface RuntimeProps {
   ready: boolean;
@@ -62,6 +74,8 @@ interface RuntimeProps {
 
 interface GardenerRuntimeProps extends RuntimeProps {
   machineSelector: React.ReactNode;
+  hideRunPanel?: boolean;
+  onParametersChange?: (parameters: GardenerParameters) => void;
 }
 
 type ReaderRuntimeProps = GardenerRuntimeProps;
@@ -96,6 +110,9 @@ const controlClassName =
 const gardenerNumericControlClassName =
   'h-8 w-full rounded-lg border border-border-primary bg-bg-primary px-3 text-xs text-text-primary outline-none focus:border-text-inactive';
 
+const tabButtonClassName =
+  'border-b-2 border-transparent px-4 py-2 text-sm text-text-inactive transition-colors hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary disabled:cursor-not-allowed';
+
 const PLAYBACK_INTERVAL_MS = 500;
 
 const FieldInput: React.FC<React.PropsWithChildren<{ label: string; htmlFor: string }>> = ({
@@ -114,12 +131,21 @@ const MachineSelector: React.FC<{
   selectedSmId?: string;
   active: boolean;
   onSelect: (smId: string) => void;
-}> = ({ options, selectedSmId, active, onSelect }) => (
+  label?: string;
+  inputId?: string;
+}> = ({
+  options,
+  selectedSmId,
+  active,
+  onSelect,
+  label = 'Машина состояний',
+  inputId = 'simulator-state-machine',
+}) => (
   <div className="min-w-0">
-    <label className="grid gap-2 text-xs" htmlFor="simulator-state-machine">
-      <span className="h2-header font-medium">Машина состояний</span>
+    <label className="grid gap-2 text-xs" htmlFor={inputId}>
+      <span className="h2-header font-medium">{label}</span>
       <ParameterSelect
-        inputId="simulator-state-machine"
+        inputId={inputId}
         className="w-full"
         isSearchable={false}
         isClearable={false}
@@ -143,6 +169,8 @@ const MachineSelector: React.FC<{
 
 const GardenerSimulator: React.FC<GardenerRuntimeProps> = ({
   machineSelector,
+  hideRunPanel,
+  onParametersChange,
   ready,
   active,
   result,
@@ -156,6 +184,15 @@ const GardenerSimulator: React.FC<GardenerRuntimeProps> = ({
   const [field, setField] = useState(() => createField(width, height));
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [orientation, setOrientation] = useState<GardenerOrientation>('east');
+  useEffect(() => {
+    onParametersChange?.({
+      width,
+      height,
+      field,
+      position,
+      orientation: orientation.toUpperCase() as Uppercase<GardenerOrientation>,
+    });
+  }, [width, height, field, position, orientation, onParametersChange]);
   const [selectedTool, setSelectedTool] = useState<GardenerTool>(0);
   const [isMouseDown, setIsMouseDown] = useState(false);
   const [isRightMouseDown, setIsRightMouseDown] = useState(false);
@@ -163,13 +200,15 @@ const GardenerSimulator: React.FC<GardenerRuntimeProps> = ({
   const [timeout, setTimeoutValue] = useState(10);
   const [historyIndex, setHistoryIndex] = useState(0);
   const [reviewingHistory, setReviewingHistory] = useState(false);
+  const [showCurrentState, setShowCurrentState] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const resultSteps = result?.steps;
   const steps = resultSteps ?? [];
   const historyStep = reviewingHistory ? steps[historyIndex] : undefined;
-  const displayedField = historyStep?.field ?? field;
-  const displayedPosition = historyStep?.position ?? position;
-  const displayedOrientation = historyStep?.orientation ?? orientation;
+  const displayedStep = active || showCurrentState ? result?.result?.environment : historyStep;
+  const displayedField = displayedStep?.field ?? field;
+  const displayedPosition = displayedStep?.position ?? position;
+  const displayedOrientation = displayedStep?.orientation ?? orientation;
 
   useEffect(() => {
     const handleMouseUp = () => {
@@ -198,7 +237,8 @@ const GardenerSimulator: React.FC<GardenerRuntimeProps> = ({
 
   useLayoutEffect(() => {
     setHistoryIndex(Math.max(0, steps.length - 1));
-    setReviewingHistory(steps.length > 0);
+    setReviewingHistory(false);
+    setShowCurrentState(true);
     setIsPlaying(false);
   }, [resultSteps, steps.length]);
 
@@ -216,6 +256,7 @@ const GardenerSimulator: React.FC<GardenerRuntimeProps> = ({
 
   const selectHistoryStep = (index: number) => {
     setIsPlaying(false);
+    setShowCurrentState(false);
     setReviewingHistory(true);
     setHistoryIndex(index);
   };
@@ -223,6 +264,7 @@ const GardenerSimulator: React.FC<GardenerRuntimeProps> = ({
   const togglePlayback = () => {
     if (steps.length === 0) return;
     setReviewingHistory(true);
+    setShowCurrentState(false);
     if (!isPlaying && historyIndex === steps.length - 1) setHistoryIndex(0);
     setIsPlaying((current) => !current);
   };
@@ -230,6 +272,7 @@ const GardenerSimulator: React.FC<GardenerRuntimeProps> = ({
   const stopHistoryPlayback = () => {
     setIsPlaying(false);
     setReviewingHistory(false);
+    setShowCurrentState(false);
   };
 
   const updateWidth = (value: number) => {
@@ -268,6 +311,7 @@ const GardenerSimulator: React.FC<GardenerRuntimeProps> = ({
 
   const handleCellMouseDown = (event: React.MouseEvent, x: number, y: number) => {
     event.preventDefault();
+    if (active) return;
 
     if (event.button === 0) {
       applySelectedTool(x, y);
@@ -278,6 +322,7 @@ const GardenerSimulator: React.FC<GardenerRuntimeProps> = ({
 
   const handleCellMouseEnter = (event: React.MouseEvent, x: number, y: number) => {
     event.preventDefault();
+    if (active) return;
 
     if (isRightMouseDown) {
       eraseCell(x, y);
@@ -286,39 +331,9 @@ const GardenerSimulator: React.FC<GardenerRuntimeProps> = ({
     }
   };
 
-  return (
-    <div className="grid min-h-0 flex-1 grid-cols-[205px_minmax(398px,1fr)_228px] gap-x-6 gap-y-5 overflow-auto text-sm max-[983px]:grid-cols-[205px_minmax(398px,1fr)] max-[729px]:grid-cols-1">
-      <div className="min-w-0">
-        <SimulationRunPanel
-          machineSelector={machineSelector}
-          mode={mode}
-          timeout={timeout}
-          ready={ready}
-          active={active}
-          error={error}
-          message={result?.message}
-          stale={stale}
-          reserveFeedbackSpace
-          onModeChange={(nextMode) => {
-            stopHistoryPlayback();
-            setMode(nextMode);
-          }}
-          onTimeoutChange={(nextTimeout) => {
-            stopHistoryPlayback();
-            setTimeoutValue(nextTimeout);
-          }}
-          onStart={() =>
-            onStart(mode, timeout, {
-              width,
-              height,
-              field,
-              position,
-              orientation: orientation.toUpperCase() as Uppercase<GardenerOrientation>,
-            })
-          }
-          onCancel={onCancel}
-        />
-
+  const historyControls = (
+    <>
+      <fieldset disabled={active}>
         <ExecutionHistory
           steps={steps}
           historyIndex={historyIndex}
@@ -327,14 +342,76 @@ const GardenerSimulator: React.FC<GardenerRuntimeProps> = ({
           onSelectStep={selectHistoryStep}
           onTogglePlayback={togglePlayback}
         />
+      </fieldset>
+      {result?.result?.environment && (
+        <button
+          type="button"
+          className="mt-3 h-8 w-full rounded-lg border border-border-primary px-3 text-xs"
+          onClick={() => {
+            setIsPlaying(false);
+            setReviewingHistory(false);
+            setShowCurrentState(true);
+          }}
+        >
+          Текущее состояние
+        </button>
+      )}
+    </>
+  );
+  const FieldSettingsContainer = hideRunPanel ? 'details' : 'section';
+
+  return (
+    <div
+      className={
+        hideRunPanel
+          ? 'joint-gardener grid min-h-0 gap-4 text-sm'
+          : 'grid min-h-0 flex-1 grid-cols-[205px_minmax(398px,1fr)_228px] gap-x-6 gap-y-5 overflow-auto text-sm max-[983px]:grid-cols-[205px_minmax(398px,1fr)] max-[729px]:grid-cols-1'
+      }
+    >
+      <div className={twMerge('min-w-0', hideRunPanel && 'hidden')}>
+        {!hideRunPanel && (
+          <SimulationRunPanel
+            machineSelector={machineSelector}
+            mode={mode}
+            timeout={timeout}
+            ready={ready}
+            active={active}
+            error={error}
+            message={result?.message}
+            stale={stale}
+            reserveFeedbackSpace
+            onModeChange={(nextMode) => {
+              stopHistoryPlayback();
+              setMode(nextMode);
+            }}
+            onTimeoutChange={(nextTimeout) => {
+              stopHistoryPlayback();
+              setTimeoutValue(nextTimeout);
+            }}
+            onStart={() =>
+              onStart(mode, timeout, {
+                width,
+                height,
+                field,
+                position,
+                orientation: orientation.toUpperCase() as Uppercase<GardenerOrientation>,
+              })
+            }
+            onCancel={onCancel}
+          />
+        )}
+
+        {!hideRunPanel && historyControls}
       </div>
 
       <section className="min-w-0">
         <h2 className="h2-header mb-2">Поле</h2>
         <div className="overflow-auto rounded-lg bg-bg-secondary p-3">
           <div
-            className="grid w-max gap-1.5"
-            style={{ gridTemplateColumns: `repeat(${width}, 2rem)` }}
+            className={twMerge('grid w-max gap-1.5', hideRunPanel && 'gap-1')}
+            style={{
+              gridTemplateColumns: `repeat(${width}, ${hideRunPanel ? '1.75rem' : '2rem'})`,
+            }}
           >
             {displayedField.flatMap((row, y) =>
               row.map((cell, x) => {
@@ -346,7 +423,7 @@ const GardenerSimulator: React.FC<GardenerRuntimeProps> = ({
                     title={`${x}, ${y}: ${cellLabels[cell]}`}
                     aria-label={`Клетка ${x}, ${y}: ${cellLabels[cell]}`}
                     className={twMerge(
-                      'relative size-8 rounded-lg',
+                      hideRunPanel ? 'relative size-7 rounded-lg' : 'relative size-8 rounded-lg',
                       gardenerCellStyles[cell],
                       reviewingHistory && 'cursor-default'
                     )}
@@ -367,16 +444,39 @@ const GardenerSimulator: React.FC<GardenerRuntimeProps> = ({
             )}
           </div>
         </div>
-        <p className="mt-6 max-w-[398px] text-xs leading-4 text-text-inactive">
-          {reviewingHistory
+        <p
+          className={twMerge(
+            'mt-6 max-w-[398px] text-xs leading-4 text-text-inactive',
+            hideRunPanel && 'mt-3'
+          )}
+        >
+          {active
+            ? 'Выполняется. Поле обновляется в реальном времени.'
+            : reviewingHistory
             ? `Просмотр шага ${historyIndex + 1} из ${steps.length}.`
+            : hideRunPanel
+            ? 'Выберите инструмент и нажмите на клетку.'
             : 'Выберите инструмент и нажмите на клетку. Кнопка “Старт” переносит начальную позицию.'}
         </p>
       </section>
 
-      <div className="min-w-0 max-[983px]:col-span-2 max-[729px]:col-span-1">
-        <section>
-          <h2 className="h2-header mb-2">Настройки поля</h2>
+      <fieldset
+        disabled={active}
+        className={
+          hideRunPanel
+            ? 'joint-gardener-settings min-w-0'
+            : 'min-w-0 max-[983px]:col-span-2 max-[729px]:col-span-1'
+        }
+      >
+        <FieldSettingsContainer>
+          {hideRunPanel ? (
+            <summary className="cursor-pointer rounded-lg border border-border-primary p-3 text-xs font-medium">
+              <ArrowIcon className="joint-disclosure-arrow size-3" aria-hidden="true" />
+              Настройки · {width} × {height}
+            </summary>
+          ) : (
+            <h2 className="h2-header mb-2">Настройки поля</h2>
+          )}
           <div className="rounded-lg border border-border-primary p-3">
             <div className="grid grid-cols-2 gap-3">
               <FieldInput label="Ширина" htmlFor="simulator-field-width">
@@ -452,7 +552,7 @@ const GardenerSimulator: React.FC<GardenerRuntimeProps> = ({
               </FieldInput>
             </div>
           </div>
-        </section>
+        </FieldSettingsContainer>
 
         <section className="mt-6">
           <h2 className="h2-header mb-2">Инструменты</h2>
@@ -464,6 +564,7 @@ const GardenerSimulator: React.FC<GardenerRuntimeProps> = ({
                   type="button"
                   className={twMerge(
                     'flex h-8 items-center gap-2 rounded-lg border border-border-primary px-3 text-left text-xs transition-colors hover:bg-bg-hover',
+                    hideRunPanel && 'gap-1 px-1.5',
                     selectedTool === tool.value && 'bg-bg-active'
                   )}
                   onClick={() => {
@@ -492,7 +593,16 @@ const GardenerSimulator: React.FC<GardenerRuntimeProps> = ({
             </button>
           </div>
         </section>
-      </div>
+        {hideRunPanel && (
+          <details className="mt-4 rounded-lg border border-border-primary p-3 [&_section]:mt-3">
+            <summary className="cursor-pointer text-xs font-medium">
+              <ArrowIcon className="joint-disclosure-arrow size-3" aria-hidden="true" />
+              История · {steps.length} шагов
+            </summary>
+            {historyControls}
+          </details>
+        )}
+      </fieldset>
     </div>
   );
 };
@@ -553,6 +663,426 @@ const ReaderSimulator: React.FC<ReaderRuntimeProps> = ({
   );
 };
 
+const useJointMachineRevision = (model: ReturnType<typeof useModelContext>, id: string) => {
+  model.model.useData(id, 'elements.states');
+  model.model.useData(id, 'elements.transitions');
+  model.model.useData(id, 'elements.components');
+  model.model.useData(id, 'elements.initialStates');
+  model.model.useData(id, 'elements.finalStates');
+  model.model.useData(id, 'elements.choiceStates');
+  model.model.useData(id, 'elements.shallowHistory');
+  model.model.useData(id, 'elements.name');
+};
+
+type JointSimulatorProps = {
+  options: SimulationMachineOption[];
+  interpreter: ReturnType<typeof useInterpreter>;
+  onStart: (
+    readerId: string,
+    gardenerId: string,
+    message: string,
+    parameters: GardenerParameters,
+    mode: SimulationMode,
+    timeout: number
+  ) => void;
+};
+
+export const JointSimulator: React.FC<JointSimulatorProps> = ({
+  options,
+  interpreter,
+  onStart,
+}) => {
+  const readers = options.filter(({ machine }) => machine.platform === 'junior-reader');
+  const gardeners = options.filter(({ machine }) => machine.platform === 'junior-gardener');
+  const [selectedReaderId, setReaderId] = useState(readers[0]?.id ?? '');
+  const [selectedGardenerId, setGardenerId] = useState(gardeners[0]?.id ?? '');
+  const readerId = readers.some(({ id }) => id === selectedReaderId)
+    ? selectedReaderId
+    : readers[0]?.id ?? '';
+  const gardenerId = gardeners.some(({ id }) => id === selectedGardenerId)
+    ? selectedGardenerId
+    : gardeners[0]?.id ?? '';
+  const [tab, setTab] = useState<'reader' | 'gardener'>('reader');
+  const [message, setMessage] = useState('');
+  const [parameters, setParameters] = useState<GardenerParameters>();
+  const [mode, setMode] = useState<SimulationMode>('finite');
+  const [timeout, setTimeoutValue] = useState(10);
+  const model = useModelContext();
+  useJointMachineRevision(model, readerId);
+  useJointMachineRevision(model, gardenerId);
+  const [runRevision, setRunRevision] = useState<string>();
+  const currentRevision = JSON.stringify([
+    model.model.data.elements.stateMachines[readerId],
+    model.model.data.elements.stateMachines[gardenerId],
+    message,
+    parameters,
+  ]);
+  const stale = Boolean(interpreter.result && runRevision !== currentRevision);
+  const referenceError = [readerId, gardenerId].flatMap((id) => {
+    const machine = options.find((option) => option.id === id)?.machine;
+    const platform = machine && getPlatform(machine.platform);
+    return machine && platform ? getMissingComponentReferences(machine, platform) : [];
+  });
+  const valid =
+    readers.some(({ id }) => id === readerId) && gardeners.some(({ id }) => id === gardenerId);
+  const error = referenceError.length
+    ? `В схемах отсутствуют компоненты: ${referenceError.join(', ')}`
+    : interpreter.ready && !interpreter.supportsSession
+    ? 'Обновите интерпретатор для совместного запуска.'
+    : interpreter.error;
+  const readerResult = interpreter.result?.machines?.[readerId];
+  const gardenerResult = interpreter.result?.machines?.[gardenerId];
+  const impulses = readerResult?.result?.calledSignals ?? [];
+  const tabs = [
+    { id: 'reader', label: 'Строчник' },
+    { id: 'gardener', label: 'Садовник' },
+  ] as const;
+
+  return (
+    <div className="joint-simulator min-h-0 min-w-0 flex-1">
+      <ScrollArea className="min-h-0 flex-1" contentClassName="joint-simulator-layout">
+        <ScrollArea
+          role="complementary"
+          aria-label="Настройки совместной симуляции"
+          className="joint-simulator-controls min-h-0 min-w-0"
+          viewportClassName="pr-3"
+          horizontalScroll={false}
+        >
+          <SimulationRunPanel
+            machineSelector={
+              <section aria-label="Машины совместной симуляции">
+                <h2 className="h2-header mb-3">Машины состояний</h2>
+                <div className="grid gap-4 rounded-lg border border-border-primary p-3">
+                  {[
+                    {
+                      id: 'reader',
+                      label: 'Строчник',
+                      value: readerId,
+                      options: readers,
+                      select: setReaderId,
+                    },
+                    {
+                      id: 'gardener',
+                      label: 'Садовник',
+                      value: gardenerId,
+                      options: gardeners,
+                      select: setGardenerId,
+                    },
+                  ].map((selector) => (
+                    <FieldInput
+                      key={selector.id}
+                      label={selector.label}
+                      htmlFor={`joint-machine-${selector.id}`}
+                    >
+                      <ParameterSelect
+                        inputId={`joint-machine-${selector.id}`}
+                        className="w-full"
+                        isSearchable={false}
+                        isClearable={false}
+                        isDisabled={interpreter.active || selector.options.length === 0}
+                        placeholder="Выберите машину"
+                        noOptionsMessage={() => 'Нет поддерживаемых машин'}
+                        options={selector.options.map(({ id, machine }) => ({
+                          value: id,
+                          label: machine.name || id,
+                        }))}
+                        value={selector.options
+                          .map(({ id, machine }) => ({ value: id, label: machine.name || id }))
+                          .find((option) => option.value === selector.value)}
+                        onChange={(option) => {
+                          if (!option) return;
+                          selector.select(option.value);
+                          interpreter.clear();
+                        }}
+                      />
+                    </FieldInput>
+                  ))}
+                </div>
+              </section>
+            }
+            mode={mode}
+            timeout={timeout}
+            ready={
+              interpreter.ready &&
+              interpreter.supportsSession &&
+              valid &&
+              referenceError.length === 0 &&
+              Boolean(parameters)
+            }
+            active={interpreter.active}
+            error={error}
+            message={interpreter.result?.message}
+            stale={stale}
+            onModeChange={setMode}
+            onTimeoutChange={setTimeoutValue}
+            onCancel={interpreter.cancel}
+            onStart={() => {
+              if (parameters) {
+                setRunRevision(currentRevision);
+                onStart(readerId, gardenerId, message, parameters, mode, timeout);
+              }
+            }}
+          />
+        </ScrollArea>
+
+        <section
+          aria-label="Рабочая область совместной симуляции"
+          className="joint-simulator-workspace flex min-h-0 min-w-0 flex-col overflow-hidden rounded-lg border border-border-primary"
+        >
+          <div
+            role="tablist"
+            aria-label="Участники симуляции"
+            className="flex shrink-0 gap-1 border-b border-border-primary px-3 pt-2"
+          >
+            {tabs.map(({ id, label }) => (
+              <button
+                key={id}
+                type="button"
+                role="tab"
+                id={`joint-tab-${id}`}
+                aria-selected={tab === id}
+                aria-controls={`joint-panel-${id}`}
+                tabIndex={tab === id ? 0 : -1}
+                className={twMerge(
+                  tabButtonClassName,
+                  tab === id && 'border-primary font-medium text-primary'
+                )}
+                onClick={() => setTab(id)}
+                onKeyDown={(event) => {
+                  if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+                  event.preventDefault();
+                  const nextTab =
+                    event.key === 'Home'
+                      ? 'reader'
+                      : event.key === 'End'
+                      ? 'gardener'
+                      : tab === 'reader'
+                      ? 'gardener'
+                      : 'reader';
+                  setTab(nextTab);
+                  document.getElementById(`joint-tab-${nextTab}`)?.focus();
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          <ScrollArea
+            className="joint-simulator-panels min-h-0 flex-1"
+            viewportClassName="px-4 py-[11px]"
+            contentClassName="h-full"
+          >
+            <div
+              role="tabpanel"
+              id="joint-panel-reader"
+              aria-labelledby="joint-tab-reader"
+              tabIndex={0}
+              className="h-full min-h-[360px]"
+              hidden={tab !== 'reader'}
+            >
+              <div className="flex h-full min-h-0 flex-col gap-4">
+                <div className="grid shrink-0 gap-2">
+                  <div className="flex items-center justify-between gap-3">
+                    <label className="h2-header" htmlFor="joint-reader-message">
+                      Входная строка
+                    </label>
+                    <span className="text-xs text-text-inactive">
+                      {countUnicodeCharacters(message)} / 10 000
+                    </span>
+                  </div>
+                  <textarea
+                    id="joint-reader-message"
+                    className={twMerge(
+                      controlClassName,
+                      'h-20 resize-none py-2 leading-6 disabled:cursor-not-allowed disabled:text-text-inactive'
+                    )}
+                    placeholder="Введите строку для Строчника"
+                    value={message}
+                    disabled={interpreter.active}
+                    onChange={(event) =>
+                      setMessage(limitUnicodeCharacters(event.target.value, 10_000))
+                    }
+                  />
+                </div>
+
+                <section
+                  className="flex min-h-0 flex-1 flex-col gap-3"
+                  aria-label="Выходные импульсы Строчника"
+                >
+                  <h2 className="h2-header flex shrink-0 items-center gap-2">
+                    Выходные импульсы
+                    <span className="rounded bg-bg-secondary px-2 py-0.5 text-xs font-normal text-text-inactive">
+                      {impulses.length}
+                    </span>
+                  </h2>
+                  {readerResult?.message && (
+                    <p className="shrink-0 break-words text-xs">{readerResult.message}</p>
+                  )}
+                  <ScrollArea
+                    className="min-h-0 flex-1 rounded-lg border border-border-primary"
+                    viewportClassName="px-3 py-[7px]"
+                    contentClassName={
+                      impulses.length === 0 ? 'flex h-full items-center justify-center' : undefined
+                    }
+                    horizontalScroll={false}
+                    tabIndex={0}
+                  >
+                    {impulses.length > 0 ? (
+                      <ol className="grid gap-2">
+                        {impulses.map((impulse, index) => (
+                          <li
+                            key={`${index}:${impulse}`}
+                            className="flex items-center gap-3 rounded-lg border border-border-primary px-3 py-2 text-xs"
+                          >
+                            <span className="text-text-inactive">{index + 1}</span>
+                            <span className="break-all">{getReaderImpulseLabel(impulse)}</span>
+                          </li>
+                        ))}
+                      </ol>
+                    ) : (
+                      <p className="text-center text-xs text-text-inactive">
+                        {interpreter.active
+                          ? 'Ожидание выходных импульсов…'
+                          : 'Импульсы появятся после запуска.'}
+                      </p>
+                    )}
+                  </ScrollArea>
+                </section>
+              </div>
+            </div>
+            <div
+              role="tabpanel"
+              id="joint-panel-gardener"
+              aria-labelledby="joint-tab-gardener"
+              tabIndex={0}
+              hidden={tab !== 'gardener'}
+            >
+              <GardenerSimulator
+                key={gardenerId}
+                machineSelector={null}
+                hideRunPanel
+                onParametersChange={setParameters}
+                ready={false}
+                active={interpreter.active}
+                result={gardenerResult}
+                stale={stale}
+                onStart={() => undefined}
+                onCancel={interpreter.cancel}
+              />
+            </div>
+          </ScrollArea>
+        </section>
+      </ScrollArea>
+    </div>
+  );
+};
+
+export const JointTaskMode: React.FC<{
+  task: CatalogTask;
+  options: SimulationMachineOption[];
+  interpreter: ReturnType<typeof useInterpreter>;
+}> = ({ task, options, interpreter }) => {
+  const model = useModelContext();
+  const readers = options.filter(({ machine }) => machine.platform === 'junior-reader');
+  const gardeners = options.filter(({ machine }) => machine.platform === 'junior-gardener');
+  const [readerSelection, setReader] = useState('');
+  const [gardenerSelection, setGardener] = useState('');
+  const reader = readers.some(({ id }) => id === readerSelection)
+    ? readerSelection
+    : readers[0]?.id ?? '';
+  const gardener = gardeners.some(({ id }) => id === gardenerSelection)
+    ? gardenerSelection
+    : gardeners[0]?.id ?? '';
+  useJointMachineRevision(model, reader);
+  useJointMachineRevision(model, gardener);
+  const revision = JSON.stringify([
+    model.model.data.elements.stateMachines[reader],
+    model.model.data.elements.stateMachines[gardener],
+  ]);
+  const selection = JSON.stringify([reader, gardener]);
+  const clear = interpreter.clear;
+  useEffect(() => {
+    useTasks.getState().selectSolution(selection, undefined);
+    clear();
+  }, [selection, revision, task.id, clear]);
+  const missing = [reader, gardener].flatMap((id) => {
+    const machine = options.find((option) => option.id === id)?.machine;
+    const platform = machine && getPlatform(machine.platform);
+    return machine && platform ? getMissingComponentReferences(machine, platform) : [];
+  });
+  const error = missing.length
+    ? `В схемах отсутствуют компоненты: ${missing.join(', ')}`
+    : !reader || !gardener
+    ? 'Добавьте в документ диаграммы Строчника и Садовника.'
+    : interpreter.ready && !interpreter.supportsTaskSession
+    ? 'Обновите интерпретатор для совместной проверки задач.'
+    : interpreter.error;
+  const payload = () => {
+    if (!reader || !gardener || missing.length) return undefined;
+    const elements = model.model.data.elements;
+    const value = {
+      xml: exportCGML({
+        parameters: elements.parameters,
+        stateMachines: {
+          [reader]: elements.stateMachines[reader],
+          [gardener]: elements.stateMachines[gardener],
+        },
+      }),
+      machines: { reader, gardener },
+      task: taskForProtocol(task),
+    };
+    useTasks.getState().selectSolution(selection, value.xml);
+    return value;
+  };
+  return (
+    <div className="flex min-h-0 flex-1 flex-col gap-4">
+      <div className="grid grid-cols-2 gap-4" aria-label="Машины совместной задачи">
+        <MachineSelector
+          label="Строчник"
+          inputId="task-reader"
+          options={readers}
+          selectedSmId={reader}
+          active={interpreter.active}
+          onSelect={setReader}
+        />
+        <MachineSelector
+          label="Садовник"
+          inputId="task-gardener"
+          options={gardeners}
+          selectedSmId={gardener}
+          active={interpreter.active}
+          onSelect={setGardener}
+        />
+      </div>
+      <TaskMode
+        task={task}
+        ready={
+          interpreter.ready &&
+          interpreter.supportsTaskSession &&
+          Boolean(reader && gardener) &&
+          missing.length === 0
+        }
+        active={interpreter.active}
+        operationKind={interpreter.operationKind}
+        liveTestId={interpreter.activeTestId}
+        liveExecution={interpreter.operationKind === 'test' ? interpreter.result : undefined}
+        error={error}
+        hasSolution={Boolean(reader && gardener)}
+        onCancel={interpreter.cancel}
+        onRunTest={(testId) => {
+          const value = payload();
+          if (value) interpreter.startTest({ ...value, testId });
+        }}
+        onSubmit={() => {
+          const value = payload();
+          if (value) interpreter.startSubmission(value);
+        }}
+      />
+    </div>
+  );
+};
+
 export const Simulator: React.FC<SimulatorProps> = ({
   initialSmId,
   onStatusChange,
@@ -560,6 +1090,7 @@ export const Simulator: React.FC<SimulatorProps> = ({
 }) => {
   const modelController = useModelContext();
   const interpreter = useInterpreter();
+  const [joint, setJoint] = useState(false);
   const [activeTask, solutionMachineId, selectSolution] = useTasks((state) => [
     getActiveTask(state),
     state.solutionMachineId,
@@ -621,12 +1152,22 @@ export const Simulator: React.FC<SimulatorProps> = ({
   const platform = machine ? getPlatform(machine.platform) : undefined;
   const missingComponentReferences =
     machine && platform ? getMissingComponentReferences(machine, platform) : [];
+  const componentRuntimeError =
+    machine?.platform === 'blg-mb-junior' &&
+    interpreter.ready &&
+    !interpreter.supportsTaskChecker &&
+    Object.values(machine.components).some((component) =>
+      ['Timer', 'Random', 'MatrixPicture'].includes(component.type)
+    )
+      ? 'Обновите интерпретатор для таймера, генератора случайностей и готовых рисунков КиберМишки.'
+      : undefined;
   const referenceError =
-    missingComponentReferences.length > 0
+    componentRuntimeError ??
+    (missingComponentReferences.length > 0
       ? `Нельзя запустить симуляцию: отсутствуют компоненты, на которые ссылается схема: ${missingComponentReferences.join(
           ', '
         )}. Восстановите компоненты или удалите ссылки.`
-      : undefined;
+      : undefined);
   const resultStale = isSimulationResultStale(
     interpreter.result !== undefined,
     lastRunRevision,
@@ -638,15 +1179,11 @@ export const Simulator: React.FC<SimulatorProps> = ({
   }, [interpreter.status, onStatusChange]);
 
   useEffect(() => {
-    onAutoSizeChange?.(
-      activeTask?.platformId === 'junior-gardener' ||
-        (!activeTask &&
-          (machine?.platform === 'junior-reader' || machine?.platform === 'junior-gardener'))
-    );
-  }, [activeTask, machine?.platform, onAutoSizeChange]);
+    onAutoSizeChange?.(activeTask?.platformId === 'junior-gardener');
+  }, [activeTask?.platformId, onAutoSizeChange]);
 
   useEffect(() => {
-    if (!activeTask) return;
+    if (!activeTask || activeTask.platformId === 'reader-gardener') return;
     selectSolution(selectedSmId, undefined);
   }, [activeTask, currentRevision, selectSolution, selectedSmId]);
 
@@ -734,8 +1271,77 @@ export const Simulator: React.FC<SimulatorProps> = ({
           </span>
         </div>
       )}
-      {(activeTask ||
-        (machine?.platform !== 'junior-gardener' && machine?.platform !== 'junior-reader')) && (
+      {!activeTask && (
+        <div
+          role="group"
+          aria-label="Режим симуляции"
+          className="mb-4 flex shrink-0 gap-1 border-b border-border-primary"
+        >
+          <button
+            type="button"
+            aria-pressed={!joint}
+            className={twMerge(
+              tabButtonClassName,
+              !joint && 'border-primary font-medium text-primary'
+            )}
+            disabled={interpreter.active}
+            onClick={() => {
+              setJoint(false);
+              interpreter.clear();
+            }}
+          >
+            Одна машина
+          </button>
+          <button
+            type="button"
+            aria-pressed={joint}
+            className={twMerge(
+              tabButtonClassName,
+              joint && 'border-primary font-medium text-primary'
+            )}
+            disabled={interpreter.active}
+            onClick={() => {
+              setJoint(true);
+              interpreter.clear();
+            }}
+          >
+            Строчник + Садовник
+          </button>
+        </div>
+      )}
+      {!activeTask && joint && (
+        <JointSimulator
+          options={allOptions}
+          interpreter={interpreter}
+          onStart={(readerId, gardenerId, message, parameters, mode, timeout) => {
+            const elements = modelController.model.data.elements;
+            const xml = exportCGML({
+              parameters: elements.parameters,
+              stateMachines: {
+                [readerId]: elements.stateMachines[readerId],
+                [gardenerId]: elements.stateMachines[gardenerId],
+              },
+            });
+            interpreter.start({
+              xml,
+              mode,
+              ...(mode === 'finite' ? { timeoutSeconds: timeout } : {}),
+              machines: [
+                { machineId: readerId, parameters: { message } },
+                { machineId: gardenerId, parameters },
+              ],
+            });
+          }}
+        />
+      )}
+      {((activeTask &&
+        activeTask.platformId !== 'blg-mb-junior' &&
+        activeTask.platformId !== 'reader-gardener') ||
+        (!activeTask &&
+          !joint &&
+          machine?.platform !== 'junior-gardener' &&
+          machine?.platform !== 'junior-reader' &&
+          machine?.platform !== 'blg-mb-junior')) && (
         <div className="mb-4 w-64 max-w-full">
           <MachineSelector
             options={options}
@@ -745,20 +1351,69 @@ export const Simulator: React.FC<SimulatorProps> = ({
           />
         </div>
       )}
-      {activeTask && (
+      {activeTask?.platformId === 'reader-gardener' && (
+        <JointTaskMode task={activeTask} options={allOptions} interpreter={interpreter} />
+      )}
+      {activeTask && activeTask.platformId !== 'reader-gardener' && (
         <TaskMode
           task={activeTask}
-          ready={interpreter.ready && !referenceError}
+          machineSelector={
+            activeTask.platformId === 'blg-mb-junior' ? (
+              <MachineSelector
+                options={options}
+                selectedSmId={selectedSmId}
+                active={interpreter.active}
+                onSelect={selectMachine}
+              />
+            ) : undefined
+          }
+          ready={
+            interpreter.ready &&
+            !referenceError &&
+            (!activeTask.checker || interpreter.supportsTaskChecker)
+          }
           active={interpreter.active}
           operationKind={interpreter.operationKind}
-          error={referenceError ?? interpreter.error}
+          liveTestId={interpreter.activeTestId}
+          liveExecution={interpreter.operationKind === 'test' ? interpreter.result : undefined}
+          error={
+            referenceError ??
+            interpreter.error ??
+            (activeTask.checker && interpreter.ready && !interpreter.supportsTaskChecker
+              ? 'Обновите интерпретатор для проверки задач КиберМишки.'
+              : undefined)
+          }
           hasSolution={machine !== undefined}
           onRunTest={runTaskTest}
           onCancel={interpreter.cancel}
           onSubmit={submitTask}
         />
       )}
-      {!activeTask && machine?.platform === 'junior-gardener' && (
+      {!activeTask && !joint && machine?.platform === 'blg-mb-junior' && (
+        <CyberBearSimulator
+          {...interpreter}
+          ready={interpreter.ready && interpreter.supportsCyberBear && !referenceError}
+          error={
+            referenceError ??
+            interpreter.error ??
+            (interpreter.ready && !interpreter.supportsCyberBear
+              ? 'Обновите интерпретатор: эта версия не поддерживает отправку байтов КиберМишке по расписанию.'
+              : undefined)
+          }
+          machineSelector={
+            <MachineSelector
+              options={options}
+              selectedSmId={selectedSmId}
+              active={interpreter.active}
+              onSelect={selectMachine}
+            />
+          }
+          stale={resultStale}
+          onStart={start}
+          onCancel={interpreter.cancel}
+        />
+      )}
+      {!activeTask && !joint && machine?.platform === 'junior-gardener' && (
         <GardenerSimulator
           {...interpreter}
           ready={interpreter.ready && !referenceError}
@@ -776,7 +1431,7 @@ export const Simulator: React.FC<SimulatorProps> = ({
           onCancel={interpreter.cancel}
         />
       )}
-      {!activeTask && machine?.platform === 'junior-reader' && (
+      {!activeTask && !joint && machine?.platform === 'junior-reader' && (
         <ReaderSimulator
           {...interpreter}
           ready={interpreter.ready && !referenceError}

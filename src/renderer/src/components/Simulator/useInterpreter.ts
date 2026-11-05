@@ -4,6 +4,7 @@ import { useSettings } from '@renderer/hooks/useSettings';
 import { useTasks } from '@renderer/store/useTasks';
 import {
   InterpreterEnvelope,
+  RunStatePayload,
   RunStartPayload,
   SimulationResult,
   SubmissionResult,
@@ -12,8 +13,15 @@ import {
   TestVerdict,
 } from '@renderer/types/InterpreterTypes';
 
+import { applyRunState, finishRunState } from './liveState';
+
 import { InterpreterClient } from '../Modules/Interpreter';
 import { ClientStatus } from '../Modules/Websocket/ClientStatus';
+
+const hasCyberBearSupport = () =>
+  InterpreterClient.capabilities.has('cyberbear.live') &&
+  InterpreterClient.capabilities.has('cyberbear.input-sequence') &&
+  InterpreterClient.capabilities.has('cyberbear.timed-inputs');
 
 export const useInterpreter = () => {
   const [settings] = useSettings('interpreter');
@@ -25,15 +33,26 @@ export const useInterpreter = () => {
   const activeTestId = useRef<string>();
   const activeTaskXml = useRef<string>();
   const [result, setResult] = useState<SimulationResult>();
+  const liveResult = useRef<SimulationResult>();
+  const [supportsCyberBear, setSupportsCyberBear] = useState(hasCyberBearSupport());
   const [error, setError] = useState<string>();
 
   useEffect(() => {
     InterpreterClient.bind(
       (nextStatus) => {
         setStatus(nextStatus);
+        setSupportsCyberBear(hasCyberBearSupport());
         if (nextStatus === ClientStatus.NO_CONNECTION) {
           setActiveRunId(undefined);
           setOperationKind(undefined);
+          if (liveResult.current?.status === 'running') {
+            liveResult.current = {
+              ...liveResult.current,
+              status: 'error',
+              message: 'Связь с интерпретатором потеряна',
+            };
+            setResult(liveResult.current);
+          }
           useTasks.getState().failOperation();
           activeTestId.current = undefined;
           activeTaskXml.current = undefined;
@@ -44,23 +63,40 @@ export const useInterpreter = () => {
     setStatus(InterpreterClient.ready ? ClientStatus.CONNECTED : ClientStatus.NO_CONNECTION);
 
     const unsubscribe = InterpreterClient.subscribeMessages<InterpreterEnvelope>((message) => {
+      if (message.type === 'run.state') {
+        if (message.runId !== InterpreterClient.activeRunId) return;
+        if (
+          InterpreterClient.activeKind === 'test' &&
+          useTasks.getState().solutionXml !== activeTaskXml.current
+        )
+          return;
+        liveResult.current = applyRunState(liveResult.current, message.payload as RunStatePayload);
+        setResult(liveResult.current);
+        return;
+      }
       if (message.type === 'run.started') return;
       if (message.type === 'run.cancel.accepted') return;
       if (message.type === 'test.started' || message.type === 'test.cancel.accepted') return;
       if (message.type === 'submission.started') return;
       if (message.type === 'submission.test.started') {
         const payload = message.payload as { testId: string };
-        useTasks.getState().startSubmissionTest(payload.testId);
+        if (useTasks.getState().solutionXml === activeTaskXml.current)
+          useTasks.getState().startSubmissionTest(payload.testId);
         return;
       }
       if (message.type === 'submission.test.completed') {
         const payload = message.payload as { verdict: TestVerdict };
-        useTasks.getState().completeSubmissionTest(payload.verdict);
+        if (useTasks.getState().solutionXml === activeTaskXml.current)
+          useTasks.getState().completeSubmissionTest(payload.verdict);
         return;
       }
       if (message.type === 'error') {
         const payload = message.payload as { message?: string };
         setError(payload.message ?? 'Интерпретатор вернул ошибку');
+        if (liveResult.current) {
+          liveResult.current = { ...liveResult.current, status: 'error', message: payload.message };
+          setResult(liveResult.current);
+        }
         setActiveRunId(InterpreterClient.activeRunId);
         setOperationKind(InterpreterClient.activeKind);
         useTasks.getState().failOperation();
@@ -73,7 +109,11 @@ export const useInterpreter = () => {
         if (useTasks.getState().solutionXml === activeTaskXml.current) {
           useTasks
             .getState()
-            .completeTrial(payload.verdict.testId, payload.verdict, payload.execution);
+            .completeTrial(
+              payload.verdict.testId,
+              payload.verdict,
+              finishRunState(liveResult.current, payload.execution)
+            );
         }
         activeTestId.current = undefined;
         activeTaskXml.current = undefined;
@@ -90,7 +130,10 @@ export const useInterpreter = () => {
         return;
       }
       if (message.type === 'submission.completed') {
-        useTasks.getState().completeSubmission(message.payload as SubmissionResult);
+        if (useTasks.getState().solutionXml === activeTaskXml.current)
+          useTasks.getState().completeSubmission(message.payload as SubmissionResult);
+        else useTasks.getState().failOperation();
+        activeTaskXml.current = undefined;
         setActiveRunId(InterpreterClient.activeRunId);
         setOperationKind(InterpreterClient.activeKind);
         return;
@@ -100,7 +143,9 @@ export const useInterpreter = () => {
         message.type === 'run.cancelled' ||
         message.type === 'run.failed'
       ) {
-        setResult(message.payload as SimulationResult);
+        const nextResult = message.payload as SimulationResult;
+        liveResult.current = finishRunState(liveResult.current, nextResult);
+        setResult(liveResult.current);
         setActiveRunId(InterpreterClient.activeRunId);
         setOperationKind(InterpreterClient.activeKind);
       }
@@ -121,6 +166,7 @@ export const useInterpreter = () => {
   const start = useCallback((payload: RunStartPayload) => {
     setError(undefined);
     setResult(undefined);
+    liveResult.current = undefined;
     const runId = InterpreterClient.start(payload);
     if (runId) setActiveRunId(runId);
     if (runId) setOperationKind('run');
@@ -129,6 +175,8 @@ export const useInterpreter = () => {
 
   const startTest = useCallback((payload: TestStartPayload) => {
     setError(undefined);
+    setResult(undefined);
+    liveResult.current = undefined;
     const runId = InterpreterClient.startTest(payload);
     if (!runId) {
       setError('Интерпретатор ещё не готов к запуску');
@@ -143,11 +191,14 @@ export const useInterpreter = () => {
 
   const startSubmission = useCallback((payload: TaskStartPayload) => {
     setError(undefined);
+    setResult(undefined);
+    liveResult.current = undefined;
     const runId = InterpreterClient.startSubmission(payload);
     if (!runId) {
       setError('Интерпретатор ещё не готов к запуску');
       return;
     }
+    activeTaskXml.current = payload.xml;
     setActiveRunId(runId);
     setOperationKind('submission');
     useTasks.getState().startSubmission();
@@ -159,6 +210,7 @@ export const useInterpreter = () => {
 
   const clear = useCallback(() => {
     setResult(undefined);
+    liveResult.current = undefined;
     setError(undefined);
   }, []);
 
@@ -167,7 +219,13 @@ export const useInterpreter = () => {
     ready: status === ClientStatus.CONNECTED && InterpreterClient.ready,
     active: activeRunId !== undefined,
     operationKind,
+    activeTestId: activeTestId.current,
     result,
+    cyberBear: result?.result?.cyberBear,
+    supportsCyberBear,
+    supportsSession: InterpreterClient.capabilities.has('run.session'),
+    supportsTaskSession: InterpreterClient.capabilities.has('task.session'),
+    supportsTaskChecker: InterpreterClient.capabilities.has('task.python-checker.v1'),
     error,
     start,
     startTest,

@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 2,
+  "id": "bear-dice",
+  "version": 2,
+  "title": "Кубик",
+  "summary": "Замените улетевший игровой кубик световыми гранями Мишки.",
+  "descriptionFile": "bear-dice.md",
+  "platformId": "blg-mb-junior",
+  "tests": [
+    {
+      "id": "all-faces",
+      "title": "Разные броски",
+      "input": {
+        "durationMs": 18500,
+        "inputs": [],
+        "random": {
+          "values": [
+            0,
+            5,
+            1,
+            4,
+            2,
+            3
+          ]
+        }
+      },
+      "checks": [
+        {
+          "type": "python"
+        }
+      ]
+    },
+    {
+      "id": "repeats",
+      "title": "Одинаковые броски подряд",
+      "input": {
+        "durationMs": 9500,
+        "inputs": [],
+        "random": {
+          "values": [
+            5,
+            5,
+            0
+          ]
+        }
+      },
+      "checks": [
+        {
+          "type": "python"
+        }
+      ]
+    }
+  ],
+  "checker": {
+    "apiVersion": 1,
+    "file": "checker.py"
+  }
+}

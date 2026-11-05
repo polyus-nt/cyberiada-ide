@@ -201,12 +201,9 @@ describe('TaskMode Reader result', () => {
   it('shows the input string with an outline and without a filled background', () => {
     const html = renderReaderTaskMode();
 
-    expect(html).toContain(
-      'whitespace-pre-wrap rounded-lg border border-border-primary p-3 text-xs'
-    );
-    expect(html).not.toContain(
-      'whitespace-pre-wrap rounded-lg border border-border-primary bg-bg-secondary'
-    );
+    expect(html).toContain('h-auto max-h-[180px] w-full rounded-lg border border-border-primary');
+    expect(html).toContain('m-0 w-max min-w-full whitespace-pre text-xs');
+    expect(html).not.toContain('rounded-lg border border-border-primary bg-bg-secondary');
   });
 
   it('uses the same impulse list presentation as ReaderResult', () => {
@@ -232,4 +229,68 @@ describe('TaskMode Reader result', () => {
 
     expect(html).toContain('Импульсы ещё не получены.');
   });
+});
+
+describe('Task checker diagnostics', () => {
+  it('shows a checker error as a task error rather than a wrong student answer', () => {
+    const verdict = {
+      testId: 'first',
+      status: 'failed',
+      reasonCode: 'CHECKER_ERROR',
+      failedCheckType: 'python',
+      message: 'ValueError: broken checker',
+    };
+    taskState.testStates = { first: { phase: 'failed', verdict } };
+    taskState.detailedResult = undefined;
+    taskState.submissionResult = {
+      status: 'not-accepted',
+      passed: 0,
+      total: 1,
+      verdicts: [verdict],
+    };
+    const html = renderTaskMode();
+    expect(html).toContain('Ошибка задачи');
+    expect(html).toContain('Ошибка проверяющего модуля задачи: ValueError: broken checker');
+    expect(html).toContain('Проверка не завершена');
+    expect(html).not.toContain('Решение не принято');
+  });
+});
+
+it('shows both participants and their results for a joint task', () => {
+  const joint: CatalogTask = {
+    ...task,
+    platformId: 'reader-gardener',
+    tests: [
+      {
+        ...task.tests[0],
+        input: {
+          reader: { message: 'АБВВБА' },
+          gardener: task.tests[0].input as import('../../../../common/tasks').GardenerTaskInput,
+        },
+      },
+    ],
+  };
+  taskState.detailedResult = {
+    testId: 'first',
+    execution: {
+      status: 'success',
+      machines: {
+        reader: {
+          status: 'success',
+          result: { calledSignals: ['impulseA', 'impulseB'], signals: [] },
+        },
+        gardener: {
+          status: 'success',
+          result: { environment: { field: [[1]], position: { x: 0, y: 0 }, orientation: 'east' } },
+        },
+      },
+    },
+  };
+  const html = renderTaskMode(joint);
+  expect(html).toContain('АБВВБА');
+  expect(html).not.toContain('Строчник → Брокер → Садовник');
+  expect(html).toContain('Импульс А');
+  expect(html).toContain('Импульс Б');
+  expect(html).toContain('Фактическое поле');
+  expect(html).toContain('Итог');
 });

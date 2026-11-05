@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 2,
+  "id": "bear-light-music",
+  "version": 1,
+  "title": "Светомузыка",
+  "summary": "Устройте в невесомости праздник с непредсказуемыми цветами.",
+  "descriptionFile": "bear-light-music.md",
+  "platformId": "blg-mb-junior",
+  "tests": [
+    {
+      "id": "colors-17",
+      "title": "Независимые цвета — запуск 1",
+      "input": {
+        "durationMs": 6000,
+        "inputs": [],
+        "random": {
+          "seed": 17
+        }
+      },
+      "checks": [
+        {
+          "type": "python"
+        }
+      ]
+    },
+    {
+      "id": "colors-42",
+      "title": "Независимые цвета — запуск 2",
+      "input": {
+        "durationMs": 6000,
+        "inputs": [],
+        "random": {
+          "seed": 42
+        }
+      },
+      "checks": [
+        {
+          "type": "python"
+        }
+      ]
+    },
+    {
+      "id": "colors-105",
+      "title": "Независимые цвета — запуск 3",
+      "input": {
+        "durationMs": 6000,
+        "inputs": [],
+        "random": {
+          "seed": 105
+        }
+      },
+      "checks": [
+        {
+          "type": "python"
+        }
+      ]
+    }
+  ],
+  "checker": {
+    "apiVersion": 1,
+    "file": "checker.py"
+  }
+}

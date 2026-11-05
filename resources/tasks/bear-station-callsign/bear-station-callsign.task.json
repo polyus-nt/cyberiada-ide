@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 2,
+  "id": "bear-station-callsign",
+  "version": 2,
+  "title": "Позывной станции",
+  "summary": "Зажгите маяк «Орбиты-7»: две короткие вспышки и одна длинная.",
+  "descriptionFile": "bear-station-callsign.md",
+  "platformId": "blg-mb-junior",
+  "tests": [
+    {
+      "id": "two-cycles",
+      "title": "Два полных позывных",
+      "input": {
+        "durationMs": 12000,
+        "inputs": []
+      },
+      "checks": [
+        {
+          "type": "python"
+        }
+      ]
+    }
+  ],
+  "checker": {
+    "apiVersion": 1,
+    "file": "checker.py"
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 2,
+  "id": "bear-cargo-sorting",
+  "version": 1,
+  "title": "Сортировка грузов",
+  "summary": "Помогите грузчику выбрать полку по чётности номера контейнера.",
+  "descriptionFile": "bear-cargo-sorting.md",
+  "platformId": "blg-mb-junior",
+  "tests": [
+    {
+      "id": "example",
+      "title": "Чётные и нечётные номера",
+      "input": {
+        "durationMs": 5000,
+        "inputs": [
+          {
+            "channel": "ears",
+            "byte": 8,
+            "timeMs": 1000
+          },
+          {
+            "channel": "ears",
+            "byte": 13,
+            "timeMs": 2000
+          },
+          {
+            "channel": "ears",
+            "byte": 0,
+            "timeMs": 3000
+          },
+          {
+            "channel": "ears",
+            "byte": 255,
+            "timeMs": 4000
+          }
+        ]
+      },
+      "checks": [
+        {
+          "type": "python"
+        }
+      ]
+    },
+    {
+      "id": "boundaries",
+      "title": "Границы диапазона и повторы",
+      "input": {
+        "durationMs": 5000,
+        "inputs": [
+          {
+            "channel": "ears",
+            "byte": 254,
+            "timeMs": 500
+          },
+          {
+            "channel": "ir",
+            "byte": 1,
+            "timeMs": 750
+          },
+          {
+            "channel": "ears",
+            "byte": 1,
+            "timeMs": 1000
+          },
+          {
+            "channel": "ears",
+            "byte": 1,
+            "timeMs": 1100
+          },
+          {
+            "channel": "ears",
+            "byte": 2,
+            "timeMs": 2000
+          },
+          {
+            "channel": "ears",
+            "byte": 127,
+            "timeMs": 3000
+          },
+          {
+            "channel": "ears",
+            "byte": 128,
+            "timeMs": 4000
+          }
+        ]
+      },
+      "checks": [
+        {
+          "type": "python"
+        }
+      ]
+    }
+  ],
+  "checker": {
+    "apiVersion": 1,
+    "file": "checker.py"
+  }
+}

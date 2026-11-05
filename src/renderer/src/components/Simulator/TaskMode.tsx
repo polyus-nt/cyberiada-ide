@@ -1,5 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
+import { ScrollArea } from '@renderer/components/UI/ScrollArea';
+
+import { CyberBearTaskDetails } from './CyberBearTaskDetails';
 import { GardenerMarker, type GardenerFieldOrientation, gardenerCellStyles } from './GardenerField';
 import { ReaderImpulseList } from './ReaderResult';
 
@@ -7,10 +10,13 @@ import type {
   CatalogTask,
   GardenerTaskInput,
   ReaderTaskInput,
+  ReaderGardenerTaskInput,
   VerificationTest,
 } from '../../../../common/tasks';
 import { type TaskTestPhase, useTasks } from '../../store/useTasks';
 import type { SimulationResult } from '../../types/InterpreterTypes';
+
+import './jointTask.css';
 
 const phaseLabels = {
   idle: 'Не запускался',
@@ -25,12 +31,14 @@ const reasonLabels = {
   TIMEOUT: 'Превышено время выполнения',
   GARDENER_CRASH: 'Садовник столкнулся с препятствием',
   EXECUTION_ERROR: 'Ошибка выполнения',
+  CHECKER_ERROR: 'Ошибка проверяющего модуля задачи',
 };
 
 const checkLabels = {
   'gardener.field.equals': 'Итоговое поле не совпадает',
   'gardener.position.equals': 'Итоговая позиция не совпадает',
   'reader.impulses.equals': 'Последовательность выходных импульсов не совпадает',
+  python: 'Поведение не соответствует условию',
 };
 
 const phaseStyles: Record<TaskTestPhase, { dot: string; label: string; text: string }> = {
@@ -80,17 +88,19 @@ const FieldView: React.FC<{
   position?: GardenerTaskInput['position'];
   orientation?: GardenerFieldOrientation;
   hiddenCells?: boolean[][];
+  compact?: boolean;
 }> = ({
   input,
   field = input.field,
   position = input.position,
   orientation = input.orientation,
   hiddenCells,
+  compact = false,
 }) => (
-  <div className="overflow-auto rounded-lg bg-bg-secondary p-3">
+  <div className={`max-w-full overflow-auto rounded-lg bg-bg-secondary ${compact ? 'p-2' : 'p-3'}`}>
     <div
-      className="grid w-max gap-1.5"
-      style={{ gridTemplateColumns: `repeat(${input.width}, 2rem)` }}
+      className={`grid w-max ${compact ? 'gap-1' : 'gap-1.5'}`}
+      style={{ gridTemplateColumns: `repeat(${input.width}, ${compact ? '1.5rem' : '2rem'})` }}
     >
       {field.flatMap((row, y) =>
         row.map((cell, x) => {
@@ -99,7 +109,7 @@ const FieldView: React.FC<{
           return (
             <div
               key={`${x}-${y}`}
-              className={`relative size-8 rounded-lg ${
+              className={`relative ${compact ? 'size-6 rounded' : 'size-8 rounded-lg'} ${
                 hidden ? 'bg-bg-active' : gardenerCellStyles[cell]
               }`}
               title={hidden ? `Скрытая клетка (${x}, ${y})` : `(${x}, ${y})`}
@@ -129,15 +139,18 @@ const FieldView: React.FC<{
 const GardenerDetails: React.FC<{
   test: VerificationTest;
   execution?: SimulationResult;
-}> = ({ test, execution }) => {
+  compact?: boolean;
+}> = ({ test, execution, compact = false }) => {
   const input = test.input as GardenerTaskInput;
   const steps = execution?.steps ?? [];
   const [stepIndex, setStepIndex] = useState(Math.max(steps.length - 1, 0));
   const [playing, setPlaying] = useState(false);
+  const [showCurrentState, setShowCurrentState] = useState(true);
 
   useEffect(() => {
     setStepIndex(Math.max(steps.length - 1, 0));
     setPlaying(false);
+    setShowCurrentState(true);
   }, [execution, steps.length]);
 
   useEffect(() => {
@@ -156,28 +169,53 @@ const GardenerDetails: React.FC<{
 
   const step = steps[stepIndex];
   const environment = execution?.result?.environment;
-  const visible = step ?? environment;
+  const visible =
+    execution?.status === 'running' || showCurrentState ? environment ?? step : step ?? environment;
 
   const emptyField = input.field.map((row) => row.map(() => 0 as const));
 
   return (
-    <div className="grid min-h-0 flex-1 grid-cols-2 content-start items-start gap-4 overflow-y-auto bg-bg-primary p-4">
-      <section className="min-w-0 rounded-xl border border-border-primary bg-bg-primary p-4 shadow-sm">
+    <div
+      className={
+        compact
+          ? 'joint-task-fields grid min-w-0 grid-cols-2 items-start gap-3'
+          : 'grid min-h-0 flex-1 grid-cols-2 content-start items-start gap-4 overflow-y-auto bg-bg-primary p-4'
+      }
+    >
+      <section
+        className={`min-w-0 rounded-xl border border-border-primary bg-bg-primary ${
+          compact ? 'p-3' : 'p-4 shadow-sm'
+        }`}
+      >
         <div className="mb-4 flex h-4 items-center">
           <h3 className="h2-header">Входное поле</h3>
         </div>
         <div className="flex justify-center">
-          <FieldView input={input} hiddenCells={test.hiddenCells} />
+          <FieldView input={input} hiddenCells={test.hiddenCells} compact={compact} />
         </div>
       </section>
 
-      <section className="min-w-0 rounded-xl border border-border-primary bg-bg-primary p-4 shadow-sm">
-        <div className="mb-4 flex h-4 items-center justify-between gap-3">
+      <section
+        className={`min-w-0 rounded-xl border border-border-primary bg-bg-primary ${
+          compact ? 'p-3' : 'p-4 shadow-sm'
+        }`}
+      >
+        <div
+          className={
+            compact
+              ? 'mb-3 flex min-h-4 flex-wrap items-center justify-between gap-2'
+              : 'mb-4 flex h-4 items-center justify-between gap-3'
+          }
+        >
           <div>
             <h3 className="h2-header">Фактическое поле</h3>
           </div>
           <span className="shrink-0 rounded-full bg-bg-secondary px-1.5 text-[14px] leading-4 text-text-inactive">
-            {steps.length > 0
+            {execution?.status === 'running'
+              ? 'Выполняется'
+              : showCurrentState && execution
+              ? 'Итог'
+              : steps.length > 0
               ? `${stepIndex + 1} / ${steps.length}`
               : execution
               ? 'Итог'
@@ -189,6 +227,7 @@ const GardenerDetails: React.FC<{
           {visible ? (
             <FieldView
               input={input}
+              compact={compact}
               field={visible.field}
               position={visible.position}
               orientation={visible.orientation}
@@ -199,6 +238,7 @@ const GardenerDetails: React.FC<{
               <div className="flex w-full justify-center opacity-25">
                 <FieldView
                   input={input}
+                  compact={compact}
                   field={emptyField}
                   position={{ x: -1, y: -1 }}
                   hiddenCells={test.hiddenCells}
@@ -216,8 +256,10 @@ const GardenerDetails: React.FC<{
             <div className="mb-2 flex items-center justify-between gap-3">
               <button
                 type="button"
+                disabled={execution?.status === 'running'}
                 className="h-8 rounded-lg px-3 text-xs transition-colors enabled:bg-primary enabled:text-text-secondary disabled:cursor-not-allowed disabled:bg-bg-active disabled:text-text-disabled"
                 onClick={() => {
+                  setShowCurrentState(false);
                   if (stepIndex >= steps.length - 1) setStepIndex(0);
                   setPlaying((current) => !current);
                 }}
@@ -230,16 +272,28 @@ const GardenerDetails: React.FC<{
             </div>
             <input
               type="range"
+              disabled={execution?.status === 'running'}
               min={0}
               max={Math.max(steps.length - 1, 0)}
               value={stepIndex}
               aria-label="Шаг выполнения"
               onChange={(event) => {
                 setPlaying(false);
+                setShowCurrentState(false);
                 setStepIndex(Number(event.target.value));
               }}
               className="w-full accent-primary"
             />
+            <button
+              type="button"
+              className="mt-2 h-8 rounded-lg border border-border-primary px-3 text-xs"
+              onClick={() => {
+                setPlaying(false);
+                setShowCurrentState(true);
+              }}
+            >
+              Текущее состояние
+            </button>
           </div>
         )}
       </section>
@@ -250,30 +304,88 @@ const GardenerDetails: React.FC<{
 const ReaderDetails: React.FC<{
   test: VerificationTest;
   execution?: SimulationResult;
-}> = ({ test, execution }) => {
+  compact?: boolean;
+}> = ({ test, execution, compact = false }) => {
   const input = test.input as ReaderTaskInput;
   const impulses = execution?.result?.calledSignals ?? [];
   return (
-    <div className="grid gap-4 overflow-y-auto bg-bg-primary p-4 lg:grid-cols-2">
-      <section className="rounded-xl border border-border-primary bg-bg-primary p-4 shadow-sm">
+    <div
+      className={
+        compact
+          ? 'grid min-w-0 content-start gap-3'
+          : 'grid min-w-0 gap-4 overflow-y-auto bg-bg-primary p-4 lg:grid-cols-2'
+      }
+    >
+      <section
+        className={`min-w-0 rounded-xl border border-border-primary bg-bg-primary ${
+          compact ? 'p-3' : 'p-4 shadow-sm'
+        }`}
+      >
         <h3 className="h2-header mb-3">Входная строка</h3>
-        <pre className="whitespace-pre-wrap rounded-lg border border-border-primary p-3 text-xs">
-          {input.message}
-        </pre>
+        <ScrollArea
+          className="h-auto max-h-[180px] w-full rounded-lg border border-border-primary"
+          viewportClassName="px-3 py-[7px]"
+          tabIndex={0}
+          aria-label="Входная строка испытания"
+        >
+          <pre className="m-0 w-max min-w-full whitespace-pre text-xs">{input.message}</pre>
+        </ScrollArea>
       </section>
-      <section className="rounded-xl border border-border-primary bg-bg-primary p-4 shadow-sm">
+      <section
+        className={`min-w-0 rounded-xl border border-border-primary bg-bg-primary ${
+          compact ? 'p-3' : 'p-4 shadow-sm'
+        }`}
+      >
         <h3 className="h2-header mb-3">Выходные импульсы</h3>
-        <ReaderImpulseList impulses={impulses} emptyMessage="Импульсы ещё не получены." />
+        <ReaderImpulseList
+          impulses={impulses}
+          emptyMessage="Импульсы ещё не получены."
+          compact={compact}
+        />
       </section>
+    </div>
+  );
+};
+
+const ReaderGardenerDetails: React.FC<{ test: VerificationTest; execution?: SimulationResult }> = ({
+  test,
+  execution,
+}) => {
+  const input = test.input as ReaderGardenerTaskInput;
+  return (
+    <div className="joint-task-workspace flex min-h-0 flex-1 flex-col">
+      <ScrollArea
+        className="min-h-0 flex-1"
+        viewportClassName="px-3 py-[7px]"
+        contentClassName="joint-task-details"
+      >
+        <section className="min-w-0" aria-label="Строчник">
+          <ReaderDetails
+            compact
+            test={{ ...test, input: input.reader }}
+            execution={execution?.machines?.reader}
+          />
+        </section>
+        <section className="joint-task-gardener" aria-label="Садовник">
+          <GardenerDetails
+            compact
+            test={{ ...test, input: input.gardener }}
+            execution={execution?.machines?.gardener}
+          />
+        </section>
+      </ScrollArea>
     </div>
   );
 };
 
 interface TaskModeProps {
   task: CatalogTask;
+  machineSelector?: React.ReactNode;
   ready: boolean;
   active: boolean;
   operationKind?: 'run' | 'test' | 'submission';
+  liveTestId?: string;
+  liveExecution?: SimulationResult;
   error?: string;
   hasSolution: boolean;
   onRunTest: (testId: string) => void;
@@ -283,9 +395,12 @@ interface TaskModeProps {
 
 export const TaskMode: React.FC<TaskModeProps> = ({
   task,
+  machineSelector,
   ready,
   active,
   operationKind,
+  liveTestId,
+  liveExecution,
   error,
   hasSolution,
   onRunTest,
@@ -303,7 +418,9 @@ export const TaskMode: React.FC<TaskModeProps> = ({
   const selectedTest = task.tests.find((test) => test.id === selectedTestId) ?? task.tests[0];
   const selectedState = selectedTest ? testStates[selectedTest.id] : undefined;
   const detailedExecution =
-    detailedResult?.testId === selectedTest?.id
+    liveTestId === selectedTest?.id && liveExecution
+      ? liveExecution
+      : detailedResult?.testId === selectedTest?.id
       ? detailedResult.execution
       : selectedState?.source === 'submission'
       ? (selectedState.verdict?.outcome as SimulationResult | undefined)
@@ -311,11 +428,15 @@ export const TaskMode: React.FC<TaskModeProps> = ({
 
   const summary = useMemo(() => {
     if (!submissionResult) return undefined;
+    if (submissionResult.verdicts?.some((verdict) => verdict.reasonCode === 'CHECKER_ERROR'))
+      return 'Проверка не завершена: ошибка проверяющего модуля задачи';
     return submissionResult.status === 'accepted'
       ? `Решение принято: ${submissionResult.passed} из ${submissionResult.total}`
       : `Решение не принято: ${submissionResult.passed} из ${submissionResult.total}`;
   }, [submissionResult]);
   const solved = submissionResult?.status === 'accepted';
+  const isCyberBear = task.platformId === 'blg-mb-junior';
+  const isJointTask = task.platformId === 'reader-gardener';
   const selectedPhase = selectedState?.phase ?? 'idle';
   const selectedPhaseStyle = phaseStyles[selectedPhase];
   const completedTests = task.tests.filter((test) => {
@@ -323,18 +444,39 @@ export const TaskMode: React.FC<TaskModeProps> = ({
     return phase === 'passed' || phase === 'failed';
   }).length;
   const passedTests = task.tests.filter((test) => testStates[test.id]?.phase === 'passed').length;
-  const failedMessage = selectedState?.verdict?.reasonCode
-    ? selectedState.verdict.failedCheckType
-      ? checkLabels[selectedState.verdict.failedCheckType]
-      : reasonLabels[selectedState.verdict.reasonCode]
+  const checkerError = selectedState?.verdict?.reasonCode === 'CHECKER_ERROR';
+  const failedMessage = checkerError
+    ? `${reasonLabels.CHECKER_ERROR}${
+        selectedState?.verdict?.message ? ': ' + selectedState.verdict.message : ''
+      }`
+    : selectedState?.verdict?.status === 'failed'
+    ? selectedState.verdict.message ||
+      (selectedState.verdict.reasonCode
+        ? selectedState.verdict.failedCheckType
+          ? checkLabels[selectedState.verdict.failedCheckType]
+          : reasonLabels[selectedState.verdict.reasonCode]
+        : undefined)
     : undefined;
 
   return (
-    <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_304px] overflow-hidden rounded-lg border border-border-primary">
-      <div className="flex min-h-0 flex-col">
-        <div className="border-b border-border-primary px-5 py-4">
+    <div
+      className={`grid min-h-0 min-w-0 flex-1 ${
+        isCyberBear || isJointTask
+          ? 'grid-cols-[minmax(0,1fr)_256px]'
+          : 'grid-cols-[minmax(0,1fr)_304px]'
+      } overflow-hidden rounded-lg border border-border-primary`}
+    >
+      <div className="flex min-h-0 min-w-0 flex-col">
+        <div
+          className={`shrink-0 border-b border-border-primary ${
+            isCyberBear ? 'px-3 py-3' : 'px-5 py-4'
+          }`}
+        >
           <div className="flex items-center justify-between gap-4">
-            <div className="min-w-0">
+            {machineSelector && (
+              <div className="w-[180px] max-w-[38%] shrink-0">{machineSelector}</div>
+            )}
+            <div className="min-w-0 flex-1">
               <p className="text-xs text-text-inactive">
                 Тест {Math.max(task.tests.findIndex((test) => test.id === selectedTest?.id) + 1, 1)}{' '}
                 из {task.tests.length}
@@ -345,26 +487,34 @@ export const TaskMode: React.FC<TaskModeProps> = ({
               className={`flex shrink-0 items-center gap-2 px-3 py-1.5 text-xs ${selectedPhaseStyle.text}`}
             >
               <span className={`size-2 rounded-full ${selectedPhaseStyle.dot}`} />
-              {selectedPhaseStyle.label}
+              {checkerError ? 'Ошибка задачи' : selectedPhaseStyle.label}
             </div>
           </div>
-          {failedMessage && (
+          {failedMessage && !isCyberBear && (
             <div className="border-error/30 bg-error/5 mt-3 flex items-center gap-2 rounded-lg border px-3 py-2 text-xs text-error">
               <AlertIcon className="size-4 shrink-0" />
               <p>{failedMessage}</p>
             </div>
           )}
         </div>
+        {selectedTest && task.platformId === 'reader-gardener' && (
+          <ReaderGardenerDetails test={selectedTest} execution={detailedExecution} />
+        )}
         {selectedTest && task.platformId === 'junior-gardener' && (
           <GardenerDetails test={selectedTest} execution={detailedExecution} />
+        )}
+        {selectedTest && task.platformId === 'blg-mb-junior' && (
+          <CyberBearTaskDetails test={selectedTest} execution={detailedExecution} />
         )}
         {selectedTest && task.platformId === 'junior-reader' && (
           <ReaderDetails test={selectedTest} execution={detailedExecution} />
         )}
       </div>
 
-      <aside className="flex min-h-0 flex-col border-l border-border-primary bg-bg-primary">
-        <div className="border-b border-border-primary px-4 py-4">
+      <aside className="flex min-h-0 min-w-0 flex-col border-l border-border-primary bg-bg-primary">
+        <div
+          className={`shrink-0 border-b border-border-primary ${isCyberBear ? 'p-3' : 'px-4 py-4'}`}
+        >
           <h2 className="h2-header truncate">{task.title}</h2>
           <div className="mt-2 flex items-center justify-between gap-3 text-xs text-text-inactive">
             <span>Проверочные тесты</span>
@@ -381,7 +531,12 @@ export const TaskMode: React.FC<TaskModeProps> = ({
             />
           </div>
         </div>
-        <div className="min-h-0 flex-1 space-y-2 overflow-y-auto p-3">
+        <ScrollArea
+          className="min-h-0 flex-1"
+          viewportClassName="px-3 py-[7px]"
+          contentClassName="space-y-2"
+          horizontalScroll={false}
+        >
           {task.tests.map((test) => {
             const state = testStates[test.id] ?? { phase: 'idle' as const };
             const phaseStyle = phaseStyles[state.phase];
@@ -389,7 +544,9 @@ export const TaskMode: React.FC<TaskModeProps> = ({
             return (
               <div
                 key={test.id}
-                className={`flex items-center gap-2 rounded-lg border p-2 transition-colors ${
+                className={`flex items-center gap-2 rounded-lg border ${
+                  isCyberBear ? 'p-1.5' : 'p-2'
+                } transition-colors ${
                   isSelected
                     ? 'border-primary bg-bg-primary shadow-sm'
                     : 'border-transparent hover:border-border-primary hover:bg-bg-hover'
@@ -398,12 +555,32 @@ export const TaskMode: React.FC<TaskModeProps> = ({
                 <button
                   type="button"
                   className="min-w-0 flex-1 rounded-md px-1 py-0.5 text-left"
+                  title={`${test.title} — ${
+                    state.verdict?.reasonCode === 'CHECKER_ERROR'
+                      ? 'Ошибка задачи'
+                      : phaseStyle.label
+                  }`}
                   onClick={() => setSelectedTestId(test.id)}
                 >
-                  <div className="truncate text-xs font-medium">{test.title}</div>
-                  <div className={`mt-1 flex items-center gap-1.5 text-xs ${phaseStyle.text}`}>
-                    <span className={`size-2 rounded-full ${phaseStyle.dot}`} />
-                    {phaseStyle.label}
+                  {isCyberBear ? (
+                    <div className="flex min-w-0 items-center gap-2">
+                      <span className={`size-2 shrink-0 rounded-full ${phaseStyle.dot}`} />
+                      <div className="truncate text-xs font-medium">{test.title}</div>
+                    </div>
+                  ) : (
+                    <div className="truncate text-xs font-medium">{test.title}</div>
+                  )}
+                  <div
+                    className={
+                      isCyberBear
+                        ? 'sr-only'
+                        : `mt-1 flex items-center gap-1.5 text-xs ${phaseStyle.text}`
+                    }
+                  >
+                    {!isCyberBear && <span className={`size-2 rounded-full ${phaseStyle.dot}`} />}
+                    {state.verdict?.reasonCode === 'CHECKER_ERROR'
+                      ? 'Ошибка задачи'
+                      : phaseStyle.label}
                   </div>
                 </button>
                 <button
@@ -422,8 +599,14 @@ export const TaskMode: React.FC<TaskModeProps> = ({
               </div>
             );
           })}
-        </div>
-        <div className="border-t border-border-primary bg-bg-primary p-3">
+          {isCyberBear && failedMessage && (
+            <div className="border-error/30 bg-error/5 flex gap-2 rounded-lg border px-3 py-2 text-xs text-error">
+              <AlertIcon className="mt-0.5 size-4 shrink-0" />
+              <p>{failedMessage}</p>
+            </div>
+          )}
+        </ScrollArea>
+        <div className="shrink-0 border-t border-border-primary bg-bg-primary p-3">
           {summary && (
             <div
               className={`mb-3 rounded-lg px-3 py-2 text-xs font-medium ${

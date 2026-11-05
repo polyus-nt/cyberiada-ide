@@ -102,7 +102,6 @@
       "singletone": false,
       "variables": {}
     },
-
     "Eyes": {
       "name": "Глаза",
       "description": "Подберите КиберМишке понравившийся цвет глаз, управляя светодиодами.",
@@ -208,7 +207,6 @@
       "importFiles": ["Eyes.hpp"],
       "singletone": false
     },
-
     "EarsBytes": {
       "name": "Уши-байты",
       "description": "КиберМишка настроил уши на принятие сообщений.",
@@ -226,8 +224,8 @@
           "img": "tjc-ms/lastData.svg",
           "type": "uint8_t",
           "description": "Последний полученный байт."
-        }   
-         },
+        }
+      },
       "methods": {},
       "buildFiles": ["Microphone.hpp"],
       "importFiles": ["Microphone.hpp"],
@@ -250,14 +248,13 @@
           "img": "tjc-ms/lastData.svg",
           "type": "uint8_t",
           "description": "Последний полученный байт."
-        }   
-         },
+        }
+      },
       "methods": {},
       "buildFiles": ["Microphone.hpp"],
       "importFiles": ["Microphone.hpp"],
       "singletone": false
     },
-
     "Matrix": {
       "name": "Матрица светодиодов",
       "description": "Расширенные настройки для матрицы. Рисуйте и задавайте яркость каждому светодиоду.",
@@ -336,7 +333,6 @@
       "importFiles": ["Matrix.hpp"],
       "singletone": false
     },
-
     "Counter": {
       "name": "Счетчик",
       "description": "Сделайте считалку для КиберМишки, прибавляя числа к счетчику.",
@@ -398,7 +394,6 @@
       "importFiles": ["Counter.h"],
       "singletone": false
     },
-
     "CalcInt": {
       "name": "Калькулятор",
       "description": "Совершайте арифметические и двоичные операции над целыми числами.",
@@ -580,6 +575,151 @@
       "constructorParameters": {},
       "buildFiles": ["CalcInt.hpp", "OverflowHelpers.hpp"],
       "importFiles": ["CalcInt.hpp"],
+      "singletone": false
+    },
+    "MatrixPicture": {
+      "name": "Матрица-картинка",
+      "description": "Коллекция готовых картинок. Выберите и КиберМишка сам нарисует ее на своем животе.",
+      "img": "blg-mb/matrixPicture.svg",
+      "signals": {},
+      "constructorParameters": {},
+      "variables": {},
+      "methods": {
+        "draw": {
+          "img": "blg-mb/drawPicture.svg",
+          "parameters": [
+            {
+              "name": "Рисунок",
+              "type": [
+                "heart",
+                "smile",
+                "sadness",
+                "cross",
+                "note",
+                "rhombus",
+                "square",
+                "question",
+                "triangle",
+                "empty",
+                "filled"
+              ],
+              "valueAlias": [
+                "Сердце",
+                "Улыбка",
+                "Грусть",
+                "Крест",
+                "Нота",
+                "Ромб",
+                "Квадрат",
+                "Вопрос",
+                "Треугольник",
+                "Пустая матрица",
+                "Заполненная матрица"
+              ],
+              "description": "Рисунок, который будет изображен на матрице."
+            }
+          ],
+          "description": "Изобразить картинку на матрице.",
+          "alias": "Установить картинку"
+        }
+      },
+      "singletone": false
+    },
+    "Random": {
+      "name": "Генератор случайностей",
+      "description": "КиберМишка подскажет, что выпало на игральном кубике, сгенерировав случайное число.",
+      "img": "common/random.svg",
+      "constructorParameters": {},
+      "signals": {},
+      "methods": {
+        "setSeed": {
+          "alias": "Установить затравку",
+          "img": "common/randomSeed.svg",
+          "parameters": [
+            {
+              "name": "Затравка",
+              "description": "Число, лежащее в основе генератора чисел и определяющее все последующие генерации.",
+              "type": "unsigned long"
+            }
+          ],
+          "description": "Продвинутая функция для отладки. Вручную устанавливает затравку для генератора случайностей, чтобы он выдавал одинаковые последовательности значений при каждом запуске программы. Для нормальной работы этого не требуется, и затравка будет взята из встроенного генератора истинных случайных чисел."
+        },
+        "doRandom": {
+          "alias": "Сгенерировать",
+          "img": "common/randomRoll.svg",
+          "description": "Сгенерировать случайное число"
+        },
+        "doRangeRandom": {
+          "alias": "Сгенерировать в диапазоне",
+          "img": "common/randomRange.svg",
+          "parameters": [
+            {
+              "name": "Начало",
+              "type": "signed long long",
+              "description": "Начало диапазона [начало; конец). Начало в диапазон входит."
+            },
+            {
+              "name": "Конец",
+              "type": "signed long long",
+              "description": "Конец диапазона [начало; конец). Конец в диапазон не входит."
+            }
+          ],
+          "description": "Сгенерировать случайное число в заданном диапазоне [начало; конец). Конец в диапазон не входит."
+        }
+      },
+      "singletone": false,
+      "variables": {
+        "value": {
+          "alias": "Целое число",
+          "img": "common/valueSigned.svg",
+          "type": "signed long",
+          "description": "Сгенерированное целое число со знаком."
+        },
+        "uValue": {
+          "alias": "Натуральное число",
+          "img": "common/valueUnsigned.svg",
+          "type": "unsigned long",
+          "description": "Сгенерированное беззнаковое целое число."
+        }
+      }
+    },
+    "Timer": {
+      "name": "Таймер",
+      "description": "Однократно вызывает событие после заданного интервала. Для нового срабатывания запустите таймер снова.",
+      "img": "arduino/timer.svg",
+      "signals": {
+        "timeout": {
+          "alias": "Время вышло",
+          "img": "arduino/timeout.svg",
+          "description": "Заданный интервал истёк. После этого таймер остановлен."
+        }
+      },
+      "methods": {
+        "start": {
+          "alias": "Запустить",
+          "img": "arduino/start.svg",
+          "description": "Запустить однократный отсчёт. Повторный запуск заменяет интервал и начинает отсчёт заново.",
+          "parameters": [
+            {
+              "name": "Интервал",
+              "type": "int",
+              "description": "Время до срабатывания в миллисекундах: целое число больше нуля."
+            }
+          ]
+        },
+        "stop": {
+          "alias": "Остановить",
+          "img": "arduino/timer-stop.svg",
+          "description": "Отменить текущий отсчёт. Уже наступившее событие остаётся в очереди."
+        },
+        "reset": {
+          "alias": "Сбросить отсчёт",
+          "img": "arduino/reset.svg",
+          "description": "Начать текущий интервал заново, если таймер работает. Остановленный таймер не запускается."
+        }
+      },
+      "variables": {},
+      "constructorParameters": {},
       "singletone": false
     }
   }

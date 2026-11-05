@@ -6,7 +6,8 @@ import { resolve } from 'path';
 
 export default defineConfig({
   main: {
-    plugins: [externalizeDepsPlugin()],
+    // The Markdown parser is ESM; bundle it into the CommonJS main process.
+    plugins: [externalizeDepsPlugin({ exclude: ['mdast-util-from-markdown'] })],
   },
   preload: {
     plugins: [externalizeDepsPlugin()],

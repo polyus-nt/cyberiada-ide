@@ -21,29 +21,71 @@ export type ReaderParameters = {
   message: string;
 };
 
-export type RunStartPayload = {
-  xml: string;
-  machineId: string;
-  mode: SimulationMode;
-  timeoutSeconds?: number;
-  parameters: GardenerParameters | ReaderParameters;
+export type CyberBearChannel = 'ir' | 'ears';
+export type CyberBearInput = { channel: CyberBearChannel; byte: number; timeMs: number };
+export type CyberBearParameters = { inputs: CyberBearInput[] };
+export type RGBK = [number, number, number, number];
+export type CyberBearState = {
+  eyes: { right: RGBK; left: RGBK };
+  matrix: number[][];
 };
 
-export type TaskStartPayload = {
+export type SessionStatePayload = {
+  platform: 'session';
+  machines: Record<string, RunStatePayload>;
+};
+
+export type RunStatePayload =
+  | SessionStatePayload
+  | { platform: 'blg-mb-junior'; cyberBear: CyberBearState }
+  | {
+      platform: 'junior-gardener';
+      environment: GardenerStep;
+      steps: GardenerStep[];
+      historyTruncated: boolean;
+    }
+  | { platform: 'junior-reader'; impulses: string[] };
+
+export type MachineParameters = GardenerParameters | ReaderParameters | CyberBearParameters;
+
+export type RunStartPayload = {
   xml: string;
-  machineId: string;
+  mode: SimulationMode;
+  live?: boolean;
+  timeoutSeconds?: number;
+} & (
+  | { machineId: string; parameters: MachineParameters; machines?: never }
+  | {
+      machines: { machineId: string; parameters: MachineParameters }[];
+      machineId?: never;
+      parameters?: never;
+    }
+);
+
+export type TaskStartPayload = {
+  live?: boolean;
+  xml: string;
+  machineId?: string;
+  machines?: { reader: string; gardener: string };
   task: ProgrammingTask;
 };
 
 export type TestStartPayload = TaskStartPayload & { testId: string };
 
-export type TestFailureCode = 'CHECK_FAILED' | 'TIMEOUT' | 'GARDENER_CRASH' | 'EXECUTION_ERROR';
+export type TestFailureCode =
+  | 'CHECK_FAILED'
+  | 'TIMEOUT'
+  | 'GARDENER_CRASH'
+  | 'EXECUTION_ERROR'
+  | 'CHECKER_ERROR';
 
 export type TestVerdict = {
   testId: string;
   status: 'passed' | 'failed';
   reasonCode?: TestFailureCode;
   failedCheckType?: VerificationCheck['type'];
+  message?: string;
+  timeMs?: number;
   outcome: Omit<SimulationResult, 'steps'>;
 };
 
@@ -58,6 +100,7 @@ export type InterpreterRequestType = 'run.start' | 'run.cancel' | 'test.start' |
 export type InterpreterResponseType =
   | 'connection.ready'
   | 'run.started'
+  | 'run.state'
   | 'run.cancel.accepted'
   | 'run.completed'
   | 'run.cancelled'
@@ -87,8 +130,9 @@ export type GardenerStep = {
 };
 
 export type SimulationResult = {
-  status: 'success' | 'timeout' | 'cancelled' | 'crash' | 'error';
+  status: 'running' | 'success' | 'timeout' | 'cancelled' | 'crash' | 'error';
   message?: string;
+  machines?: Record<string, SimulationResult>;
   steps?: GardenerStep[];
   warnings?: string[];
   result?: {
@@ -96,6 +140,8 @@ export type SimulationResult = {
     calledSignals: string[];
     timeout?: boolean;
     environment?: GardenerStep;
+    cyberBear?: CyberBearState;
+    trace?: { timeMs: number; kind: string; state?: CyberBearState; [key: string]: unknown }[];
   };
   code?: string;
 };

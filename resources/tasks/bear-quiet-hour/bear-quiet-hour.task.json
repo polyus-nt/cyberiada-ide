@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 2,
+  "id": "bear-quiet-hour",
+  "version": 1,
+  "title": "Тихий час",
+  "summary": "Чередуйте дежурство у пульта и короткий отдых.",
+  "descriptionFile": "bear-quiet-hour.md",
+  "platformId": "blg-mb-junior",
+  "tests": [
+    {
+      "id": "duty-rest",
+      "title": "Дежурство, отдых и пробуждение",
+      "input": {
+        "durationMs": 32000,
+        "inputs": []
+      },
+      "checks": [
+        {
+          "type": "python"
+        }
+      ]
+    }
+  ],
+  "checker": {
+    "apiVersion": 1,
+    "file": "checker.py"
+  }
+}

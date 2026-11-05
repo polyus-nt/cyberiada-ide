@@ -20,10 +20,11 @@ describe('simulator state machine selection', () => {
     arduino: machine('arduino-uno', 'Arduino'),
     reader: machine('junior-reader', 'Reader'),
     gardener: machine('junior-gardener', 'Gardener'),
+    bear: machine('blg-mb-junior', 'КиберМишка'),
   });
 
   it('includes only supported state machines', () => {
-    expect(options.map(({ id }) => id)).toEqual(['reader', 'gardener']);
+    expect(options.map(({ id }) => id)).toEqual(['reader', 'gardener', 'bear']);
   });
 
   it('prefers the supported active state machine', () => {

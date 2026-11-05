@@ -341,6 +341,47 @@
       },
       "constructorParameters": {},
       "singletone": false
+    },
+    "Receiver": {
+      "name": "Приёмник",
+      "description": "Принимает импульсы от Строчника в совместной симуляции.",
+      "img": "junior/impulse.svg",
+      "signals": {
+        "impulse_received": {
+          "alias": "Получен импульс",
+          "description": "Получен очередной импульс от Строчника.",
+          "img": "junior/impulse.svg"
+        }
+      },
+      "methods": {},
+      "variables": {
+        "received_impulse": {
+          "alias": "Полученный импульс",
+          "type": "unsigned long",
+          "description": "Значение полученного импульса; до первого импульса равно нулю.",
+          "img": "junior/impulse.svg"
+        },
+        "impulseA": {
+          "alias": "Импульс А",
+          "type": "unsigned long",
+          "description": "Значение для сравнения с полученным импульсом.",
+          "img": "junior/a.svg"
+        },
+        "impulseB": {
+          "alias": "Импульс Б",
+          "type": "unsigned long",
+          "description": "Значение для сравнения с полученным импульсом.",
+          "img": "junior/b.svg"
+        },
+        "impulseC": {
+          "alias": "Импульс В",
+          "type": "unsigned long",
+          "description": "Значение для сравнения с полученным импульсом.",
+          "img": "junior/c.svg"
+        }
+      },
+      "constructorParameters": {},
+      "singletone": false
     }
   }
 }
