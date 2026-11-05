@@ -250,11 +250,8 @@ export const TaskBook: React.FC<TaskBookProps> = ({
                     <div className="flex items-center gap-2">
                       <PlatformIcon
                         className={twMerge(
-                          'size-5 shrink-0',
-                          isHighlighted &&
-                            (task.platformId === 'junior-gardener'
-                              ? '[&_circle]:stroke-icon-hover [&_path]:fill-icon-hover'
-                              : '[&_path]:fill-icon-hover [&_path]:stroke-icon-hover')
+                          'size-5 shrink-0 text-icon-secondary',
+                          isHighlighted && 'text-icon-hover'
                         )}
                       />
                       <div className="min-w-0 flex-1">
