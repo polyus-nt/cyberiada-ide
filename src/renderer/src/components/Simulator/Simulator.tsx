@@ -30,7 +30,11 @@ import {
   resizeField,
   setFieldCell,
 } from './model';
-import { countUnicodeCharacters, limitUnicodeCharacters } from './readerModel';
+import {
+  countUnicodeCharacters,
+  getReaderImpulseLabel,
+  limitUnicodeCharacters,
+} from './readerModel';
 import { ReaderResult } from './ReaderResult';
 import {
   SimulationMachineOption,
@@ -42,6 +46,8 @@ import { SimulationMode, SimulationRunPanel } from './SimulationRunPanel';
 import { TaskMode } from './TaskMode';
 import { taskForProtocol } from './taskProtocol';
 import { useInterpreter } from './useInterpreter';
+
+import './jointSimulator.css';
 
 interface SimulatorProps {
   initialSmId?: string;
@@ -309,9 +315,44 @@ const GardenerSimulator: React.FC<GardenerRuntimeProps> = ({
     }
   };
 
+  const historyControls = (
+    <>
+      <fieldset disabled={active}>
+        <ExecutionHistory
+          steps={steps}
+          historyIndex={historyIndex}
+          isPlaying={isPlaying}
+          isTruncated={result?.warnings?.includes('EXECUTION_HISTORY_TRUNCATED') ?? false}
+          onSelectStep={selectHistoryStep}
+          onTogglePlayback={togglePlayback}
+        />
+      </fieldset>
+      {result?.result?.environment && (
+        <button
+          type="button"
+          className="mt-3 h-8 w-full rounded-lg border border-border-primary px-3 text-xs"
+          onClick={() => {
+            setIsPlaying(false);
+            setReviewingHistory(false);
+            setShowCurrentState(true);
+          }}
+        >
+          Текущее состояние
+        </button>
+      )}
+    </>
+  );
+  const FieldSettingsContainer = hideRunPanel ? 'details' : 'section';
+
   return (
-    <div className="grid min-h-0 flex-1 grid-cols-[205px_minmax(398px,1fr)_228px] gap-x-6 gap-y-5 overflow-auto text-sm max-[983px]:grid-cols-[205px_minmax(398px,1fr)] max-[729px]:grid-cols-1">
-      <div className="min-w-0">
+    <div
+      className={
+        hideRunPanel
+          ? 'joint-gardener grid min-h-0 gap-4 text-sm'
+          : 'grid min-h-0 flex-1 grid-cols-[205px_minmax(398px,1fr)_228px] gap-x-6 gap-y-5 overflow-auto text-sm max-[983px]:grid-cols-[205px_minmax(398px,1fr)] max-[729px]:grid-cols-1'
+      }
+    >
+      <div className={twMerge('min-w-0', hideRunPanel && 'hidden')}>
         {!hideRunPanel && (
           <SimulationRunPanel
             machineSelector={machineSelector}
@@ -344,37 +385,17 @@ const GardenerSimulator: React.FC<GardenerRuntimeProps> = ({
           />
         )}
 
-        <fieldset disabled={active}>
-          <ExecutionHistory
-            steps={steps}
-            historyIndex={historyIndex}
-            isPlaying={isPlaying}
-            isTruncated={result?.warnings?.includes('EXECUTION_HISTORY_TRUNCATED') ?? false}
-            onSelectStep={selectHistoryStep}
-            onTogglePlayback={togglePlayback}
-          />
-        </fieldset>
-        {result?.result?.environment && (
-          <button
-            type="button"
-            className="mt-3 h-8 w-full rounded-lg border border-border-primary px-3 text-xs"
-            onClick={() => {
-              setIsPlaying(false);
-              setReviewingHistory(false);
-              setShowCurrentState(true);
-            }}
-          >
-            Текущее состояние
-          </button>
-        )}
+        {!hideRunPanel && historyControls}
       </div>
 
       <section className="min-w-0">
         <h2 className="h2-header mb-2">Поле</h2>
         <div className="overflow-auto rounded-lg bg-bg-secondary p-3">
           <div
-            className="grid w-max gap-1.5"
-            style={{ gridTemplateColumns: `repeat(${width}, 2rem)` }}
+            className={twMerge('grid w-max gap-1.5', hideRunPanel && 'gap-1')}
+            style={{
+              gridTemplateColumns: `repeat(${width}, ${hideRunPanel ? '1.75rem' : '2rem'})`,
+            }}
           >
             {displayedField.flatMap((row, y) =>
               row.map((cell, x) => {
@@ -386,7 +407,7 @@ const GardenerSimulator: React.FC<GardenerRuntimeProps> = ({
                     title={`${x}, ${y}: ${cellLabels[cell]}`}
                     aria-label={`Клетка ${x}, ${y}: ${cellLabels[cell]}`}
                     className={twMerge(
-                      'relative size-8 rounded-lg',
+                      hideRunPanel ? 'relative size-7 rounded-lg' : 'relative size-8 rounded-lg',
                       gardenerCellStyles[cell],
                       reviewingHistory && 'cursor-default'
                     )}
@@ -407,18 +428,38 @@ const GardenerSimulator: React.FC<GardenerRuntimeProps> = ({
             )}
           </div>
         </div>
-        <p className="mt-6 max-w-[398px] text-xs leading-4 text-text-inactive">
+        <p
+          className={twMerge(
+            'mt-6 max-w-[398px] text-xs leading-4 text-text-inactive',
+            hideRunPanel && 'mt-3'
+          )}
+        >
           {active
             ? 'Выполняется. Поле обновляется в реальном времени.'
             : reviewingHistory
             ? `Просмотр шага ${historyIndex + 1} из ${steps.length}.`
+            : hideRunPanel
+            ? 'Выберите инструмент и нажмите на клетку.'
             : 'Выберите инструмент и нажмите на клетку. Кнопка “Старт” переносит начальную позицию.'}
         </p>
       </section>
 
-      <fieldset disabled={active} className="min-w-0 max-[983px]:col-span-2 max-[729px]:col-span-1">
-        <section>
-          <h2 className="h2-header mb-2">Настройки поля</h2>
+      <fieldset
+        disabled={active}
+        className={
+          hideRunPanel
+            ? 'joint-gardener-settings min-w-0'
+            : 'min-w-0 max-[983px]:col-span-2 max-[729px]:col-span-1'
+        }
+      >
+        <FieldSettingsContainer>
+          {hideRunPanel ? (
+            <summary className="cursor-pointer rounded-lg border border-border-primary p-3 text-xs font-medium">
+              Настройки · {width} × {height}
+            </summary>
+          ) : (
+            <h2 className="h2-header mb-2">Настройки поля</h2>
+          )}
           <div className="rounded-lg border border-border-primary p-3">
             <div className="grid grid-cols-2 gap-3">
               <FieldInput label="Ширина" htmlFor="simulator-field-width">
@@ -494,7 +535,7 @@ const GardenerSimulator: React.FC<GardenerRuntimeProps> = ({
               </FieldInput>
             </div>
           </div>
-        </section>
+        </FieldSettingsContainer>
 
         <section className="mt-6">
           <h2 className="h2-header mb-2">Инструменты</h2>
@@ -506,6 +547,7 @@ const GardenerSimulator: React.FC<GardenerRuntimeProps> = ({
                   type="button"
                   className={twMerge(
                     'flex h-8 items-center gap-2 rounded-lg border border-border-primary px-3 text-left text-xs transition-colors hover:bg-bg-hover',
+                    hideRunPanel && 'gap-1 px-1.5',
                     selectedTool === tool.value && 'bg-bg-active'
                   )}
                   onClick={() => {
@@ -534,6 +576,14 @@ const GardenerSimulator: React.FC<GardenerRuntimeProps> = ({
             </button>
           </div>
         </section>
+        {hideRunPanel && (
+          <details className="mt-4 rounded-lg border border-border-primary p-3 [&_section]:mt-3">
+            <summary className="cursor-pointer text-xs font-medium">
+              История · {steps.length} шагов
+            </summary>
+            {historyControls}
+          </details>
+        )}
       </fieldset>
     </div>
   );
@@ -634,7 +684,7 @@ export const JointSimulator: React.FC<JointSimulatorProps> = ({
   const gardenerId = gardeners.some(({ id }) => id === selectedGardenerId)
     ? selectedGardenerId
     : gardeners[0]?.id ?? '';
-  const [tab, setTab] = useState('reader');
+  const [tab, setTab] = useState<'reader' | 'gardener'>('reader');
   const [message, setMessage] = useState('');
   const [parameters, setParameters] = useState<GardenerParameters>();
   const [mode, setMode] = useState<SimulationMode>('finite');
@@ -666,41 +716,71 @@ export const JointSimulator: React.FC<JointSimulatorProps> = ({
     : interpreter.error;
   const readerResult = interpreter.result?.machines?.[readerId];
   const gardenerResult = interpreter.result?.machines?.[gardenerId];
+  const impulses = readerResult?.result?.calledSignals ?? [];
+  const tabs = [
+    { id: 'reader', label: 'Строчник' },
+    { id: 'gardener', label: 'Садовник' },
+  ] as const;
+
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-auto">
-      <div className="flex flex-wrap gap-4">
-        {[
-          { label: 'Строчник', value: readerId, options: readers, select: setReaderId },
-          { label: 'Садовник', value: gardenerId, options: gardeners, select: setGardenerId },
-        ].map((selector) => (
-          <label key={selector.label} className="grid gap-2 text-xs">
-            {selector.label}
-            <select
-              aria-label={selector.label}
-              className={controlClassName}
-              value={selector.value}
-              disabled={interpreter.active}
-              onChange={(event) => {
-                selector.select(event.target.value);
-                interpreter.clear();
-              }}
-            >
-              <option value="" disabled>
-                Выберите машину
-              </option>
-              {selector.options.map(({ id, machine }) => (
-                <option key={id} value={id}>
-                  {machine.name || id}
-                </option>
-              ))}
-            </select>
-          </label>
-        ))}
-      </div>
-      <div className="flex flex-wrap gap-6">
-        <div className="w-52 shrink-0">
+    <div className="joint-simulator min-h-0 min-w-0 flex-1">
+      <div className="joint-simulator-layout">
+        <aside
+          aria-label="Настройки совместной симуляции"
+          className="joint-simulator-controls min-h-0 min-w-0 overflow-y-auto"
+        >
           <SimulationRunPanel
-            machineSelector={null}
+            machineSelector={
+              <section aria-label="Машины совместной симуляции">
+                <h2 className="h2-header mb-3">Машины состояний</h2>
+                <div className="grid gap-4 rounded-lg border border-border-primary p-3">
+                  {[
+                    {
+                      id: 'reader',
+                      label: 'Строчник',
+                      value: readerId,
+                      options: readers,
+                      select: setReaderId,
+                    },
+                    {
+                      id: 'gardener',
+                      label: 'Садовник',
+                      value: gardenerId,
+                      options: gardeners,
+                      select: setGardenerId,
+                    },
+                  ].map((selector) => (
+                    <FieldInput
+                      key={selector.id}
+                      label={selector.label}
+                      htmlFor={`joint-machine-${selector.id}`}
+                    >
+                      <ParameterSelect
+                        inputId={`joint-machine-${selector.id}`}
+                        className="w-full"
+                        isSearchable={false}
+                        isClearable={false}
+                        isDisabled={interpreter.active || selector.options.length === 0}
+                        placeholder="Выберите машину"
+                        noOptionsMessage={() => 'Нет поддерживаемых машин'}
+                        options={selector.options.map(({ id, machine }) => ({
+                          value: id,
+                          label: machine.name || id,
+                        }))}
+                        value={selector.options
+                          .map(({ id, machine }) => ({ value: id, label: machine.name || id }))
+                          .find((option) => option.value === selector.value)}
+                        onChange={(option) => {
+                          if (!option) return;
+                          selector.select(option.value);
+                          interpreter.clear();
+                        }}
+                      />
+                    </FieldInput>
+                  ))}
+                </div>
+              </section>
+            }
             mode={mode}
             timeout={timeout}
             ready={
@@ -724,66 +804,142 @@ export const JointSimulator: React.FC<JointSimulatorProps> = ({
               }
             }}
           />
-        </div>
-        <section className="min-w-52 flex-1" aria-label="Общая лента импульсов">
-          <h2 className="h2-header mb-2">Строчник → Садовник · Импульсы</h2>
-          <ReaderResult result={readerResult} stale={stale} active={interpreter.active} />
-        </section>
-      </div>
-      <div
-        role="tablist"
-        aria-label="Участники симуляции"
-        className="flex gap-2 border-b border-border-primary"
-      >
-        {['reader', 'gardener'].map((id) => (
-          <button
-            key={id}
-            type="button"
-            role="tab"
-            id={`joint-tab-${id}`}
-            aria-selected={tab === id}
-            aria-controls={`joint-panel-${id}`}
-            className={twMerge('rounded-t-lg px-4 py-2 text-sm', tab === id && 'bg-bg-active')}
-            onClick={() => setTab(id)}
+        </aside>
+
+        <section
+          aria-label="Рабочая область совместной симуляции"
+          className="joint-simulator-workspace flex min-h-0 min-w-0 flex-col overflow-hidden rounded-lg border border-border-primary"
+        >
+          <div
+            role="tablist"
+            aria-label="Участники симуляции"
+            className="flex shrink-0 gap-1 border-b border-border-primary bg-bg-secondary px-3 pt-2"
           >
-            {id === 'reader' ? 'Строчник' : 'Садовник'}
-          </button>
-        ))}
-      </div>
-      <div
-        role="tabpanel"
-        id="joint-panel-reader"
-        aria-labelledby="joint-tab-reader"
-        hidden={tab !== 'reader'}
-      >
-        <FieldInput label="Входная строка" htmlFor="joint-reader-message">
-          <textarea
-            id="joint-reader-message"
-            className={twMerge(controlClassName, 'h-32 py-2')}
-            value={message}
-            disabled={interpreter.active}
-            onChange={(event) => setMessage(limitUnicodeCharacters(event.target.value, 10_000))}
-          />
-        </FieldInput>
-      </div>
-      <div
-        role="tabpanel"
-        id="joint-panel-gardener"
-        aria-labelledby="joint-tab-gardener"
-        hidden={tab !== 'gardener'}
-      >
-        <GardenerSimulator
-          key={gardenerId}
-          machineSelector={null}
-          hideRunPanel
-          onParametersChange={setParameters}
-          ready={false}
-          active={interpreter.active}
-          result={gardenerResult}
-          stale={stale}
-          onStart={() => undefined}
-          onCancel={interpreter.cancel}
-        />
+            {tabs.map(({ id, label }) => (
+              <button
+                key={id}
+                type="button"
+                role="tab"
+                id={`joint-tab-${id}`}
+                aria-selected={tab === id}
+                aria-controls={`joint-panel-${id}`}
+                tabIndex={tab === id ? 0 : -1}
+                className={twMerge(
+                  'border-b-2 border-transparent px-4 py-2 text-sm text-text-inactive transition-colors hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary',
+                  tab === id && 'border-primary font-medium text-primary'
+                )}
+                onClick={() => setTab(id)}
+                onKeyDown={(event) => {
+                  if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+                  event.preventDefault();
+                  const nextTab =
+                    event.key === 'Home'
+                      ? 'reader'
+                      : event.key === 'End'
+                      ? 'gardener'
+                      : tab === 'reader'
+                      ? 'gardener'
+                      : 'reader';
+                  setTab(nextTab);
+                  document.getElementById(`joint-tab-${nextTab}`)?.focus();
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          <div className="joint-simulator-panels min-h-0 flex-1 overflow-y-auto p-4">
+            <div
+              role="tabpanel"
+              id="joint-panel-reader"
+              aria-labelledby="joint-tab-reader"
+              tabIndex={0}
+              className="h-full min-h-52"
+              hidden={tab !== 'reader'}
+            >
+              <div className="flex h-full flex-col gap-3">
+                <label className="h2-header" htmlFor="joint-reader-message">
+                  Входная строка
+                </label>
+                <textarea
+                  id="joint-reader-message"
+                  className={twMerge(
+                    controlClassName,
+                    'min-h-32 flex-1 resize-none py-3 leading-6 disabled:cursor-not-allowed disabled:text-text-inactive'
+                  )}
+                  placeholder="Введите строку для Строчника"
+                  value={message}
+                  disabled={interpreter.active}
+                  onChange={(event) =>
+                    setMessage(limitUnicodeCharacters(event.target.value, 10_000))
+                  }
+                />
+                <div className="flex justify-between gap-3 text-xs text-text-inactive">
+                  <span>До 10 000 символов</span>
+                  <span>{countUnicodeCharacters(message)} / 10 000</span>
+                </div>
+              </div>
+            </div>
+            <div
+              role="tabpanel"
+              id="joint-panel-gardener"
+              aria-labelledby="joint-tab-gardener"
+              tabIndex={0}
+              hidden={tab !== 'gardener'}
+            >
+              <GardenerSimulator
+                key={gardenerId}
+                machineSelector={null}
+                hideRunPanel
+                onParametersChange={setParameters}
+                ready={false}
+                active={interpreter.active}
+                result={gardenerResult}
+                stale={stale}
+                onStart={() => undefined}
+                onCancel={interpreter.cancel}
+              />
+            </div>
+          </div>
+
+          <section
+            className="flex min-h-[66px] shrink-0 items-center gap-4 border-t border-border-primary px-4 py-3"
+            aria-label="Общая лента импульсов"
+            title="Строчник → Садовник"
+          >
+            <h2 className="h2-header flex shrink-0 items-center gap-2">
+              Импульсы
+              <span className="rounded bg-bg-secondary px-2 py-0.5 text-xs font-normal text-text-inactive">
+                {impulses.length}
+              </span>
+            </h2>
+            {impulses.length > 0 ? (
+              <ol className="flex min-w-0 flex-1 gap-2 overflow-x-auto" tabIndex={0}>
+                {impulses.map((impulse, index) => (
+                  <li
+                    key={`${index}:${impulse}`}
+                    className="flex shrink-0 items-center gap-2 rounded-lg border border-border-primary px-3 py-1.5 text-xs"
+                  >
+                    <span className="text-text-inactive">{index + 1}</span>
+                    <span>{getReaderImpulseLabel(impulse)}</span>
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <p className="text-xs text-text-inactive">
+                {interpreter.active
+                  ? 'Ожидание выходных импульсов…'
+                  : 'Строчник → Садовник · Ожидание запуска'}
+              </p>
+            )}
+            {readerResult?.message && (
+              <p className="min-w-0 max-w-[40%] truncate text-xs" title={readerResult.message}>
+                {readerResult.message}
+              </p>
+            )}
+          </section>
+        </section>
       </div>
     </div>
   );
@@ -888,8 +1044,8 @@ export const Simulator: React.FC<SimulatorProps> = ({
     onAutoSizeChange?.(
       activeTask?.platformId === 'junior-gardener' ||
         (!activeTask &&
-          (joint ||
-            machine?.platform === 'junior-reader' ||
+          !joint &&
+          (machine?.platform === 'junior-reader' ||
             machine?.platform === 'junior-gardener' ||
             machine?.platform === 'blg-mb-junior'))
     );

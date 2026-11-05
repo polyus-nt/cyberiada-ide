@@ -23,11 +23,7 @@ vi.mock('@renderer/store/useTasks', () => ({ getActiveTask: vi.fn(), useTasks: v
 vi.mock('./useInterpreter', () => ({ useInterpreter: vi.fn() }));
 vi.mock('./TaskMode', () => ({ TaskMode: () => null }));
 vi.mock('./CyberBearSimulator', () => ({ CyberBearSimulator: () => null }));
-vi.mock('./ReaderResult', () => ({
-  ReaderResult: ({ result }: { result?: { result?: { calledSignals: string[] } } }) => (
-    <div>{result?.result?.calledSignals.join(',')}</div>
-  ),
-}));
+vi.mock('./ReaderResult', () => ({ ReaderResult: () => null }));
 
 import type { SimulationMachineOption } from './selection';
 import { JointSimulator } from './Simulator';
@@ -36,6 +32,7 @@ import type { useInterpreter } from './useInterpreter';
 it('keeps input and field configuration across tabs and switches tabs during the common run', () => {
   vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
   const container = document.createElement('div');
+  document.body.append(container);
   const root = createRoot(container);
   const onStart = vi.fn();
   const cancel = vi.fn();
@@ -108,11 +105,17 @@ it('keeps input and field configuration across tabs and switches tabs during the
     act(() => button('Садовник').click());
     expect(container.querySelector('#joint-panel-gardener')?.hasAttribute('hidden')).toBe(false);
     expect(container.querySelector('[aria-label="Общая лента импульсов"]')?.textContent).toContain(
-      'impulseA'
+      'Импульс А'
     );
+    act(() => Simulate.keyDown(button('Садовник'), { key: 'ArrowLeft' }));
+    expect(button('Строчник').getAttribute('aria-selected')).toBe('true');
+    expect(document.activeElement).toBe(button('Строчник'));
+    expect(input.value).toBe('АБВ');
+    expect(width.value).toBe('4');
     expect(cancel).not.toHaveBeenCalled();
   } finally {
     act(() => root.unmount());
+    container.remove();
     vi.unstubAllGlobals();
   }
 });

@@ -51,6 +51,7 @@ it('switches simulator modes and participant tabs without submitting the modal f
   document.body.append(container);
   const root = createRoot(container);
   const submit = vi.fn((event: React.FormEvent) => event.preventDefault());
+  const onAutoSizeChange = vi.fn();
   const click = (text: string) => {
     const button = Array.from(container.querySelectorAll('button')).find(
       (element) => element.textContent === text
@@ -63,11 +64,12 @@ it('switches simulator modes and participant tabs without submitting the modal f
     act(() =>
       root.render(
         <form onSubmit={submit}>
-          <Simulator initialSmId="reader" />
+          <Simulator initialSmId="reader" onAutoSizeChange={onAutoSizeChange} />
         </form>
       )
     );
     click('Строчник + Садовник');
+    expect(onAutoSizeChange).toHaveBeenLastCalledWith(false);
     expect(container.querySelector('[role="tablist"]')).not.toBeNull();
     expect(submit).not.toHaveBeenCalled();
     click('Садовник');
