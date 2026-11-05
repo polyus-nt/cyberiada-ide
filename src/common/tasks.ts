@@ -356,17 +356,30 @@ const parseCyberBearTest = (
   };
 };
 
-export const parseProgrammingTask = (value: unknown): ProgrammingTask => {
+export const parseProgrammingTask = (
+  value: unknown,
+  loadDescription?: (file: string) => string
+): ProgrammingTask => {
   const task = assertObject(value, 'task');
   assertExactKeys(
     task,
-    ['schemaVersion', 'id', 'version', 'title', 'summary', 'description', 'platformId', 'tests'],
-    ['codeWord', 'checker'],
+    ['schemaVersion', 'id', 'version', 'title', 'summary', 'platformId', 'tests'],
+    ['description', 'descriptionFile', 'codeWord', 'checker'],
     'task'
   );
   if (task.schemaVersion !== 1 && task.schemaVersion !== 2) {
     throw new Error(`schemaVersion ${String(task.schemaVersion)} не поддерживается`);
   }
+  if ((task.description === undefined) === (task.descriptionFile === undefined)) {
+    throw new Error('Укажите ровно одно поле: task.description или task.descriptionFile');
+  }
+  let description = task.description;
+  if (task.descriptionFile !== undefined) {
+    const file = assertString(task.descriptionFile, 'task.descriptionFile', 1000);
+    if (!loadDescription) throw new Error('Для task.descriptionFile требуется загрузчик Markdown');
+    description = loadDescription(file);
+  }
+  const parsedDescription = assertString(description, 'task.description', 100_000);
   if (
     !['junior-gardener', 'junior-reader', 'blg-mb-junior', 'reader-gardener'].includes(
       task.platformId as string
@@ -465,7 +478,7 @@ export const parseProgrammingTask = (value: unknown): ProgrammingTask => {
     version: assertInteger(task.version, 'task.version', 1, Number.MAX_SAFE_INTEGER),
     title: assertString(task.title, 'task.title', 200),
     summary: assertString(task.summary, 'task.summary', 1000),
-    description: assertString(task.description, 'task.description', 100_000),
+    description: parsedDescription,
     ...(task.codeWord === undefined
       ? {}
       : { codeWord: assertString(task.codeWord, 'task.codeWord', 100) }),

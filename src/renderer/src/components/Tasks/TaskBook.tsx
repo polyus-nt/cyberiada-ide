@@ -15,90 +15,13 @@ import { useSimulatorWindow } from '@renderer/store/useSimulatorWindow';
 import { getActiveTask, useTasks } from '@renderer/store/useTasks';
 
 import { filterTasks } from './filterTasks';
-
-import type { CatalogTask } from '../../../../common/tasks';
+import { MarkdownDescription } from './MarkdownDescription';
 
 const platformIcons = {
   'reader-gardener': ReaderGardenerIcon,
   'junior-gardener': GardenerIcon,
   'junior-reader': ReaderIcon,
   'blg-mb-junior': CyberBearIcon,
-};
-
-const inlineText = (text: string): React.ReactNode[] =>
-  text
-    .split(/(\*\*[^*]+\*\*)/g)
-    .map((part, index) =>
-      part.startsWith('**') && part.endsWith('**') ? (
-        <strong key={index}>{part.slice(2, -2)}</strong>
-      ) : (
-        part
-      )
-    );
-
-const MarkdownDescription: React.FC<{
-  task: CatalogTask;
-  assetRootUrl: string;
-}> = ({ task, assetRootUrl }) => {
-  const imagePattern = /^!\[([^\]]*)\]\(([^)]+)\)$/;
-  const descriptionLines = task.description.split('\n');
-  const firstContentLineIndex = descriptionLines.findIndex((line) => line.trim());
-  const hasTitle = descriptionLines[firstContentLineIndex]?.trim().startsWith('# ');
-  const bodyStartIndex = hasTitle
-    ? descriptionLines.findIndex(
-        (line, index) => index > firstContentLineIndex && line.trim() !== ''
-      )
-    : 0;
-  const bodyLines = hasTitle
-    ? descriptionLines.slice(bodyStartIndex === -1 ? descriptionLines.length : bodyStartIndex)
-    : descriptionLines;
-
-  return (
-    <div className="space-y-2 text-xs leading-5">
-      {bodyLines.map((rawLine, index) => {
-        const line = rawLine.trim();
-        const image = line.match(imagePattern);
-        if (image) {
-          try {
-            const source = new URL(image[2], task.assetBaseUrl).toString();
-            if (!assetRootUrl || !source.startsWith(assetRootUrl)) {
-              return (
-                <p key={index} className="text-error">
-                  Недоступное изображение: {image[2]}
-                </p>
-              );
-            }
-            return <img key={index} src={source} alt={image[1]} className="max-w-full rounded" />;
-          } catch {
-            return (
-              <p key={index} className="text-error">
-                Некорректное изображение: {image[2]}
-              </p>
-            );
-          }
-        }
-        if (line.startsWith('# '))
-          return (
-            <h2 key={index} className="h2-header">
-              {inlineText(line.slice(2))}
-            </h2>
-          );
-        if (line.startsWith('## '))
-          return (
-            <h3 key={index} className="h2-header">
-              {inlineText(line.slice(3))}
-            </h3>
-          );
-        if (line.startsWith('- '))
-          return (
-            <div key={index} className="ml-4 before:mr-2 before:content-['•']">
-              {inlineText(line.slice(2))}
-            </div>
-          );
-        return line ? <p key={index}>{inlineText(line)}</p> : <div key={index} className="h-1" />;
-      })}
-    </div>
-  );
 };
 
 interface TaskBookProps {
@@ -281,7 +204,11 @@ export const TaskBook: React.FC<TaskBookProps> = ({
                     <div className="min-h-0 overflow-hidden">
                       <div className="mx-3 border-t border-border-primary" />
                       <div className="p-3">
-                        <MarkdownDescription task={task} assetRootUrl={catalog.assetRootUrl} />
+                        <MarkdownDescription
+                          task={task}
+                          assetRootUrl={catalog.assetRootUrl}
+                          isExpanded={isSelected}
+                        />
                         <div className="mt-4 flex gap-2">
                           <button
                             type="button"

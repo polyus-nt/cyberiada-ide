@@ -1,0 +1,104 @@
+.task-markdown {
+  overflow-wrap: anywhere;
+}
+
+.task-markdown > * + *,
+.task-markdown blockquote > * + *,
+.task-markdown li > * + * {
+  margin-top: 0.75rem;
+}
+
+.task-markdown h1,
+.task-markdown h2,
+.task-markdown h3,
+.task-markdown h4,
+.task-markdown h5,
+.task-markdown h6 {
+  margin-top: 1rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.task-markdown h1 {
+  font-size: 1.125rem;
+}
+.task-markdown h2 {
+  font-size: 1rem;
+}
+.task-markdown h3 {
+  font-size: 0.9375rem;
+}
+.task-markdown > :first-child {
+  margin-top: 0;
+}
+
+.task-markdown ul,
+.task-markdown ol {
+  padding-left: 1.5rem;
+}
+
+.task-markdown ul {
+  list-style: disc;
+}
+.task-markdown ol {
+  list-style: decimal;
+}
+.task-markdown li + li {
+  margin-top: 0.25rem;
+}
+.task-markdown li > ul,
+.task-markdown li > ol {
+  margin-top: 0.25rem;
+}
+.task-markdown .contains-task-list {
+  list-style: none;
+}
+.task-markdown input[type='checkbox'] {
+  margin-right: 0.375rem;
+}
+
+.task-markdown a {
+  @apply text-primary underline;
+}
+.task-markdown a:focus-visible {
+  outline: 1px solid currentColor;
+}
+.task-markdown img {
+  @apply my-2 max-w-full rounded;
+}
+.task-markdown blockquote {
+  @apply border-l-2 border-border-primary pl-3 text-text-inactive;
+}
+.task-markdown hr {
+  @apply my-3 border-border-primary;
+}
+
+.task-markdown code {
+  @apply rounded bg-bg-secondary px-1 py-0.5;
+  font-family: 'Fira Mono', monospace;
+  font-size: 0.875em;
+}
+
+.task-markdown pre {
+  @apply overflow-x-auto rounded bg-bg-secondary p-3;
+  overflow-wrap: normal;
+}
+
+.task-markdown pre code {
+  padding: 0;
+  background: none;
+  font-size: inherit;
+  white-space: pre;
+}
+
+.task-markdown table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.task-markdown th,
+.task-markdown td {
+  @apply border border-border-primary px-2 py-1;
+}
+.task-markdown th {
+  @apply bg-bg-secondary font-semibold;
+}

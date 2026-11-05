@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { createRoot } from 'react-dom/client';
 import { act, Simulate } from 'react-dom/test-utils';
 import { expect, it, vi } from 'vitest';
