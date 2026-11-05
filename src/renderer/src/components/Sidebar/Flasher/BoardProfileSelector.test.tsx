@@ -10,6 +10,9 @@ import { useFlasher } from '@renderer/store/useFlasher';
 
 import { BoardProfileSelector } from './BoardProfileSelector';
 
+vi.mock('@renderer/hooks', () => ({ usePortalZIndex: () => 400 }));
+vi.mock('@renderer/assets/icons/arrow-down.svg', () => ({ ReactComponent: () => null }));
+
 const unknown = new UnknownDevice({
   deviceID: 'serial:COM5',
   name: 'Неизвестная плата',
@@ -26,6 +29,13 @@ describe('BoardProfileSelector', () => {
   };
   beforeEach(() => {
     vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        observe() {}
+        disconnect() {}
+      }
+    );
     host = document.createElement('div');
     document.body.append(host);
     root = createRoot(host);
@@ -38,16 +48,25 @@ describe('BoardProfileSelector', () => {
     vi.unstubAllGlobals();
   });
 
+  const chooseProfile = (label: string) => {
+    act(() => {
+      element<HTMLInputElement>('[role="combobox"]').dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true })
+      );
+    });
+    const option = [...document.querySelectorAll<HTMLElement>('[role="option"]')].find(
+      (option) => option.textContent === label
+    );
+    if (!option) throw new Error(`Profile not found: ${label}`);
+    act(() => option.click());
+  };
+
   it('assigns Uno to the selected port and shows server errors', async () => {
     const assign = vi
       .spyOn(Flasher, 'setBoardProfile')
       .mockRejectedValue(new Error('Закройте монитор порта'));
     act(() => root.render(createElement(BoardProfileSelector, { device: unknown })));
-    const select = element<HTMLSelectElement>('select');
-    act(() => {
-      select.value = '2';
-      select.dispatchEvent(new Event('change', { bubbles: true }));
-    });
+    chooseProfile('Arduino Uno');
     await act(async () => element<HTMLButtonElement>('button').click());
     expect(assign).toHaveBeenCalledWith('serial:COM5', 2);
     expect(host.querySelector('[role="alert"]')?.textContent).toBe('Закройте монитор порта');
@@ -62,12 +81,9 @@ describe('BoardProfileSelector', () => {
       manuallyAssigned: true,
     } as unknown as ArduinoDevice);
     act(() => root.render(createElement(BoardProfileSelector, { device: arduino })));
-    const select = element<HTMLSelectElement>('select');
-    expect(select.value).toBe('2');
-    act(() => {
-      select.value = '';
-      select.dispatchEvent(new Event('change', { bubbles: true }));
-    });
+    expect(host.textContent).toContain('Arduino Uno');
+    expect(element<HTMLButtonElement>('button').disabled).toBe(true);
+    chooseProfile('Автоопределение');
     await act(async () => element<HTMLButtonElement>('button').click());
     expect(assign).toHaveBeenCalledWith('serial:COM5', null);
   });
@@ -75,7 +91,7 @@ describe('BoardProfileSelector', () => {
   it('disables assignment while flashing', () => {
     useFlasher.setState({ isFlashing: true });
     act(() => root.render(createElement(BoardProfileSelector, { device: unknown })));
-    expect(element<HTMLSelectElement>('select').disabled).toBe(true);
+    expect(element<HTMLInputElement>('[role="combobox"]').disabled).toBe(true);
     expect(element<HTMLButtonElement>('button').disabled).toBe(true);
   });
 });

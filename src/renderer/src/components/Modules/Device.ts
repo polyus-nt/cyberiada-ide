@@ -73,7 +73,11 @@ export class ArduinoDevice extends Device {
   }
 
   displayName(): string {
-    return `${this.name} (${this.portName})`;
+    return `${this.portName} (${this.name})`;
+  }
+
+  displaySerialName(): string {
+    return this.displayName();
   }
 
   getSerialPort(): string | null {
@@ -123,7 +127,11 @@ export class UnknownDevice extends Device {
   }
 
   displayName(): string {
-    return `${this.name} (${this.portName})`;
+    return this.portName;
+  }
+
+  displaySerialName(): string {
+    return this.displayName();
   }
 
   getSerialPort(): string {

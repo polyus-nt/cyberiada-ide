@@ -23,6 +23,9 @@ vi.mock('@renderer/components/UI', () => ({
   ),
 }));
 
+vi.mock('@renderer/hooks', () => ({ usePortalZIndex: () => 400 }));
+vi.mock('@renderer/assets/icons/arrow-down.svg', () => ({ ReactComponent: () => null }));
+
 const unknown = new UnknownDevice({
   deviceID: 'serial:COM5',
   name: 'Неизвестная плата',
@@ -81,7 +84,9 @@ describe('DeviceList unknown ports', () => {
   it('shows the unknown port and requires a board before adding it for flashing', () => {
     renderList();
     choosePort();
-    expect(host.textContent).toContain('Неизвестная плата (COM5)');
+    expect(host.querySelector('[aria-pressed="true"]')?.textContent).toBe('COM5');
+    expect(host.textContent).not.toContain('Неизвестная плата');
+    expect(unknown.displaySerialName()).toBe('COM5');
     expect(submit().disabled).toBe(true);
     const assigned = new ArduinoDevice({
       ...unknown,
@@ -101,6 +106,8 @@ describe('DeviceList unknown ports', () => {
       )
     );
     expect(submit().disabled).toBe(false);
+    expect(host.querySelector('[aria-pressed="true"]')?.textContent).toBe('COM5 (Arduino Uno)');
+    expect(assigned.displaySerialName()).toBe('COM5 (Arduino Uno)');
   });
 
   it('lets the serial monitor select a port without assigning a board', () => {

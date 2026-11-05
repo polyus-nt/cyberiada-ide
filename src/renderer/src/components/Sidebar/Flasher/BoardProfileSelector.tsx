@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useId, useState } from 'react';
 
 import { ArduinoDevice, Device, UnknownDevice } from '@renderer/components/Modules/Device';
 import { Flasher } from '@renderer/components/Modules/Flasher';
+import { ParameterSelect } from '@renderer/components/UI/ParameterSelect';
 import { useFlasher } from '@renderer/store/useFlasher';
 
 export const BoardProfileSelector: React.FC<{ device: Device }> = ({ device }) => {
+  const selectID = useId();
   const profiles = useFlasher((state) => state.boardProfiles);
   const isFlashing = useFlasher((state) => state.isFlashing);
   const [profileID, setProfileID] = useState('');
@@ -21,7 +23,9 @@ export const BoardProfileSelector: React.FC<{ device: Device }> = ({ device }) =
   if (!(device instanceof ArduinoDevice) && !(device instanceof UnknownDevice)) return null;
   if (profiles.length === 0) {
     return device instanceof UnknownDevice ? (
-      <p>Обновите загрузчик для ручного выбора платы.</p>
+      <p className="border-t border-border-primary pt-4 text-text-inactive">
+        Обновите загрузчик для ручного выбора платы.
+      </p>
     ) : null;
   }
 
@@ -37,37 +41,51 @@ export const BoardProfileSelector: React.FC<{ device: Device }> = ({ device }) =
     }
   };
 
+  const options = [
+    { value: '', label: device instanceof UnknownDevice ? 'Выберите плату' : 'Автоопределение' },
+    ...profiles.map((profile) => ({ value: String(profile.id), label: profile.name })),
+  ];
+  const unchanged = profileID === (device.manuallyAssigned ? String(device.profileID) : '');
+
   return (
-    <div className="mt-3 space-y-2 text-left">
-      <label className="block">
-        Плата
-        <select
-          aria-label="Плата"
-          className="mt-1 w-full rounded border border-border-primary bg-bg-control p-1"
-          value={profileID}
-          disabled={pending || isFlashing}
-          onChange={(event) => setProfileID(event.target.value)}
-        >
-          <option value="">Автоопределение</option>
-          {profiles.map((profile) => (
-            <option key={profile.id} value={profile.id}>
-              {profile.name}
-            </option>
-          ))}
-        </select>
+    <section className="space-y-3 border-t border-border-primary pt-4">
+      <label htmlFor={selectID} className="block font-medium">
+        Плата для прошивки
       </label>
-      <button
-        type="button"
-        className="text-primary disabled:opacity-60"
-        disabled={pending || isFlashing || (profileID === '' && !device.manuallyAssigned)}
-        onClick={apply}
-      >
-        {pending ? 'Применение…' : 'Применить'}
-      </button>
-      <p className="text-sm text-text-inactive">
-        Выбор действует до отключения устройства или перезапуска загрузчика.
+      <ParameterSelect
+        inputId={selectID}
+        indicatorClassName="text-text-primary"
+        classNames={{
+          menu: () => '!bg-bg-primary [&_[role=listbox]]:!bg-bg-primary',
+        }}
+        aria-label="Плата для прошивки"
+        options={options}
+        value={options.find((option) => option.value === profileID) ?? options[0]}
+        isDisabled={pending || isFlashing}
+        onChange={(option) => setProfileID(option?.value ?? '')}
+        noOptionsMessage={() => 'Нет подходящих плат'}
+      />
+      <div className="flex justify-end">
+        <button
+          type="button"
+          className="btn-secondary"
+          disabled={pending || isFlashing || unchanged}
+          onClick={apply}
+        >
+          {pending ? 'Применение…' : 'Применить'}
+        </button>
+      </div>
+      <p className="text-text-inactive">
+        {device instanceof UnknownDevice
+          ? 'Для прошивки выберите модель платы и нажмите «Применить».'
+          : 'Можно выбрать другую модель или вернуть автоопределение.'}{' '}
+        Выбор сохранится до отключения устройства или перезапуска загрузчика.
       </p>
-      {error && <p role="alert">{error}</p>}
-    </div>
+      {error && (
+        <p role="alert" className="break-words text-error">
+          {error}
+        </p>
+      )}
+    </section>
   );
 };
