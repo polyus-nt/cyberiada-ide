@@ -313,7 +313,7 @@ const ReaderDetails: React.FC<{
       className={
         compact
           ? 'grid min-w-0 content-start gap-3'
-          : 'grid gap-4 overflow-y-auto bg-bg-primary p-4 lg:grid-cols-2'
+          : 'grid min-w-0 gap-4 overflow-y-auto bg-bg-primary p-4 lg:grid-cols-2'
       }
     >
       <section
@@ -322,9 +322,14 @@ const ReaderDetails: React.FC<{
         }`}
       >
         <h3 className="h2-header mb-3">Входная строка</h3>
-        <pre className="whitespace-pre-wrap rounded-lg border border-border-primary p-3 text-xs">
-          {input.message}
-        </pre>
+        <ScrollArea
+          className="h-auto max-h-[180px] w-full rounded-lg border border-border-primary"
+          viewportClassName="px-3 py-[7px]"
+          tabIndex={0}
+          aria-label="Входная строка испытания"
+        >
+          <pre className="m-0 w-max min-w-full whitespace-pre text-xs">{input.message}</pre>
+        </ScrollArea>
       </section>
       <section
         className={`min-w-0 rounded-xl border border-border-primary bg-bg-primary ${
