@@ -8,6 +8,7 @@ import type {
   CatalogTask,
   GardenerTaskInput,
   ReaderTaskInput,
+  ReaderGardenerTaskInput,
   VerificationTest,
 } from '../../../../common/tasks';
 import { type TaskTestPhase, useTasks } from '../../store/useTasks';
@@ -293,6 +294,26 @@ const ReaderDetails: React.FC<{
   );
 };
 
+const ReaderGardenerDetails: React.FC<{ test: VerificationTest; execution?: SimulationResult }> = ({
+  test,
+  execution,
+}) => {
+  const input = test.input as ReaderGardenerTaskInput;
+  return (
+    <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+      <p className="px-4 pt-4 text-xs text-text-inactive">Строчник → Брокер → Садовник</p>
+      <ReaderDetails
+        test={{ ...test, input: input.reader }}
+        execution={execution?.machines?.reader}
+      />
+      <GardenerDetails
+        test={{ ...test, input: input.gardener }}
+        execution={execution?.machines?.gardener}
+      />
+    </div>
+  );
+};
+
 interface TaskModeProps {
   task: CatalogTask;
   machineSelector?: React.ReactNode;
@@ -409,6 +430,9 @@ export const TaskMode: React.FC<TaskModeProps> = ({
             </div>
           )}
         </div>
+        {selectedTest && task.platformId === 'reader-gardener' && (
+          <ReaderGardenerDetails test={selectedTest} execution={detailedExecution} />
+        )}
         {selectedTest && task.platformId === 'junior-gardener' && (
           <GardenerDetails test={selectedTest} execution={detailedExecution} />
         )}

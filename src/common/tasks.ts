@@ -3,7 +3,11 @@ export const DEFAULT_TEST_TIMEOUT_SECONDS = 10;
 export const MAX_TASK_TESTS = 32;
 export const MAX_TASK_TOTAL_TIMEOUT_SECONDS = 300;
 
-export type TaskPlatformId = 'junior-gardener' | 'junior-reader' | 'blg-mb-junior';
+export type TaskPlatformId =
+  | 'junior-gardener'
+  | 'junior-reader'
+  | 'blg-mb-junior'
+  | 'reader-gardener';
 export type GardenerCell = -1 | 0 | 1 | 2 | 3;
 export type GardenerOrientation = 'NORTH' | 'EAST' | 'SOUTH' | 'WEST';
 
@@ -17,6 +21,11 @@ export interface GardenerTaskInput {
 
 export interface ReaderTaskInput {
   message: string;
+}
+
+export interface ReaderGardenerTaskInput {
+  reader: ReaderTaskInput;
+  gardener: GardenerTaskInput;
 }
 
 export interface CyberBearTaskInput {
@@ -56,7 +65,7 @@ export interface VerificationTest {
   id: string;
   title: string;
   timeoutSeconds?: number;
-  input: GardenerTaskInput | ReaderTaskInput | CyberBearTaskInput;
+  input: GardenerTaskInput | ReaderTaskInput | CyberBearTaskInput | ReaderGardenerTaskInput;
   parameters?: Record<string, unknown>;
   hideInputs?: boolean;
   checks: VerificationCheck[];
@@ -263,6 +272,30 @@ const parseReaderTest = (
   return { input: { message: input.message }, checks };
 };
 
+const parseReaderGardenerTest = (
+  rawInput: unknown,
+  rawChecks: unknown[],
+  path: string
+): Pick<VerificationTest, 'input' | 'checks'> => {
+  const input = assertObject(rawInput, `${path}.input`);
+  assertExactKeys(input, ['reader', 'gardener'], [], `${path}.input`);
+  const gardener = parseGardenerTest(input.gardener, [], path);
+  const reader = parseReaderTest(input.reader, [], path);
+  const checks = rawChecks.flatMap((rawCheck) => {
+    const check = assertObject(rawCheck, `${path}.checks`);
+    return check.type === 'reader.impulses.equals'
+      ? parseReaderTest(input.reader, [check], path).checks
+      : parseGardenerTest(input.gardener, [check], path).checks;
+  });
+  return {
+    input: {
+      reader: reader.input as ReaderTaskInput,
+      gardener: gardener.input as GardenerTaskInput,
+    },
+    checks,
+  };
+};
+
 const parseCyberBearTest = (
   rawInput: unknown,
   rawChecks: unknown[],
@@ -334,7 +367,11 @@ export const parseProgrammingTask = (value: unknown): ProgrammingTask => {
   if (task.schemaVersion !== 1 && task.schemaVersion !== 2) {
     throw new Error(`schemaVersion ${String(task.schemaVersion)} не поддерживается`);
   }
-  if (!['junior-gardener', 'junior-reader', 'blg-mb-junior'].includes(task.platformId as string)) {
+  if (
+    !['junior-gardener', 'junior-reader', 'blg-mb-junior', 'reader-gardener'].includes(
+      task.platformId as string
+    )
+  ) {
     throw new Error('task.platformId не поддерживается задачником');
   }
   if (!Array.isArray(task.tests) || task.tests.length === 0) {
@@ -383,7 +420,9 @@ export const parseProgrammingTask = (value: unknown): ProgrammingTask => {
         : assertInteger(test.timeoutSeconds, `${path}.timeoutSeconds`, 1, 30);
     totalTimeout += timeoutSeconds ?? DEFAULT_TEST_TIMEOUT_SECONDS;
     const parsed =
-      platformId === 'blg-mb-junior'
+      platformId === 'reader-gardener'
+        ? parseReaderGardenerTest(test.input, test.checks, path)
+        : platformId === 'blg-mb-junior'
         ? parseCyberBearTest(test.input, test.checks, path)
         : platformId === 'junior-gardener'
         ? parseGardenerTest(test.input, test.checks, path)

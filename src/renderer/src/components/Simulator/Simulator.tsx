@@ -48,6 +48,8 @@ import { TaskMode } from './TaskMode';
 import { taskForProtocol } from './taskProtocol';
 import { useInterpreter } from './useInterpreter';
 
+import type { CatalogTask } from '../../../../common/tasks';
+
 import './jointSimulator.css';
 
 interface SimulatorProps {
@@ -128,12 +130,21 @@ const MachineSelector: React.FC<{
   selectedSmId?: string;
   active: boolean;
   onSelect: (smId: string) => void;
-}> = ({ options, selectedSmId, active, onSelect }) => (
+  label?: string;
+  inputId?: string;
+}> = ({
+  options,
+  selectedSmId,
+  active,
+  onSelect,
+  label = 'Машина состояний',
+  inputId = 'simulator-state-machine',
+}) => (
   <div className="min-w-0">
-    <label className="grid gap-2 text-xs" htmlFor="simulator-state-machine">
-      <span className="h2-header font-medium">Машина состояний</span>
+    <label className="grid gap-2 text-xs" htmlFor={inputId}>
+      <span className="h2-header font-medium">{label}</span>
       <ParameterSelect
-        inputId="simulator-state-machine"
+        inputId={inputId}
         className="w-full"
         isSearchable={false}
         isClearable={false}
@@ -957,6 +968,111 @@ export const JointSimulator: React.FC<JointSimulatorProps> = ({
   );
 };
 
+export const JointTaskMode: React.FC<{
+  task: CatalogTask;
+  options: SimulationMachineOption[];
+  interpreter: ReturnType<typeof useInterpreter>;
+}> = ({ task, options, interpreter }) => {
+  const model = useModelContext();
+  const readers = options.filter(({ machine }) => machine.platform === 'junior-reader');
+  const gardeners = options.filter(({ machine }) => machine.platform === 'junior-gardener');
+  const [readerSelection, setReader] = useState('');
+  const [gardenerSelection, setGardener] = useState('');
+  const reader = readers.some(({ id }) => id === readerSelection)
+    ? readerSelection
+    : readers[0]?.id ?? '';
+  const gardener = gardeners.some(({ id }) => id === gardenerSelection)
+    ? gardenerSelection
+    : gardeners[0]?.id ?? '';
+  useJointMachineRevision(model, reader);
+  useJointMachineRevision(model, gardener);
+  const revision = JSON.stringify([
+    model.model.data.elements.stateMachines[reader],
+    model.model.data.elements.stateMachines[gardener],
+  ]);
+  const selection = JSON.stringify([reader, gardener]);
+  const clear = interpreter.clear;
+  useEffect(() => {
+    useTasks.getState().selectSolution(selection, undefined);
+    clear();
+  }, [selection, revision, task.id, clear]);
+  const missing = [reader, gardener].flatMap((id) => {
+    const machine = options.find((option) => option.id === id)?.machine;
+    const platform = machine && getPlatform(machine.platform);
+    return machine && platform ? getMissingComponentReferences(machine, platform) : [];
+  });
+  const error = missing.length
+    ? `В схемах отсутствуют компоненты: ${missing.join(', ')}`
+    : !reader || !gardener
+    ? 'Добавьте в документ диаграммы Строчника и Садовника.'
+    : interpreter.ready && !interpreter.supportsTaskSession
+    ? 'Обновите интерпретатор для совместной проверки задач.'
+    : interpreter.error;
+  const payload = () => {
+    if (!reader || !gardener || missing.length) return undefined;
+    const elements = model.model.data.elements;
+    const value = {
+      xml: exportCGML({
+        parameters: elements.parameters,
+        stateMachines: {
+          [reader]: elements.stateMachines[reader],
+          [gardener]: elements.stateMachines[gardener],
+        },
+      }),
+      machines: { reader, gardener },
+      task: taskForProtocol(task),
+    };
+    useTasks.getState().selectSolution(selection, value.xml);
+    return value;
+  };
+  return (
+    <div className="flex min-h-0 flex-1 flex-col gap-4">
+      <div className="grid grid-cols-2 gap-4" aria-label="Машины совместной задачи">
+        <MachineSelector
+          label="Строчник"
+          inputId="task-reader"
+          options={readers}
+          selectedSmId={reader}
+          active={interpreter.active}
+          onSelect={setReader}
+        />
+        <MachineSelector
+          label="Садовник"
+          inputId="task-gardener"
+          options={gardeners}
+          selectedSmId={gardener}
+          active={interpreter.active}
+          onSelect={setGardener}
+        />
+      </div>
+      <TaskMode
+        task={task}
+        ready={
+          interpreter.ready &&
+          interpreter.supportsTaskSession &&
+          Boolean(reader && gardener) &&
+          missing.length === 0
+        }
+        active={interpreter.active}
+        operationKind={interpreter.operationKind}
+        liveTestId={interpreter.activeTestId}
+        liveExecution={interpreter.operationKind === 'test' ? interpreter.result : undefined}
+        error={error}
+        hasSolution={Boolean(reader && gardener)}
+        onCancel={interpreter.cancel}
+        onRunTest={(testId) => {
+          const value = payload();
+          if (value) interpreter.startTest({ ...value, testId });
+        }}
+        onSubmit={() => {
+          const value = payload();
+          if (value) interpreter.startSubmission(value);
+        }}
+      />
+    </div>
+  );
+};
+
 export const Simulator: React.FC<SimulatorProps> = ({
   initialSmId,
   onStatusChange,
@@ -1057,7 +1173,7 @@ export const Simulator: React.FC<SimulatorProps> = ({
   }, [activeTask?.platformId, onAutoSizeChange]);
 
   useEffect(() => {
-    if (!activeTask) return;
+    if (!activeTask || activeTask.platformId === 'reader-gardener') return;
     selectSolution(selectedSmId, undefined);
   }, [activeTask, currentRevision, selectSolution, selectedSmId]);
 
@@ -1208,7 +1324,9 @@ export const Simulator: React.FC<SimulatorProps> = ({
           }}
         />
       )}
-      {((activeTask && activeTask.platformId !== 'blg-mb-junior') ||
+      {((activeTask &&
+        activeTask.platformId !== 'blg-mb-junior' &&
+        activeTask.platformId !== 'reader-gardener') ||
         (!activeTask &&
           !joint &&
           machine?.platform !== 'junior-gardener' &&
@@ -1223,7 +1341,10 @@ export const Simulator: React.FC<SimulatorProps> = ({
           />
         </div>
       )}
-      {activeTask && (
+      {activeTask?.platformId === 'reader-gardener' && (
+        <JointTaskMode task={activeTask} options={allOptions} interpreter={interpreter} />
+      )}
+      {activeTask && activeTask.platformId !== 'reader-gardener' && (
         <TaskMode
           task={activeTask}
           machineSelector={

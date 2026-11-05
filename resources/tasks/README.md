@@ -73,3 +73,7 @@ Lapki загружает задачи один раз при запуске пр
 
 Полный работающий пример находится в
 [`gardener-letter-a.task.json`](gardener-letter-a.task.json).
+
+## Совместные задачи
+
+`platformId: "reader-gardener"` выбирает режим «Садовник + Строчник». Вход испытания содержит `reader: {message}` и `gardener: {width, height, field, position, orientation}`. В одном массиве `checks` можно сочетать `reader.impulses.equals`, `gardener.field.equals` и `gardener.position.equals`; должны пройти все проверки. Первая такая задача — «Посадка по радио».

@@ -65,7 +65,8 @@ export type RunStartPayload = {
 export type TaskStartPayload = {
   live?: boolean;
   xml: string;
-  machineId: string;
+  machineId?: string;
+  machines?: { reader: string; gardener: string };
   task: ProgrammingTask;
 };
 

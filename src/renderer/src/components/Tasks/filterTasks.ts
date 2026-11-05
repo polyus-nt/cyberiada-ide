@@ -1,6 +1,7 @@
 import type { CatalogTask } from '../../../../common/tasks';
 
 const platformNames: Record<CatalogTask['platformId'], string> = {
+  'reader-gardener': 'Садовник + Строчник',
   'junior-gardener': 'Садовник',
   'junior-reader': 'Строчник',
   'blg-mb-junior': 'КиберМишка',

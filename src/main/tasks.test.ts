@@ -70,7 +70,7 @@ describe('loadTaskCatalog', () => {
     const cornflowerPath = catalog.tasks.find((entry) => entry.id === 'gardener-cornflower-path');
 
     expect(catalog.diagnostics).toEqual([]);
-    expect(catalog.tasks.filter((entry) => entry.schemaVersion === 1)).toHaveLength(18);
+    expect(catalog.tasks.filter((entry) => entry.schemaVersion === 1)).toHaveLength(19);
     expect(
       catalog.tasks.filter((entry) => entry.schemaVersion === 1).every((entry) => entry.codeWord)
     ).toBe(true);

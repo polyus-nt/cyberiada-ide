@@ -80,12 +80,14 @@ export const useInterpreter = () => {
       if (message.type === 'submission.started') return;
       if (message.type === 'submission.test.started') {
         const payload = message.payload as { testId: string };
-        useTasks.getState().startSubmissionTest(payload.testId);
+        if (useTasks.getState().solutionXml === activeTaskXml.current)
+          useTasks.getState().startSubmissionTest(payload.testId);
         return;
       }
       if (message.type === 'submission.test.completed') {
         const payload = message.payload as { verdict: TestVerdict };
-        useTasks.getState().completeSubmissionTest(payload.verdict);
+        if (useTasks.getState().solutionXml === activeTaskXml.current)
+          useTasks.getState().completeSubmissionTest(payload.verdict);
         return;
       }
       if (message.type === 'error') {
@@ -128,7 +130,10 @@ export const useInterpreter = () => {
         return;
       }
       if (message.type === 'submission.completed') {
-        useTasks.getState().completeSubmission(message.payload as SubmissionResult);
+        if (useTasks.getState().solutionXml === activeTaskXml.current)
+          useTasks.getState().completeSubmission(message.payload as SubmissionResult);
+        else useTasks.getState().failOperation();
+        activeTaskXml.current = undefined;
         setActiveRunId(InterpreterClient.activeRunId);
         setOperationKind(InterpreterClient.activeKind);
         return;
@@ -193,6 +198,7 @@ export const useInterpreter = () => {
       setError('Интерпретатор ещё не готов к запуску');
       return;
     }
+    activeTaskXml.current = payload.xml;
     setActiveRunId(runId);
     setOperationKind('submission');
     useTasks.getState().startSubmission();
@@ -218,6 +224,7 @@ export const useInterpreter = () => {
     cyberBear: result?.result?.cyberBear,
     supportsCyberBear,
     supportsSession: InterpreterClient.capabilities.has('run.session'),
+    supportsTaskSession: InterpreterClient.capabilities.has('task.session'),
     supportsTaskChecker: InterpreterClient.capabilities.has('task.python-checker.v1'),
     error,
     start,

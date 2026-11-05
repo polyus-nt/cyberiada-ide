@@ -1,0 +1,264 @@
+{
+  "schemaVersion": 1,
+  "id": "reader-gardener-radio-planting",
+  "version": 1,
+  "title": "Посадка по радио",
+  "summary": "Передавайте буквы от Строчника через брокер Садовнику и выращивайте ряд цветов.",
+  "codeWord": "РАДИО",
+  "platformId": "reader-gardener",
+  "description": "# Посадка по радио\n\nСадовник стоит в начале пустого коридора из **7 клеток** и смотрит вдоль него. Строчник получает строку из букв **А**, **Б** и **В** длиной не более шести символов и пересылает Садовнику каждую букву через брокер.\n\nСоздайте **две диаграммы в одном документе**: для Строчника и Садовника. В режиме задач «Садовник + Строчник» выберите обе диаграммы.\n\n- Строчнику нужны считыватель и отправка в брокер: для каждой буквы отправляйте соответствующий импульс А, Б или В.\n- Садовнику нужны приём из брокера, цветы и движение.\n- Если пришла **А**, Садовник сажает **розу**.\n- Если пришла **Б**, Садовник сажает **мяту**.\n- Если пришла **В**, Садовник сажает **василёк**.\n- Посадив цветок, Садовник делает **один шаг вперёд**.\n\n## Пример\n\nДля строки **АБВВБА** должен вырасти ряд: **роза, мята, василёк, василёк, мята, роза**. Садовник останавливается в **седьмой клетке**, которая остаётся пустой.\n\nКороткая строка занимает только начало коридора. Для пустой строки Садовник остаётся на старте и ничего не сажает.\n\n## Теория\n\nБрокер связывает двух исполнителей: **Строчник → Брокер → Садовник**. Отправленный импульс вызывает у Садовника событие «Получен импульс». В условиях события сравнивайте полученное значение с импульсами А, Б и В. Отправка и приём работают в одном совместном запуске.\n\n## На мастер-классе\n\nПокажите две диаграммы в одном документе и брокер между ними. Запустите пример АБВВБА, проследите переданные импульсы и получившийся ряд цветов.",
+  "tests": [
+    {
+      "id": "example",
+      "title": "Пример: АБВВБА",
+      "input": {
+        "reader": {
+          "message": "АБВВБА"
+        },
+        "gardener": {
+          "width": 7,
+          "height": 1,
+          "field": [[0, 0, 0, 0, 0, 0, 0]],
+          "position": {
+            "x": 0,
+            "y": 0
+          },
+          "orientation": "EAST"
+        }
+      },
+      "checks": [
+        {
+          "type": "reader.impulses.equals",
+          "expected": ["impulseA", "impulseB", "impulseC", "impulseC", "impulseB", "impulseA"]
+        },
+        {
+          "type": "gardener.field.equals",
+          "expected": [[1, 2, 3, 3, 2, 1, 0]]
+        },
+        {
+          "type": "gardener.position.equals",
+          "expected": {
+            "x": 6,
+            "y": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "reverse",
+      "title": "Другой порядок",
+      "input": {
+        "reader": {
+          "message": "ВБААБВ"
+        },
+        "gardener": {
+          "width": 7,
+          "height": 1,
+          "field": [[0, 0, 0, 0, 0, 0, 0]],
+          "position": {
+            "x": 0,
+            "y": 0
+          },
+          "orientation": "EAST"
+        }
+      },
+      "checks": [
+        {
+          "type": "reader.impulses.equals",
+          "expected": ["impulseC", "impulseB", "impulseA", "impulseA", "impulseB", "impulseC"]
+        },
+        {
+          "type": "gardener.field.equals",
+          "expected": [[3, 2, 1, 1, 2, 3, 0]]
+        },
+        {
+          "type": "gardener.position.equals",
+          "expected": {
+            "x": 6,
+            "y": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "roses",
+      "title": "Только розы",
+      "input": {
+        "reader": {
+          "message": "АААААА"
+        },
+        "gardener": {
+          "width": 7,
+          "height": 1,
+          "field": [[0, 0, 0, 0, 0, 0, 0]],
+          "position": {
+            "x": 0,
+            "y": 0
+          },
+          "orientation": "EAST"
+        }
+      },
+      "checks": [
+        {
+          "type": "reader.impulses.equals",
+          "expected": ["impulseA", "impulseA", "impulseA", "impulseA", "impulseA", "impulseA"]
+        },
+        {
+          "type": "gardener.field.equals",
+          "expected": [[1, 1, 1, 1, 1, 1, 0]]
+        },
+        {
+          "type": "gardener.position.equals",
+          "expected": {
+            "x": 6,
+            "y": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "mint",
+      "title": "Только мята",
+      "input": {
+        "reader": {
+          "message": "ББББББ"
+        },
+        "gardener": {
+          "width": 7,
+          "height": 1,
+          "field": [[0, 0, 0, 0, 0, 0, 0]],
+          "position": {
+            "x": 0,
+            "y": 0
+          },
+          "orientation": "EAST"
+        }
+      },
+      "checks": [
+        {
+          "type": "reader.impulses.equals",
+          "expected": ["impulseB", "impulseB", "impulseB", "impulseB", "impulseB", "impulseB"]
+        },
+        {
+          "type": "gardener.field.equals",
+          "expected": [[2, 2, 2, 2, 2, 2, 0]]
+        },
+        {
+          "type": "gardener.position.equals",
+          "expected": {
+            "x": 6,
+            "y": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "cornflowers",
+      "title": "Только васильки",
+      "input": {
+        "reader": {
+          "message": "ВВВВВВ"
+        },
+        "gardener": {
+          "width": 7,
+          "height": 1,
+          "field": [[0, 0, 0, 0, 0, 0, 0]],
+          "position": {
+            "x": 0,
+            "y": 0
+          },
+          "orientation": "EAST"
+        }
+      },
+      "checks": [
+        {
+          "type": "reader.impulses.equals",
+          "expected": ["impulseC", "impulseC", "impulseC", "impulseC", "impulseC", "impulseC"]
+        },
+        {
+          "type": "gardener.field.equals",
+          "expected": [[3, 3, 3, 3, 3, 3, 0]]
+        },
+        {
+          "type": "gardener.position.equals",
+          "expected": {
+            "x": 6,
+            "y": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "short",
+      "title": "Короткая строка",
+      "input": {
+        "reader": {
+          "message": "БВА"
+        },
+        "gardener": {
+          "width": 7,
+          "height": 1,
+          "field": [[0, 0, 0, 0, 0, 0, 0]],
+          "position": {
+            "x": 0,
+            "y": 0
+          },
+          "orientation": "EAST"
+        }
+      },
+      "checks": [
+        {
+          "type": "reader.impulses.equals",
+          "expected": ["impulseB", "impulseC", "impulseA"]
+        },
+        {
+          "type": "gardener.field.equals",
+          "expected": [[2, 3, 1, 0, 0, 0, 0]]
+        },
+        {
+          "type": "gardener.position.equals",
+          "expected": {
+            "x": 3,
+            "y": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "empty",
+      "title": "Пустая строка",
+      "input": {
+        "reader": {
+          "message": ""
+        },
+        "gardener": {
+          "width": 7,
+          "height": 1,
+          "field": [[0, 0, 0, 0, 0, 0, 0]],
+          "position": {
+            "x": 0,
+            "y": 0
+          },
+          "orientation": "EAST"
+        }
+      },
+      "checks": [
+        {
+          "type": "reader.impulses.equals",
+          "expected": []
+        },
+        {
+          "type": "gardener.field.equals",
+          "expected": [[0, 0, 0, 0, 0, 0, 0]]
+        },
+        {
+          "type": "gardener.position.equals",
+          "expected": {
+            "x": 0,
+            "y": 0
+          }
+        }
+      ]
+    }
+  ]
+}

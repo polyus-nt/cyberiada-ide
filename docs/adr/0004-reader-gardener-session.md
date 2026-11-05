@@ -44,4 +44,24 @@ live history.
 Tabs can switch without affecting execution. One shared impulse feed and common
 controls describe one operation. Compatibility is capability-gated. Long actions
 remain atomic and can delay dispatch in the other machine; true CPU parallelism
-is not promised. Ordinary task verification remains a single-machine operation.
+is not promised. Task verification also supports this session as described below.
+
+## Extension: joint task verification
+
+Capability `task.session` enables `platformId: reader-gardener` tasks. Each test
+contains `input.reader` and `input.gardener`, validated with the existing platform
+rules, and AND-combined Reader and Gardener checks. The task target names the pair;
+it is not an executable state-machine platform.
+
+`test.start` and `submission.start` select roles with
+`machines: {reader: "reader-id", gardener: "gardener-id"}` in place of `machineId`.
+Both identifiers must be distinct and resolve to the required platforms in the
+same XML document. Each test starts a fresh shared session, retaining the existing
+cancellation, timeout, submission and broker delivery semantics.
+
+Task live frames and terminal outcomes use stable role keys `reader` and
+`gardener`, independent of document identifiers. Verdicts compare Reader output
+and Gardener field/position, omit nested execution histories, and report session
+failure as a failed test. Ordinary simulation continues to key results by document
+machine identifier. The client gates joint verification on `task.session` and
+invalidates previous results when either selected diagram changes.

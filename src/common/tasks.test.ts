@@ -360,3 +360,40 @@ it('validates CyberBear task packages and rejects malformed checker inputs', () 
     expect(() => parseProgrammingTask(invalid)).toThrow();
   }
 });
+
+const radioTask = () =>
+  JSON.parse(readFileSync('resources/tasks/reader-gardener-radio-planting.task.json', 'utf8'));
+
+it('validates both inputs and the combined checks of the radio planting task', () => {
+  const task = parseProgrammingTask(radioTask());
+  expect(task.platformId).toBe('reader-gardener');
+  expect(task.tests[0].checks).toEqual([
+    {
+      type: 'reader.impulses.equals',
+      expected: ['impulseA', 'impulseB', 'impulseC', 'impulseC', 'impulseB', 'impulseA'],
+    },
+    { type: 'gardener.field.equals', expected: [[1, 2, 3, 3, 2, 1, 0]] },
+    { type: 'gardener.position.equals', expected: { x: 6, y: 0 } },
+  ]);
+  for (const mutate of [
+    (raw: ReturnType<typeof radioTask>) => {
+      raw.tests[0].input.reader.message = 42;
+    },
+    (raw: ReturnType<typeof radioTask>) => {
+      raw.tests[0].input.gardener.position.x = 7;
+    },
+    (raw: ReturnType<typeof radioTask>) => {
+      raw.tests[0].checks[0].expected = ['impulseD'];
+    },
+    (raw: ReturnType<typeof radioTask>) => {
+      raw.tests[0].checks[1].expected = [[1]];
+    },
+    (raw: ReturnType<typeof radioTask>) => {
+      raw.tests[0].checks[0].type = 'unknown';
+    },
+  ]) {
+    const raw = radioTask();
+    mutate(raw);
+    expect(() => parseProgrammingTask(raw)).toThrow();
+  }
+});

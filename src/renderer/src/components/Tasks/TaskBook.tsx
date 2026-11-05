@@ -18,6 +18,12 @@ import { filterTasks } from './filterTasks';
 import type { CatalogTask } from '../../../../common/tasks';
 
 const platformIcons = {
+  'reader-gardener': ({ className }: { className?: string }) => (
+    <span className="flex shrink-0 gap-1" aria-label="Садовник + Строчник">
+      <GardenerIcon className={className} />
+      <ReaderIcon className={className} />
+    </span>
+  ),
   'junior-gardener': GardenerIcon,
   'junior-reader': ReaderIcon,
   'blg-mb-junior': CyberBearIcon,
