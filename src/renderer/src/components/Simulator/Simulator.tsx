@@ -107,6 +107,9 @@ const controlClassName =
 const gardenerNumericControlClassName =
   'h-8 w-full rounded-lg border border-border-primary bg-bg-primary px-3 text-xs text-text-primary outline-none focus:border-text-inactive';
 
+const tabButtonClassName =
+  'border-b-2 border-transparent px-4 py-2 text-sm text-text-inactive transition-colors hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary disabled:cursor-not-allowed';
+
 const PLAYBACK_INTERVAL_MS = 500;
 
 const FieldInput: React.FC<React.PropsWithChildren<{ label: string; htmlFor: string }>> = ({
@@ -826,7 +829,7 @@ export const JointSimulator: React.FC<JointSimulatorProps> = ({
                 aria-controls={`joint-panel-${id}`}
                 tabIndex={tab === id ? 0 : -1}
                 className={twMerge(
-                  'border-b-2 border-transparent px-4 py-2 text-sm text-text-inactive transition-colors hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary',
+                  tabButtonClassName,
                   tab === id && 'border-primary font-medium text-primary'
                 )}
                 onClick={() => setTab(id)}
@@ -1143,12 +1146,17 @@ export const Simulator: React.FC<SimulatorProps> = ({
         </div>
       )}
       {!activeTask && (
-        <div className="mb-4 flex gap-2">
+        <div
+          role="group"
+          aria-label="Режим симуляции"
+          className="mb-4 flex shrink-0 gap-1 border-b border-border-primary"
+        >
           <button
             type="button"
+            aria-pressed={!joint}
             className={twMerge(
-              'rounded-lg border border-border-primary px-3 py-2 text-xs',
-              !joint && 'bg-bg-active'
+              tabButtonClassName,
+              !joint && 'border-primary font-medium text-primary'
             )}
             disabled={interpreter.active}
             onClick={() => {
@@ -1160,9 +1168,10 @@ export const Simulator: React.FC<SimulatorProps> = ({
           </button>
           <button
             type="button"
+            aria-pressed={joint}
             className={twMerge(
-              'rounded-lg border border-border-primary px-3 py-2 text-xs',
-              joint && 'bg-bg-active'
+              tabButtonClassName,
+              joint && 'border-primary font-medium text-primary'
             )}
             disabled={interpreter.active}
             onClick={() => {

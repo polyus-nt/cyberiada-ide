@@ -8,8 +8,13 @@
   flex: 1;
   min-width: 0;
   min-height: 0;
-  grid-template-columns: 205px minmax(0, 1fr);
+  grid-template-columns: 225px minmax(0, 1fr);
   gap: 24px;
+}
+
+.joint-simulator-controls {
+  padding-inline-end: 12px;
+  scrollbar-gutter: stable;
 }
 
 .joint-simulator-workspace {
@@ -73,7 +78,7 @@
 
 @container joint-simulator (max-width: 600px) {
   .joint-simulator-layout {
-    grid-template-columns: 180px minmax(0, 1fr);
+    grid-template-columns: 200px minmax(0, 1fr);
     gap: 16px;
   }
 }
