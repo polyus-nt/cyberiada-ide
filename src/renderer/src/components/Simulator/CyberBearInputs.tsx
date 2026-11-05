@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 import { nanoid } from 'nanoid';
 
+import { ReactComponent as ArrowIcon } from '@renderer/assets/icons/arrow-down.svg';
 import { ParameterSelect } from '@renderer/components/UI';
 import type { CyberBearChannel } from '@renderer/types/InterpreterTypes';
 
@@ -17,7 +18,7 @@ const channels: { value: CyberBearChannel; label: string }[] = [
   { value: 'ears', label: 'Акустика' },
 ];
 const rowButton =
-  'size-7 rounded border border-border-primary text-xs disabled:opacity-40 enabled:hover:bg-bg-hover';
+  'flex size-5 shrink-0 items-center justify-center rounded text-xs disabled:opacity-40 enabled:hover:bg-bg-hover';
 
 const CyberBearInputFields: React.FC<{
   input: CyberBearInputDraft;
@@ -79,6 +80,7 @@ export const CyberBearInputs: React.FC<{
   active: boolean;
   onChange: (inputs: CyberBearInputDraft[]) => void;
 }> = ({ inputs, active, onChange }) => {
+  const [expandedId, setExpandedId] = useState<string>();
   const update = (index: number, patch: Partial<CyberBearInputDraft>) =>
     onChange(inputs.map((input, current) => (current === index ? { ...input, ...patch } : input)));
   const move = (index: number, direction: number) => {
@@ -90,11 +92,34 @@ export const CyberBearInputs: React.FC<{
   return (
     <section>
       <h2 className="h2-header mb-3">Входная последовательность</h2>
-      <ol className="max-h-[420px] space-y-3 overflow-y-auto">
+      <ol className="max-h-[420px] space-y-1.5 overflow-y-auto">
         {inputs.map((input, index) => (
-          <li key={input.id} className="space-y-2 rounded-lg border border-border-primary p-2">
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-xs text-text-inactive">{index + 1}</span>
+          <li key={input.id} className="rounded-lg border border-border-primary">
+            <div className="flex h-[30px] items-center gap-1 px-2">
+              <span className="w-3 shrink-0 text-xs text-text-inactive">{index + 1}</span>
+              <button
+                type="button"
+                className="grid h-full min-w-0 flex-1 grid-cols-[10px_minmax(0,1fr)_24px_40px] items-center gap-1 rounded text-left text-xs hover:bg-bg-hover focus-visible:outline-primary"
+                aria-label={`${expandedId === input.id ? 'Свернуть' : 'Раскрыть'} элемент ${
+                  index + 1
+                }`}
+                aria-expanded={expandedId === input.id}
+                aria-controls={`cyberbear-input-editor-${input.id}`}
+                title={`Время: ${input.timeMs || '—'} мс; канал: ${
+                  input.channel === 'ir' ? 'ИК' : 'Акустика'
+                }; байт: ${input.value || '—'}`}
+                onClick={() =>
+                  setExpandedId((current) => (current === input.id ? undefined : input.id))
+                }
+              >
+                <ArrowIcon
+                  className={expandedId === input.id ? 'rotate-0' : '-rotate-90'}
+                  aria-hidden="true"
+                />
+                <span className="truncate tabular-nums">{input.timeMs || '—'} мс</span>
+                <span>{input.channel === 'ir' ? 'ИК' : 'АК'}</span>
+                <span className="truncate tabular-nums">{input.value || '—'}</span>
+              </button>
               <div className="flex gap-1">
                 <button
                   type="button"
@@ -119,31 +144,40 @@ export const CyberBearInputs: React.FC<{
                   className={rowButton}
                   aria-label={`Удалить элемент ${index + 1}`}
                   disabled={active}
-                  onClick={() => onChange(inputs.filter((_, current) => current !== index))}
+                  onClick={() => {
+                    if (expandedId === input.id) setExpandedId(undefined);
+                    onChange(inputs.filter((_, current) => current !== index));
+                  }}
                 >
                   ×
                 </button>
               </div>
             </div>
-            <label className="grid gap-1 text-xs" htmlFor={`cyberbear-channel-${input.id}`}>
-              Канал
-              <ParameterSelect
-                inputId={`cyberbear-channel-${input.id}`}
-                options={channels}
-                value={channels.find((option) => option.value === input.channel)}
-                isDisabled={active}
-                isSearchable={false}
-                isClearable={false}
-                onChange={(option) => {
-                  if (option) update(index, { channel: option.value });
-                }}
+            <div
+              id={`cyberbear-input-editor-${input.id}`}
+              hidden={expandedId !== input.id}
+              className="space-y-2 border-t border-border-primary p-2"
+            >
+              <label className="grid gap-1 text-xs" htmlFor={`cyberbear-channel-${input.id}`}>
+                Канал
+                <ParameterSelect
+                  inputId={`cyberbear-channel-${input.id}`}
+                  options={channels}
+                  value={channels.find((option) => option.value === input.channel)}
+                  isDisabled={active}
+                  isSearchable={false}
+                  isClearable={false}
+                  onChange={(option) => {
+                    if (option) update(index, { channel: option.value });
+                  }}
+                />
+              </label>
+              <CyberBearInputFields
+                input={input}
+                active={active}
+                onChange={(patch) => update(index, patch)}
               />
-            </label>
-            <CyberBearInputFields
-              input={input}
-              active={active}
-              onChange={(patch) => update(index, patch)}
-            />
+            </div>
           </li>
         ))}
       </ol>
