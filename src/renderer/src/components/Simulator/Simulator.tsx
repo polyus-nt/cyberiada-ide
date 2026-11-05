@@ -1041,8 +1041,9 @@ export const Simulator: React.FC<SimulatorProps> = ({
           }}
         />
       )}
-      {(activeTask ||
-        (!joint &&
+      {((activeTask && activeTask.platformId !== 'blg-mb-junior') ||
+        (!activeTask &&
+          !joint &&
           machine?.platform !== 'junior-gardener' &&
           machine?.platform !== 'junior-reader' &&
           machine?.platform !== 'blg-mb-junior')) && (
@@ -1058,6 +1059,16 @@ export const Simulator: React.FC<SimulatorProps> = ({
       {activeTask && (
         <TaskMode
           task={activeTask}
+          machineSelector={
+            activeTask.platformId === 'blg-mb-junior' ? (
+              <MachineSelector
+                options={options}
+                selectedSmId={selectedSmId}
+                active={interpreter.active}
+                onSelect={selectMachine}
+              />
+            ) : undefined
+          }
           ready={
             interpreter.ready &&
             !referenceError &&

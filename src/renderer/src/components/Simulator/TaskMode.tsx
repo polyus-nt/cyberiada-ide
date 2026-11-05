@@ -295,6 +295,7 @@ const ReaderDetails: React.FC<{
 
 interface TaskModeProps {
   task: CatalogTask;
+  machineSelector?: React.ReactNode;
   ready: boolean;
   active: boolean;
   operationKind?: 'run' | 'test' | 'submission';
@@ -309,6 +310,7 @@ interface TaskModeProps {
 
 export const TaskMode: React.FC<TaskModeProps> = ({
   task,
+  machineSelector,
   ready,
   active,
   operationKind,
@@ -348,6 +350,7 @@ export const TaskMode: React.FC<TaskModeProps> = ({
       : `Решение не принято: ${submissionResult.passed} из ${submissionResult.total}`;
   }, [submissionResult]);
   const solved = submissionResult?.status === 'accepted';
+  const isCyberBear = task.platformId === 'blg-mb-junior';
   const selectedPhase = selectedState?.phase ?? 'idle';
   const selectedPhaseStyle = phaseStyles[selectedPhase];
   const completedTests = task.tests.filter((test) => {
@@ -370,11 +373,22 @@ export const TaskMode: React.FC<TaskModeProps> = ({
     : undefined;
 
   return (
-    <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_304px] overflow-hidden rounded-lg border border-border-primary">
-      <div className="flex min-h-0 flex-col">
-        <div className="border-b border-border-primary px-5 py-4">
+    <div
+      className={`grid min-h-0 min-w-0 flex-1 ${
+        isCyberBear ? 'grid-cols-[minmax(0,1fr)_256px]' : 'grid-cols-[minmax(0,1fr)_304px]'
+      } overflow-hidden rounded-lg border border-border-primary`}
+    >
+      <div className="flex min-h-0 min-w-0 flex-col">
+        <div
+          className={`shrink-0 border-b border-border-primary ${
+            isCyberBear ? 'px-3 py-3' : 'px-5 py-4'
+          }`}
+        >
           <div className="flex items-center justify-between gap-4">
-            <div className="min-w-0">
+            {machineSelector && (
+              <div className="w-[180px] max-w-[38%] shrink-0">{machineSelector}</div>
+            )}
+            <div className="min-w-0 flex-1">
               <p className="text-xs text-text-inactive">
                 Тест {Math.max(task.tests.findIndex((test) => test.id === selectedTest?.id) + 1, 1)}{' '}
                 из {task.tests.length}
@@ -388,7 +402,7 @@ export const TaskMode: React.FC<TaskModeProps> = ({
               {checkerError ? 'Ошибка задачи' : selectedPhaseStyle.label}
             </div>
           </div>
-          {failedMessage && (
+          {failedMessage && !isCyberBear && (
             <div className="border-error/30 bg-error/5 mt-3 flex items-center gap-2 rounded-lg border px-3 py-2 text-xs text-error">
               <AlertIcon className="size-4 shrink-0" />
               <p>{failedMessage}</p>
@@ -406,8 +420,10 @@ export const TaskMode: React.FC<TaskModeProps> = ({
         )}
       </div>
 
-      <aside className="flex min-h-0 flex-col border-l border-border-primary bg-bg-primary">
-        <div className="border-b border-border-primary px-4 py-4">
+      <aside className="flex min-h-0 min-w-0 flex-col border-l border-border-primary bg-bg-primary">
+        <div
+          className={`shrink-0 border-b border-border-primary ${isCyberBear ? 'p-3' : 'px-4 py-4'}`}
+        >
           <h2 className="h2-header truncate">{task.title}</h2>
           <div className="mt-2 flex items-center justify-between gap-3 text-xs text-text-inactive">
             <span>Проверочные тесты</span>
@@ -432,7 +448,9 @@ export const TaskMode: React.FC<TaskModeProps> = ({
             return (
               <div
                 key={test.id}
-                className={`flex items-center gap-2 rounded-lg border p-2 transition-colors ${
+                className={`flex items-center gap-2 rounded-lg border ${
+                  isCyberBear ? 'p-1.5' : 'p-2'
+                } transition-colors ${
                   isSelected
                     ? 'border-primary bg-bg-primary shadow-sm'
                     : 'border-transparent hover:border-border-primary hover:bg-bg-hover'
@@ -441,11 +459,29 @@ export const TaskMode: React.FC<TaskModeProps> = ({
                 <button
                   type="button"
                   className="min-w-0 flex-1 rounded-md px-1 py-0.5 text-left"
+                  title={`${test.title} — ${
+                    state.verdict?.reasonCode === 'CHECKER_ERROR'
+                      ? 'Ошибка задачи'
+                      : phaseStyle.label
+                  }`}
                   onClick={() => setSelectedTestId(test.id)}
                 >
-                  <div className="truncate text-xs font-medium">{test.title}</div>
-                  <div className={`mt-1 flex items-center gap-1.5 text-xs ${phaseStyle.text}`}>
-                    <span className={`size-2 rounded-full ${phaseStyle.dot}`} />
+                  {isCyberBear ? (
+                    <div className="flex min-w-0 items-center gap-2">
+                      <span className={`size-2 shrink-0 rounded-full ${phaseStyle.dot}`} />
+                      <div className="truncate text-xs font-medium">{test.title}</div>
+                    </div>
+                  ) : (
+                    <div className="truncate text-xs font-medium">{test.title}</div>
+                  )}
+                  <div
+                    className={
+                      isCyberBear
+                        ? 'sr-only'
+                        : `mt-1 flex items-center gap-1.5 text-xs ${phaseStyle.text}`
+                    }
+                  >
+                    {!isCyberBear && <span className={`size-2 rounded-full ${phaseStyle.dot}`} />}
                     {state.verdict?.reasonCode === 'CHECKER_ERROR'
                       ? 'Ошибка задачи'
                       : phaseStyle.label}
@@ -467,8 +503,14 @@ export const TaskMode: React.FC<TaskModeProps> = ({
               </div>
             );
           })}
+          {isCyberBear && failedMessage && (
+            <div className="border-error/30 bg-error/5 flex gap-2 rounded-lg border px-3 py-2 text-xs text-error">
+              <AlertIcon className="mt-0.5 size-4 shrink-0" />
+              <p>{failedMessage}</p>
+            </div>
+          )}
         </div>
-        <div className="border-t border-border-primary bg-bg-primary p-3">
+        <div className="shrink-0 border-t border-border-primary bg-bg-primary p-3">
           {summary && (
             <div
               className={`mb-3 rounded-lg px-3 py-2 text-xs font-medium ${

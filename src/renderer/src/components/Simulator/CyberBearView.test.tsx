@@ -1,3 +1,5 @@
+import { createElement } from 'react';
+
 import { createRoot } from 'react-dom/client';
 import { act } from 'react-dom/test-utils';
 import { describe, expect, it, vi } from 'vitest';
@@ -27,7 +29,7 @@ describe('CyberBear artwork', () => {
     const glow = (side: string) => container.querySelector(`[data-eye="${side}"] path`);
 
     try {
-      act(() => root.render(<CyberBearView state={state} />));
+      act(() => root.render(createElement(CyberBearView, { state })));
       const body = container.querySelector('image');
       const firstLight = light(0, 0);
       expect(container.querySelectorAll('[data-led]').length).toBe(35);
@@ -45,7 +47,7 @@ describe('CyberBear artwork', () => {
       state.matrix[6][4] = 1;
       state.eyes.right = [10, 0, 0, 10];
       state.eyes.left = [0, 0, 10, 0];
-      act(() => root.render(<CyberBearView state={state} />));
+      act(() => root.render(createElement(CyberBearView, { state })));
 
       expect(light(0, 0)?.getAttribute('opacity')).toBe('1');
       expect(light(3, 2)?.getAttribute('opacity')).toBe('0.5');
@@ -62,7 +64,7 @@ describe('CyberBear artwork', () => {
         Number(firstLight?.getAttribute('y'))
       );
 
-      act(() => root.render(<CyberBearView state={createCyberBearState()} />));
+      act(() => root.render(createElement(CyberBearView, { state: createCyberBearState() })));
       expect(container.querySelector('image')).toBe(body);
       expect(light(0, 0)).toBe(firstLight);
       expect(light(0, 0)?.getAttribute('opacity')).toBe('0');

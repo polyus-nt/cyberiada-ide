@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { twMerge } from 'tailwind-merge';
+
 import body from '@renderer/assets/cyberbear/body.svg';
 import face from '@renderer/assets/cyberbear/face.svg';
 import matrixLed from '@renderer/assets/cyberbear/matrix-led.svg';
@@ -8,10 +10,13 @@ import type { CyberBearState } from '@renderer/types/InterpreterTypes';
 import { CYBERBEAR_EYES, MATRIX_COLUMNS, MATRIX_ROWS } from './cyberBearArtwork';
 import { rgbkColor } from './cyberBearModel';
 
-export const CyberBearView: React.FC<{ state: CyberBearState }> = ({ state }) => (
+export const CyberBearView: React.FC<{ state: CyberBearState; className?: string }> = ({
+  state,
+  className,
+}) => (
   <svg
     viewBox="0 0 253 381"
-    className="mx-auto block w-full max-w-[253px]"
+    className={twMerge('mx-auto block w-full max-w-[253px]', className)}
     role="img"
     aria-label="КиберМишка: глаза RGBK и матрица 5 на 7"
   >
