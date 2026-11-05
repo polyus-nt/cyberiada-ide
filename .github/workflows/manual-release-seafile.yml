@@ -1,11 +1,14 @@
-name: Build Release manually (Seafile upload)
+name: Build Windows Release manually (Seafile upload)
 
 on:
   workflow_dispatch:
 
 jobs:
-  linux-windows-build:
+  windows-build:
     runs-on: ubuntu-latest
+    env:
+      RELEASE_SKIP_LINUX: '1'
+      RELEASE_SKIP_WINDOWS: '0'
 
     steps:
       - name: Checkout code
@@ -25,7 +28,7 @@ jobs:
         run: docker compose -f compose.release.yml build release
       - name: Check Wine before downloading Windows toolchains
         run: docker compose -f compose.release.yml run --rm --no-deps release winepath -w /project
-      - name: Build Linux and Windows artifacts
+      - name: Build Windows artifacts
         run: RELEASE_SEAFILE_STAGING=1 docker compose -f compose.release.yml run --rm release
 
       - name: Get current date
@@ -45,13 +48,6 @@ jobs:
           local-path: 'outputs/seafile-upload/*'
           overwrite: 'true'
 
-      - name: Save deb artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: deb-build
-          path: |
-            dist/*.deb
-
       - name: Save exe artifact
         uses: actions/upload-artifact@v4
         with:
@@ -65,57 +61,3 @@ jobs:
           name: windows-zip-build
           path: |
             outputs/cyberiada-*-windows.zip
-
-      - name: Save snap artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: snap-build
-          path: |
-            dist/*.snap
-
-      - name: Save AppImage artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: appimage-build
-          path: |
-            dist/*.AppImage
-
-  mac-build:
-    runs-on: 'macos-latest'
-
-    needs: linux-windows-build
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Use Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20.x'
-      - run: npm ci
-      - name: Check macOS module packaging and repair script
-        run: node --test build/test-macos-packaging.cjs
-      - run: npm run build
-      - run: npm run bundle:mac
-        env:
-          USE_HARD_LINKS: 'false'
-
-      - name: Save dmg artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: dmg-build
-          path: |
-            dist/*.dmg
-
-      - name: Upload to Seafile
-        uses: chekoopa/upload-to-seafile@v1
-        with:
-          server-url: ${{ secrets.SEAFILE_SERVER_URL }}
-          username: ${{ secrets.SEAFILE_USERNAME }}
-          password: ${{ secrets.SEAFILE_PASSWORD }}
-          repo-id: ${{ secrets.SEAFILE_REPO_ID }}
-          remote-path: '/'
-          # remote-path: /${{ env.date }}
-          local-path: 'dist/*.dmg'
-          overwrite: 'true'
