@@ -1,0 +1,31 @@
+.joint-task-workspace {
+  container: joint-task / inline-size;
+}
+
+.joint-task-details {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.8fr) minmax(0, 1.2fr);
+  align-content: start;
+  align-items: start;
+  gap: 12px;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 12px;
+}
+
+.joint-task-gardener {
+  min-width: 0;
+  container: task-gardener / inline-size;
+}
+
+@container task-gardener (max-width: 500px) {
+  .joint-task-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@container joint-task (max-width: 600px) {
+  .joint-task-details {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

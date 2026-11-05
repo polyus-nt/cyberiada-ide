@@ -14,6 +14,8 @@ import type {
 import { type TaskTestPhase, useTasks } from '../../store/useTasks';
 import type { SimulationResult } from '../../types/InterpreterTypes';
 
+import './jointTask.css';
+
 const phaseLabels = {
   idle: 'Не запускался',
   waiting: 'Ожидает',
@@ -84,17 +86,19 @@ const FieldView: React.FC<{
   position?: GardenerTaskInput['position'];
   orientation?: GardenerFieldOrientation;
   hiddenCells?: boolean[][];
+  compact?: boolean;
 }> = ({
   input,
   field = input.field,
   position = input.position,
   orientation = input.orientation,
   hiddenCells,
+  compact = false,
 }) => (
-  <div className="overflow-auto rounded-lg bg-bg-secondary p-3">
+  <div className={`max-w-full overflow-auto rounded-lg bg-bg-secondary ${compact ? 'p-2' : 'p-3'}`}>
     <div
-      className="grid w-max gap-1.5"
-      style={{ gridTemplateColumns: `repeat(${input.width}, 2rem)` }}
+      className={`grid w-max ${compact ? 'gap-1' : 'gap-1.5'}`}
+      style={{ gridTemplateColumns: `repeat(${input.width}, ${compact ? '1.5rem' : '2rem'})` }}
     >
       {field.flatMap((row, y) =>
         row.map((cell, x) => {
@@ -103,7 +107,7 @@ const FieldView: React.FC<{
           return (
             <div
               key={`${x}-${y}`}
-              className={`relative size-8 rounded-lg ${
+              className={`relative ${compact ? 'size-6 rounded' : 'size-8 rounded-lg'} ${
                 hidden ? 'bg-bg-active' : gardenerCellStyles[cell]
               }`}
               title={hidden ? `Скрытая клетка (${x}, ${y})` : `(${x}, ${y})`}
@@ -133,7 +137,8 @@ const FieldView: React.FC<{
 const GardenerDetails: React.FC<{
   test: VerificationTest;
   execution?: SimulationResult;
-}> = ({ test, execution }) => {
+  compact?: boolean;
+}> = ({ test, execution, compact = false }) => {
   const input = test.input as GardenerTaskInput;
   const steps = execution?.steps ?? [];
   const [stepIndex, setStepIndex] = useState(Math.max(steps.length - 1, 0));
@@ -168,18 +173,38 @@ const GardenerDetails: React.FC<{
   const emptyField = input.field.map((row) => row.map(() => 0 as const));
 
   return (
-    <div className="grid min-h-0 flex-1 grid-cols-2 content-start items-start gap-4 overflow-y-auto bg-bg-primary p-4">
-      <section className="min-w-0 rounded-xl border border-border-primary bg-bg-primary p-4 shadow-sm">
+    <div
+      className={
+        compact
+          ? 'joint-task-fields grid min-w-0 grid-cols-2 items-start gap-3'
+          : 'grid min-h-0 flex-1 grid-cols-2 content-start items-start gap-4 overflow-y-auto bg-bg-primary p-4'
+      }
+    >
+      <section
+        className={`min-w-0 rounded-xl border border-border-primary bg-bg-primary ${
+          compact ? 'p-3' : 'p-4 shadow-sm'
+        }`}
+      >
         <div className="mb-4 flex h-4 items-center">
           <h3 className="h2-header">Входное поле</h3>
         </div>
         <div className="flex justify-center">
-          <FieldView input={input} hiddenCells={test.hiddenCells} />
+          <FieldView input={input} hiddenCells={test.hiddenCells} compact={compact} />
         </div>
       </section>
 
-      <section className="min-w-0 rounded-xl border border-border-primary bg-bg-primary p-4 shadow-sm">
-        <div className="mb-4 flex h-4 items-center justify-between gap-3">
+      <section
+        className={`min-w-0 rounded-xl border border-border-primary bg-bg-primary ${
+          compact ? 'p-3' : 'p-4 shadow-sm'
+        }`}
+      >
+        <div
+          className={
+            compact
+              ? 'mb-3 flex min-h-4 flex-wrap items-center justify-between gap-2'
+              : 'mb-4 flex h-4 items-center justify-between gap-3'
+          }
+        >
           <div>
             <h3 className="h2-header">Фактическое поле</h3>
           </div>
@@ -200,6 +225,7 @@ const GardenerDetails: React.FC<{
           {visible ? (
             <FieldView
               input={input}
+              compact={compact}
               field={visible.field}
               position={visible.position}
               orientation={visible.orientation}
@@ -210,6 +236,7 @@ const GardenerDetails: React.FC<{
               <div className="flex w-full justify-center opacity-25">
                 <FieldView
                   input={input}
+                  compact={compact}
                   field={emptyField}
                   position={{ x: -1, y: -1 }}
                   hiddenCells={test.hiddenCells}
@@ -275,20 +302,39 @@ const GardenerDetails: React.FC<{
 const ReaderDetails: React.FC<{
   test: VerificationTest;
   execution?: SimulationResult;
-}> = ({ test, execution }) => {
+  compact?: boolean;
+}> = ({ test, execution, compact = false }) => {
   const input = test.input as ReaderTaskInput;
   const impulses = execution?.result?.calledSignals ?? [];
   return (
-    <div className="grid gap-4 overflow-y-auto bg-bg-primary p-4 lg:grid-cols-2">
-      <section className="rounded-xl border border-border-primary bg-bg-primary p-4 shadow-sm">
+    <div
+      className={
+        compact
+          ? 'grid min-w-0 content-start gap-3'
+          : 'grid gap-4 overflow-y-auto bg-bg-primary p-4 lg:grid-cols-2'
+      }
+    >
+      <section
+        className={`min-w-0 rounded-xl border border-border-primary bg-bg-primary ${
+          compact ? 'p-3' : 'p-4 shadow-sm'
+        }`}
+      >
         <h3 className="h2-header mb-3">Входная строка</h3>
         <pre className="whitespace-pre-wrap rounded-lg border border-border-primary p-3 text-xs">
           {input.message}
         </pre>
       </section>
-      <section className="rounded-xl border border-border-primary bg-bg-primary p-4 shadow-sm">
+      <section
+        className={`min-w-0 rounded-xl border border-border-primary bg-bg-primary ${
+          compact ? 'p-3' : 'p-4 shadow-sm'
+        }`}
+      >
         <h3 className="h2-header mb-3">Выходные импульсы</h3>
-        <ReaderImpulseList impulses={impulses} emptyMessage="Импульсы ещё не получены." />
+        <ReaderImpulseList
+          impulses={impulses}
+          emptyMessage="Импульсы ещё не получены."
+          compact={compact}
+        />
       </section>
     </div>
   );
@@ -300,16 +346,23 @@ const ReaderGardenerDetails: React.FC<{ test: VerificationTest; execution?: Simu
 }) => {
   const input = test.input as ReaderGardenerTaskInput;
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-      <p className="px-4 pt-4 text-xs text-text-inactive">Строчник → Брокер → Садовник</p>
-      <ReaderDetails
-        test={{ ...test, input: input.reader }}
-        execution={execution?.machines?.reader}
-      />
-      <GardenerDetails
-        test={{ ...test, input: input.gardener }}
-        execution={execution?.machines?.gardener}
-      />
+    <div className="joint-task-workspace flex min-h-0 flex-1 flex-col">
+      <div className="joint-task-details">
+        <section className="min-w-0" aria-label="Строчник">
+          <ReaderDetails
+            compact
+            test={{ ...test, input: input.reader }}
+            execution={execution?.machines?.reader}
+          />
+        </section>
+        <section className="joint-task-gardener" aria-label="Садовник">
+          <GardenerDetails
+            compact
+            test={{ ...test, input: input.gardener }}
+            execution={execution?.machines?.gardener}
+          />
+        </section>
+      </div>
     </div>
   );
 };
@@ -372,6 +425,7 @@ export const TaskMode: React.FC<TaskModeProps> = ({
   }, [submissionResult]);
   const solved = submissionResult?.status === 'accepted';
   const isCyberBear = task.platformId === 'blg-mb-junior';
+  const isJointTask = task.platformId === 'reader-gardener';
   const selectedPhase = selectedState?.phase ?? 'idle';
   const selectedPhaseStyle = phaseStyles[selectedPhase];
   const completedTests = task.tests.filter((test) => {
@@ -396,7 +450,9 @@ export const TaskMode: React.FC<TaskModeProps> = ({
   return (
     <div
       className={`grid min-h-0 min-w-0 flex-1 ${
-        isCyberBear ? 'grid-cols-[minmax(0,1fr)_256px]' : 'grid-cols-[minmax(0,1fr)_304px]'
+        isCyberBear || isJointTask
+          ? 'grid-cols-[minmax(0,1fr)_256px]'
+          : 'grid-cols-[minmax(0,1fr)_304px]'
       } overflow-hidden rounded-lg border border-border-primary`}
     >
       <div className="flex min-h-0 min-w-0 flex-col">

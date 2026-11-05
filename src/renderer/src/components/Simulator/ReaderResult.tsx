@@ -8,22 +8,29 @@ import { getReaderImpulseLabel } from './readerModel';
 export const ReaderImpulseList: React.FC<{
   impulses: string[];
   emptyMessage?: string;
-}> = ({ impulses, emptyMessage = 'Нет выходных импульсов.' }) =>
+  compact?: boolean;
+}> = ({ impulses, emptyMessage = 'Нет выходных импульсов.', compact = false }) =>
   impulses.length === 0 ? (
-    <div className="flex h-28 items-center justify-center rounded-lg p-4 text-center text-xs leading-4 text-text-inactive">
+    <div
+      className={`flex ${
+        compact ? 'h-14 p-2' : 'h-28 p-4'
+      } items-center justify-center rounded-lg text-center text-xs leading-4 text-text-inactive`}
+    >
       {emptyMessage}
     </div>
   ) : (
     <ScrollArea
-      className="max-h-[236px] min-h-0 flex-1 py-0"
+      className={compact ? 'h-auto max-h-[180px] py-0' : 'max-h-[236px] min-h-0 flex-1 py-0'}
       viewportClassName="mr-[6px]"
       horizontalScroll={false}
     >
-      <ol className="grid gap-2">
+      <ol className={compact ? 'flex flex-wrap gap-2' : 'grid gap-2'}>
         {impulses.map((impulse, index) => (
           <li
             key={`${index}:${impulse}`}
-            className="rounded-lg border border-border-primary bg-bg-primary p-2"
+            className={`rounded-lg border border-border-primary bg-bg-primary ${
+              compact ? 'px-2 py-1' : 'p-2'
+            }`}
           >
             <code className="break-all text-text-primary">{getReaderImpulseLabel(impulse)}</code>
           </li>

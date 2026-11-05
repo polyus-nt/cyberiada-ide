@@ -9,7 +9,7 @@ import { useModal } from '@renderer/hooks/useModal';
 import { useWindowManagerStore } from '@renderer/hooks/useWindowManagerStore';
 import { useDoc } from '@renderer/store/useDoc';
 import { useSimulatorWindow } from '@renderer/store/useSimulatorWindow';
-import { useTasks } from '@renderer/store/useTasks';
+import { getActiveTask, useTasks } from '@renderer/store/useTasks';
 import { ConnectionIndicator } from '@renderer/components/UI/ConnectionIndicator';
 
 import {
@@ -54,6 +54,7 @@ export const Header: React.FC<HeaderProps> = ({ fileMenuItems, initialSimulation
     state.close,
   ]);
   const submissionActive = useTasks((state) => state.submissionActive);
+  const isJointTask = useTasks((state) => getActiveTask(state)?.platformId === 'reader-gardener');
   const [setActiveWindow, bringToFront, removeWindow] = useWindowManagerStore((state) => [
     state.setActiveWindow,
     state.bringToFront,
@@ -240,7 +241,11 @@ export const Header: React.FC<HeaderProps> = ({ fileMenuItems, initialSimulation
         onRequestClose={closeSimulatorWindow}
         hideCancelButton
         className={`max-h-[calc(100vh-36px)] max-w-[calc(100vw-40px)] p-6 [&>.content]:overflow-hidden ${
-          isAutoSizedSimulator ? 'h-fit w-fit' : 'h-[664px] w-[976px]'
+          isAutoSizedSimulator
+            ? 'h-fit w-fit'
+            : isJointTask
+            ? 'h-[664px] w-[1200px]'
+            : 'h-[664px] w-[976px]'
         }`}
       >
         <Simulator

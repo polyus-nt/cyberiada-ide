@@ -291,7 +291,7 @@ it('shows both participants and their results for a joint task', () => {
   };
   const html = renderTaskMode(joint);
   expect(html).toContain('АБВВБА');
-  expect(html).toContain('Брокер');
+  expect(html).not.toContain('Строчник → Брокер → Садовник');
   expect(html).toContain('Импульс А');
   expect(html).toContain('Импульс Б');
   expect(html).toContain('Фактическое поле');
