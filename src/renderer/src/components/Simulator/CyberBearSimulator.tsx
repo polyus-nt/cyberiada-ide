@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 
+import { ScrollArea } from '@renderer/components/UI/ScrollArea';
+
 import type {
   CyberBearParameters,
   CyberBearState,
@@ -45,7 +47,11 @@ export const CyberBearSimulator: React.FC<CyberBearSimulatorProps> = ({
   const state = cyberBear ?? createCyberBearState();
 
   return (
-    <div className="grid min-h-0 flex-1 grid-cols-[205px_minmax(260px,1fr)_260px] gap-6 overflow-auto text-sm max-[983px]:grid-cols-[205px_minmax(260px,1fr)] max-[729px]:grid-cols-1">
+    <ScrollArea
+      className="min-h-0 flex-1 text-sm"
+      viewportClassName="pr-3"
+      contentClassName="grid min-h-full grid-cols-[205px_minmax(260px,1fr)_260px] gap-6 max-[983px]:grid-cols-[205px_minmax(260px,1fr)] max-[729px]:grid-cols-1"
+    >
       <SimulationRunPanel
         machineSelector={machineSelector}
         mode={mode}
@@ -74,6 +80,6 @@ export const CyberBearSimulator: React.FC<CyberBearSimulatorProps> = ({
       <div className="max-[983px]:col-span-2 max-[729px]:col-span-1">
         <CyberBearInputs inputs={inputs} active={active} onChange={setInputs} />
       </div>
-    </div>
+    </ScrollArea>
   );
 };

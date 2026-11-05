@@ -8,9 +8,6 @@
   align-content: start;
   align-items: start;
   gap: 12px;
-  min-height: 0;
-  overflow-y: auto;
-  padding: 12px;
 }
 
 .joint-task-gardener {

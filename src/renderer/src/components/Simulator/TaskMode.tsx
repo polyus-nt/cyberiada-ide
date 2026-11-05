@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
+import { ScrollArea } from '@renderer/components/UI/ScrollArea';
+
 import { CyberBearTaskDetails } from './CyberBearTaskDetails';
 import { GardenerMarker, type GardenerFieldOrientation, gardenerCellStyles } from './GardenerField';
 import { ReaderImpulseList } from './ReaderResult';
@@ -347,7 +349,11 @@ const ReaderGardenerDetails: React.FC<{ test: VerificationTest; execution?: Simu
   const input = test.input as ReaderGardenerTaskInput;
   return (
     <div className="joint-task-workspace flex min-h-0 flex-1 flex-col">
-      <div className="joint-task-details">
+      <ScrollArea
+        className="min-h-0 flex-1"
+        viewportClassName="px-3 py-[7px]"
+        contentClassName="joint-task-details"
+      >
         <section className="min-w-0" aria-label="Строчник">
           <ReaderDetails
             compact
@@ -362,7 +368,7 @@ const ReaderGardenerDetails: React.FC<{ test: VerificationTest; execution?: Simu
             execution={execution?.machines?.gardener}
           />
         </section>
-      </div>
+      </ScrollArea>
     </div>
   );
 };
@@ -520,7 +526,12 @@ export const TaskMode: React.FC<TaskModeProps> = ({
             />
           </div>
         </div>
-        <div className="min-h-0 flex-1 space-y-2 overflow-y-auto p-3">
+        <ScrollArea
+          className="min-h-0 flex-1"
+          viewportClassName="px-3 py-[7px]"
+          contentClassName="space-y-2"
+          horizontalScroll={false}
+        >
           {task.tests.map((test) => {
             const state = testStates[test.id] ?? { phase: 'idle' as const };
             const phaseStyle = phaseStyles[state.phase];
@@ -589,7 +600,7 @@ export const TaskMode: React.FC<TaskModeProps> = ({
               <p>{failedMessage}</p>
             </div>
           )}
-        </div>
+        </ScrollArea>
         <div className="shrink-0 border-t border-border-primary bg-bg-primary p-3">
           {summary && (
             <div

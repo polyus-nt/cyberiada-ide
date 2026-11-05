@@ -20,7 +20,7 @@ export const ReaderImpulseList: React.FC<{
     </div>
   ) : (
     <ScrollArea
-      className={compact ? 'h-auto max-h-[180px] py-0' : 'max-h-[236px] min-h-0 flex-1 py-0'}
+      className={compact ? 'h-auto max-h-[180px]' : 'max-h-[236px] min-h-0 flex-1'}
       viewportClassName="mr-[6px]"
       horizontalScroll={false}
     >

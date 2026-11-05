@@ -4,6 +4,7 @@ import { nanoid } from 'nanoid';
 
 import { ReactComponent as ArrowIcon } from '@renderer/assets/icons/arrow-down.svg';
 import { ParameterSelect } from '@renderer/components/UI';
+import { ScrollArea } from '@renderer/components/UI/ScrollArea';
 import type { CyberBearChannel } from '@renderer/types/InterpreterTypes';
 
 import {
@@ -92,95 +93,103 @@ export const CyberBearInputs: React.FC<{
   return (
     <section>
       <h2 className="h2-header mb-3">Входная последовательность</h2>
-      <ol className="max-h-[420px] space-y-1.5 overflow-y-auto">
-        {inputs.map((input, index) => (
-          <li key={input.id} className="rounded-lg border border-border-primary">
-            <div className="flex h-[30px] items-center gap-1 px-2">
-              <button
-                type="button"
-                className="grid h-full min-w-0 flex-1 grid-cols-[10px_12px_minmax(0,1fr)_24px_40px] items-center gap-1 rounded text-left text-xs hover:bg-bg-hover focus-visible:outline-primary"
-                aria-label={`${expandedId === input.id ? 'Свернуть' : 'Раскрыть'} элемент ${
-                  index + 1
-                }`}
-                aria-expanded={expandedId === input.id}
-                aria-controls={`cyberbear-input-editor-${input.id}`}
-                title={`Время: ${input.timeMs || '—'} мс; канал: ${
-                  input.channel === 'ir' ? 'ИК' : 'Акустика'
-                }; байт: ${input.value || '—'}`}
-                onClick={() =>
-                  setExpandedId((current) => (current === input.id ? undefined : input.id))
-                }
-              >
-                <ArrowIcon
-                  className={expandedId === input.id ? 'rotate-0' : '-rotate-90'}
-                  aria-hidden="true"
-                />
-                <span className="text-text-inactive">{index + 1}</span>
-                <span className="truncate tabular-nums">{input.timeMs || '—'} мс</span>
-                <span>{input.channel === 'ir' ? 'ИК' : 'АК'}</span>
-                <span className="truncate tabular-nums">{input.value || '—'}</span>
-              </button>
-              <div className="flex gap-1">
-                <button
-                  type="button"
-                  className={rowButton}
-                  aria-label={`Поднять элемент ${index + 1}`}
-                  disabled={active || index === 0}
-                  onClick={() => move(index, -1)}
+      {inputs.length > 0 && (
+        <ScrollArea
+          className="h-auto max-h-[420px]"
+          viewportClassName="pr-1"
+          horizontalScroll={false}
+        >
+          <ol className="space-y-1.5">
+            {inputs.map((input, index) => (
+              <li key={input.id} className="rounded-lg border border-border-primary">
+                <div className="flex h-[30px] items-center gap-1 px-2">
+                  <button
+                    type="button"
+                    className="grid h-full min-w-0 flex-1 grid-cols-[10px_12px_minmax(0,1fr)_24px_40px] items-center gap-1 rounded text-left text-xs hover:bg-bg-hover focus-visible:outline-primary"
+                    aria-label={`${expandedId === input.id ? 'Свернуть' : 'Раскрыть'} элемент ${
+                      index + 1
+                    }`}
+                    aria-expanded={expandedId === input.id}
+                    aria-controls={`cyberbear-input-editor-${input.id}`}
+                    title={`Время: ${input.timeMs || '—'} мс; канал: ${
+                      input.channel === 'ir' ? 'ИК' : 'Акустика'
+                    }; байт: ${input.value || '—'}`}
+                    onClick={() =>
+                      setExpandedId((current) => (current === input.id ? undefined : input.id))
+                    }
+                  >
+                    <ArrowIcon
+                      className={expandedId === input.id ? 'rotate-0' : '-rotate-90'}
+                      aria-hidden="true"
+                    />
+                    <span className="text-text-inactive">{index + 1}</span>
+                    <span className="truncate tabular-nums">{input.timeMs || '—'} мс</span>
+                    <span>{input.channel === 'ir' ? 'ИК' : 'АК'}</span>
+                    <span className="truncate tabular-nums">{input.value || '—'}</span>
+                  </button>
+                  <div className="flex gap-1">
+                    <button
+                      type="button"
+                      className={rowButton}
+                      aria-label={`Поднять элемент ${index + 1}`}
+                      disabled={active || index === 0}
+                      onClick={() => move(index, -1)}
+                    >
+                      ↑
+                    </button>
+                    <button
+                      type="button"
+                      className={rowButton}
+                      aria-label={`Опустить элемент ${index + 1}`}
+                      disabled={active || index === inputs.length - 1}
+                      onClick={() => move(index, 1)}
+                    >
+                      ↓
+                    </button>
+                    <button
+                      type="button"
+                      className={rowButton}
+                      aria-label={`Удалить элемент ${index + 1}`}
+                      disabled={active}
+                      onClick={() => {
+                        if (expandedId === input.id) setExpandedId(undefined);
+                        onChange(inputs.filter((_, current) => current !== index));
+                      }}
+                    >
+                      ×
+                    </button>
+                  </div>
+                </div>
+                <div
+                  id={`cyberbear-input-editor-${input.id}`}
+                  hidden={expandedId !== input.id}
+                  className="space-y-2 border-t border-border-primary p-2"
                 >
-                  ↑
-                </button>
-                <button
-                  type="button"
-                  className={rowButton}
-                  aria-label={`Опустить элемент ${index + 1}`}
-                  disabled={active || index === inputs.length - 1}
-                  onClick={() => move(index, 1)}
-                >
-                  ↓
-                </button>
-                <button
-                  type="button"
-                  className={rowButton}
-                  aria-label={`Удалить элемент ${index + 1}`}
-                  disabled={active}
-                  onClick={() => {
-                    if (expandedId === input.id) setExpandedId(undefined);
-                    onChange(inputs.filter((_, current) => current !== index));
-                  }}
-                >
-                  ×
-                </button>
-              </div>
-            </div>
-            <div
-              id={`cyberbear-input-editor-${input.id}`}
-              hidden={expandedId !== input.id}
-              className="space-y-2 border-t border-border-primary p-2"
-            >
-              <label className="grid gap-1 text-xs" htmlFor={`cyberbear-channel-${input.id}`}>
-                Канал
-                <ParameterSelect
-                  inputId={`cyberbear-channel-${input.id}`}
-                  options={channels}
-                  value={channels.find((option) => option.value === input.channel)}
-                  isDisabled={active}
-                  isSearchable={false}
-                  isClearable={false}
-                  onChange={(option) => {
-                    if (option) update(index, { channel: option.value });
-                  }}
-                />
-              </label>
-              <CyberBearInputFields
-                input={input}
-                active={active}
-                onChange={(patch) => update(index, patch)}
-              />
-            </div>
-          </li>
-        ))}
-      </ol>
+                  <label className="grid gap-1 text-xs" htmlFor={`cyberbear-channel-${input.id}`}>
+                    Канал
+                    <ParameterSelect
+                      inputId={`cyberbear-channel-${input.id}`}
+                      options={channels}
+                      value={channels.find((option) => option.value === input.channel)}
+                      isDisabled={active}
+                      isSearchable={false}
+                      isClearable={false}
+                      onChange={(option) => {
+                        if (option) update(index, { channel: option.value });
+                      }}
+                    />
+                  </label>
+                  <CyberBearInputFields
+                    input={input}
+                    active={active}
+                    onChange={(patch) => update(index, patch)}
+                  />
+                </div>
+              </li>
+            ))}
+          </ol>
+        </ScrollArea>
+      )}
       {inputs.length === 0 && (
         <p className="mb-3 text-xs text-text-inactive">Нет входных байтов.</p>
       )}

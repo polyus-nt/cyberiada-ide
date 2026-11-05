@@ -4,6 +4,7 @@ import { twMerge } from 'tailwind-merge';
 
 import { ReactComponent as ArrowIcon } from '@renderer/assets/icons/arrow-down.svg';
 import { ParameterSelect } from '@renderer/components/UI';
+import { ScrollArea } from '@renderer/components/UI/ScrollArea';
 import { getMissingComponentReferences } from '@renderer/lib/data/ComponentReferences';
 import { exportCGML, exportStateMachineCGML } from '@renderer/lib/data/GraphmlBuilder';
 import { getPlatform } from '@renderer/lib/data/PlatformLoader';
@@ -739,10 +740,13 @@ export const JointSimulator: React.FC<JointSimulatorProps> = ({
 
   return (
     <div className="joint-simulator min-h-0 min-w-0 flex-1">
-      <div className="joint-simulator-layout">
-        <aside
+      <ScrollArea className="min-h-0 flex-1" contentClassName="joint-simulator-layout">
+        <ScrollArea
+          role="complementary"
           aria-label="Настройки совместной симуляции"
-          className="joint-simulator-controls min-h-0 min-w-0 overflow-y-auto"
+          className="joint-simulator-controls min-h-0 min-w-0"
+          viewportClassName="pr-3"
+          horizontalScroll={false}
         >
           <SimulationRunPanel
             machineSelector={
@@ -819,7 +823,7 @@ export const JointSimulator: React.FC<JointSimulatorProps> = ({
               }
             }}
           />
-        </aside>
+        </ScrollArea>
 
         <section
           aria-label="Рабочая область совместной симуляции"
@@ -864,7 +868,11 @@ export const JointSimulator: React.FC<JointSimulatorProps> = ({
             ))}
           </div>
 
-          <div className="joint-simulator-panels min-h-0 flex-1 overflow-y-auto p-4">
+          <ScrollArea
+            className="joint-simulator-panels min-h-0 flex-1"
+            viewportClassName="px-4 py-[11px]"
+            contentClassName="h-full"
+          >
             <div
               role="tabpanel"
               id="joint-panel-reader"
@@ -911,11 +919,13 @@ export const JointSimulator: React.FC<JointSimulatorProps> = ({
                   {readerResult?.message && (
                     <p className="shrink-0 break-words text-xs">{readerResult.message}</p>
                   )}
-                  <div
-                    className={twMerge(
-                      'min-h-0 flex-1 overflow-auto rounded-lg border border-border-primary p-3',
-                      impulses.length === 0 && 'flex items-center justify-center'
-                    )}
+                  <ScrollArea
+                    className="min-h-0 flex-1 rounded-lg border border-border-primary"
+                    viewportClassName="px-3 py-[7px]"
+                    contentClassName={
+                      impulses.length === 0 ? 'flex h-full items-center justify-center' : undefined
+                    }
+                    horizontalScroll={false}
                     tabIndex={0}
                   >
                     {impulses.length > 0 ? (
@@ -937,7 +947,7 @@ export const JointSimulator: React.FC<JointSimulatorProps> = ({
                           : 'Импульсы появятся после запуска.'}
                       </p>
                     )}
-                  </div>
+                  </ScrollArea>
                 </section>
               </div>
             </div>
@@ -961,9 +971,9 @@ export const JointSimulator: React.FC<JointSimulatorProps> = ({
                 onCancel={interpreter.cancel}
               />
             </div>
-          </div>
+          </ScrollArea>
         </section>
-      </div>
+      </ScrollArea>
     </div>
   );
 };
