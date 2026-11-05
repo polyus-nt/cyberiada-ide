@@ -8,7 +8,9 @@ import { Flasher } from '@renderer/components/Modules/Flasher';
 import { Modal, ScrollArea } from '@renderer/components/UI';
 import { useFlasher } from '@renderer/store/useFlasher';
 
-import { ArduinoDevice, BlgMbDevice, Device, MSDevice } from '../../Modules/Device';
+import { BoardProfileSelector } from './BoardProfileSelector';
+
+import { ArduinoDevice, BlgMbDevice, Device, MSDevice, UnknownDevice } from '../../Modules/Device';
 import { ClientStatus } from '../../Modules/Websocket/ClientStatus';
 
 interface DeviceListProps {
@@ -17,6 +19,7 @@ interface DeviceListProps {
   onSubmit: (deviceIds: string[]) => void;
   submitLabel: string;
   devices: Map<string, Device>;
+  allowUnknownSelection?: boolean;
 }
 
 export const DeviceList: React.FC<DeviceListProps> = ({
@@ -25,6 +28,7 @@ export const DeviceList: React.FC<DeviceListProps> = ({
   onSubmit,
   submitLabel,
   devices,
+  allowUnknownSelection = false,
   ...props
 }) => {
   const { handleSubmit: hookHandleSubmit } = useForm();
@@ -46,49 +50,49 @@ export const DeviceList: React.FC<DeviceListProps> = ({
     Flasher.getList();
   };
 
-  const deviceInfoDisplay = (device: Device | undefined) => {
-    if (!device) return;
-    if (device.isMSDevice()) {
-      const MSDevice = device as MSDevice;
-      let portNames = MSDevice.portNames[0];
-      for (let i = 1; i < MSDevice.portNames.length; i++) {
-        portNames = portNames + '; ' + MSDevice.portNames[i];
+  const selectedDevice = currentDeviceID ? devices.get(currentDeviceID) : undefined;
+  const canSelect =
+    !!selectedDevice && (allowUnknownSelection || !(selectedDevice instanceof UnknownDevice));
+
+  const deviceInfoDisplay = (device: Device) => {
+    const details: [string, string][] = [];
+    if (device instanceof UnknownDevice) {
+      details.push(['Порт', device.portName]);
+      if (device.serialID) details.push(['Серийный номер', device.serialID]);
+      if (device.vendorID || device.productID) {
+        details.push(['VID / PID', `${device.vendorID || '—'} / ${device.productID || '—'}`]);
       }
-      return (
-        <div>
-          <p>{MSDevice.name}</p>
-          <p>Порты: {portNames}</p>
-        </div>
-      );
-    } else if (device.isArduinoDevice()) {
-      const ArduinoDevice = device as ArduinoDevice;
-      return (
-        <div>
-          <p> {ArduinoDevice.name}</p>
-          <p>Серийный номер: {ArduinoDevice.serialID}</p>
-          <p>Порт: {ArduinoDevice.portName}</p>
-          <p>Контроллер: {ArduinoDevice.controller}</p>
-          <p>Программатор: {ArduinoDevice.programmer}</p>
-        </div>
-      );
-    } else if (device.isBlgMbDevice()) {
-      const BlgMbDevice = device as BlgMbDevice;
-      return (
-        <div>
-          <p> {BlgMbDevice.name}</p>
-          <p>Версия: {BlgMbDevice.version}</p>
-        </div>
-      );
-    } else {
-      return <div className="text-center">Дополнительная информация отсутствует</div>;
+    } else if (device instanceof MSDevice) {
+      details.push(['Порты', device.portNames.join('; ')]);
+    } else if (device instanceof ArduinoDevice) {
+      details.push(['Порт', device.portName]);
+      if (device.serialID) details.push(['Серийный номер', device.serialID]);
+      details.push(['Контроллер', device.controller], ['Программатор', device.programmer]);
+    } else if (device instanceof BlgMbDevice) {
+      details.push(['Версия', device.version]);
     }
+    return (
+      <div className="space-y-4">
+        <h3 className="break-words font-medium [overflow-wrap:anywhere]">{device.displayName()}</h3>
+        {details.length > 0 ? (
+          <dl className="space-y-2">
+            {details.map(([label, value]) => (
+              <div key={label} className="grid grid-cols-[120px_minmax(0,1fr)] gap-3">
+                <dt className="text-text-inactive">{label}</dt>
+                <dd className="break-words [overflow-wrap:anywhere]">{value || '—'}</dd>
+              </div>
+            ))}
+          </dl>
+        ) : (
+          <p className="text-text-inactive">Дополнительная информация отсутствует</p>
+        )}
+        <BoardProfileSelector key={device.deviceID} device={device} />
+      </div>
+    );
   };
 
   const handleSubmit = hookHandleSubmit(() => {
-    if (!currentDeviceID) {
-      onClose();
-      return;
-    }
+    if (!currentDeviceID || !canSelect) return;
     // TODO: реализовать передачу нескольких устройств одновременно
     onSubmit([currentDeviceID]);
     onClose();
@@ -97,61 +101,68 @@ export const DeviceList: React.FC<DeviceListProps> = ({
   const renderContent = () => {
     if (connectionStatus === ClientStatus.CONNECTED) {
       return (
-        <div className="grid w-[618px] grid-cols-[310px_284px] gap-x-6">
-          <div>
-            <div className="mb-[11px] flex items-center gap-3 font-medium">
-              <span>Устройства</span>
+        <div className="grid min-h-0 gap-5 sm:grid-cols-[minmax(0,260px)_minmax(0,1fr)]">
+          <section className="flex min-w-0 flex-col gap-3">
+            <div className="flex h-6 items-center justify-between gap-3">
+              <h2 className="font-medium">
+                Устройства <span className="text-text-inactive">{devices.size}</span>
+              </h2>
               <button
-                className="text-primary transition-opacity disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded p-1 text-text-inactive transition-colors hover:bg-bg-hover hover:text-text-primary focus-visible:outline focus-visible:outline-1 focus-visible:outline-primary"
                 onClick={handleGetList}
-                disabled={connectionStatus !== ClientStatus.CONNECTED}
                 type="button"
-                aria-label="Обновить"
-                title="Обновить"
+                aria-label="Обновить список устройств"
+                title="Обновить список устройств"
               >
                 <Update className="h-4 w-4" />
               </button>
             </div>
             <ScrollArea
-              className="h-[140px] rounded-lg border border-border-primary bg-bg-control py-0"
-              viewportClassName="px-[8px] py-[8px]"
-              verticalOverflowViewportClassName="pr-0"
+              className="h-40 rounded-lg border border-border-primary bg-bg-control py-0 sm:h-[340px]"
+              viewportClassName="p-2"
+              verticalOverflowViewportClassName="pr-3"
               horizontalScroll={false}
             >
               {devices.size === 0 ? (
                 <p className="px-3 py-2 text-text-inactive">Устройства не найдены</p>
               ) : (
-                [...devices.keys()].map((key) => (
+                [...devices].map(([key, device]) => (
                   <button
                     key={key}
+                    aria-pressed={isActive(key)}
                     className={twMerge(
-                      'flex h-[25px] w-full cursor-pointer select-none items-center rounded-lg px-3 text-left leading-4 transition-colors hover:bg-bg-hover',
-                      isActive(key) && 'bg-bg-active'
+                      'mb-1 flex min-h-9 w-full cursor-pointer select-none items-center rounded-md px-3 py-2 text-left transition-colors last:mb-0 hover:bg-bg-hover focus-visible:outline focus-visible:outline-1 focus-visible:outline-primary',
+                      isActive(key) && 'bg-bg-active hover:bg-bg-active'
                     )}
                     onClick={() => setCurrentDevice(key)}
                     type="button"
                   >
-                    {devices.get(key)?.displayName()}
+                    <span className="w-full break-words [overflow-wrap:anywhere]">
+                      {device.displayName()}
+                    </span>
                   </button>
                 ))
               )}
             </ScrollArea>
-          </div>
+          </section>
 
-          <div>
-            <h2 className="mb-[11px] font-medium">Описание</h2>
+          <section className="flex min-w-0 flex-col gap-3">
+            <h2 className="flex h-6 items-center font-medium">Описание устройства</h2>
             <ScrollArea
-              className="h-[140px]"
-              viewportClassName="break-words text-left leading-4"
+              className="h-[340px] rounded-lg border border-border-primary py-0"
+              viewportClassName="p-4 text-left"
+              verticalOverflowViewportClassName="pr-5"
               horizontalScroll={false}
             >
-              {currentDeviceID ? (
-                deviceInfoDisplay(devices.get(currentDeviceID))
+              {selectedDevice ? (
+                deviceInfoDisplay(selectedDevice)
               ) : (
-                <p>Выберите устройство из списка, чтобы посмотреть информацию о нем</p>
+                <p className="text-text-inactive">
+                  Выберите устройство из списка, чтобы посмотреть информацию о нём
+                </p>
               )}
             </ScrollArea>
-          </div>
+          </section>
         </div>
       );
     } else {
@@ -168,11 +179,12 @@ export const DeviceList: React.FC<DeviceListProps> = ({
       {...props}
       isOpen={isOpen}
       title="Список устройств"
+      className="w-[760px] max-w-[calc(100vw-32px)] overflow-y-auto"
       onRequestClose={onClose}
       submitLabel={submitLabel}
       onSubmit={handleSubmit}
       hideCancelButton
-      submitDisabled={!currentDeviceID}
+      submitDisabled={!canSelect}
     >
       {renderContent()}
     </Modal>

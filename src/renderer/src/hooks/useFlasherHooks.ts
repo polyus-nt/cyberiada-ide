@@ -2,7 +2,13 @@ import { useEffect } from 'react';
 
 import { Buffer } from 'buffer';
 
-import { ArduinoDevice, BlgMbDevice, Device, MSDevice } from '@renderer/components/Modules/Device';
+import {
+  ArduinoDevice,
+  BlgMbDevice,
+  Device,
+  MSDevice,
+  UnknownDevice,
+} from '@renderer/components/Modules/Device';
 import { Flasher } from '@renderer/components/Modules/Flasher';
 import { ManagerMS } from '@renderer/components/Modules/ManagerMS';
 import {
@@ -94,6 +100,7 @@ export const useFlasherHooks = () => {
         setDeviceMS(device as MSDevice);
       }
     }
+    if (serialMonitorDevice?.deviceID === device.deviceID) setSerialMonitorDevice(device);
     newMap.set(device.deviceID, device);
     setDevices(newMap);
   };
@@ -219,6 +226,7 @@ export const useFlasherHooks = () => {
 
   useEffect(() => {
     setDevices(new Map());
+    if (connectionStatus !== ClientStatus.CONNECTED) useFlasher.getState().setBoardProfiles([]);
     setMsDevicesCnt(0);
     setDeviceMS(undefined);
     setIsFlashing(false);
@@ -266,6 +274,10 @@ export const useFlasherHooks = () => {
           `Устройство ${flasherMessage.payload} не поддерживается для прошивки в данной версии IDE.`,
           undefined
         );
+        break;
+      }
+      case 'unknown-device': {
+        addDevice(new UnknownDevice(flasherMessage.payload as UnknownDevice));
         break;
       }
       case 'device': {

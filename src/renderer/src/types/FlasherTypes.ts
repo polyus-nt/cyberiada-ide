@@ -20,6 +20,11 @@ export type FlashUpdatePort = {
 
 // TODO: поделить на исходящие и принимающие сообщения
 export type FlasherType =
+  | 'get-board-profiles'
+  | 'board-profiles'
+  | 'set-board-profile'
+  | 'board-profile-result'
+  | 'unknown-device'
   | 'reset'
   | 'reset-result'
   | 'ping'
@@ -82,7 +87,12 @@ export type FlasherType =
   | 'get-firmware-finish'
   | 'ready-for-binary'
   | 'binary-data';
+export type BoardProfile = { id: number; name: string };
+export type SetBoardProfile = { deviceID: string; profileID: number | null };
+
 export type FlasherPayload =
+  | BoardProfile[]
+  | SetBoardProfile
   | null
   | string
   | Uint8Array
