@@ -39,7 +39,7 @@ import { createCyberBearState } from './cyberBearModel';
 import { CyberBearSimulator } from './CyberBearSimulator';
 
 describe('CyberBear simulator', () => {
-  it('creates compact rows and expands only one editor, keeping it attached when reordered', () => {
+  it('opens each added input and keeps only one editor expanded, including after reordering', () => {
     vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
     const container = document.createElement('div');
     const root = createRoot(container);
@@ -79,7 +79,10 @@ describe('CyberBear simulator', () => {
         )
       );
       click('Добавить элемент');
+      expect(editors().map((editor) => editor.hidden)).toEqual([false]);
       click('Добавить элемент');
+      expect(editors().map((editor) => editor.hidden)).toEqual([true, false]);
+      click('Свернуть элемент 2');
       expect(editors().map((editor) => editor.hidden)).toEqual([true, true]);
       const first = container.querySelector('[aria-label="Раскрыть элемент 1"]');
       expect(first?.textContent).toContain('0 мсИК—');
@@ -144,11 +147,6 @@ describe('CyberBear simulator', () => {
         )
       );
       click('Добавить элемент');
-      const expand = container.querySelector<HTMLButtonElement>(
-        '[aria-label="Раскрыть элемент 1"]'
-      );
-      if (!expand) throw new Error('Missing expand button');
-      act(() => expand.click());
       const value = container.querySelector<HTMLInputElement>('[id^="cyberbear-value-"]');
       const time = container.querySelector<HTMLInputElement>('[id^="cyberbear-time-"]');
       if (!value || !time) throw new Error('Missing sequence inputs');
@@ -195,11 +193,6 @@ describe('CyberBear simulator', () => {
       act(() => moveDown.click());
       expect(time.getAttribute('aria-invalid')).toBe('true');
       expect(newTime.getAttribute('aria-invalid')).toBe('false');
-      const expandNew = container.querySelector<HTMLButtonElement>(
-        '[aria-label="Раскрыть элемент 1"]'
-      );
-      if (!expandNew) throw new Error('Missing expand button');
-      act(() => expandNew.click());
       act(() => Simulate.blur(newTime));
       expect(newTime.getAttribute('aria-invalid')).toBe('true');
       expect(newValue.getAttribute('aria-invalid')).toBe('false');
@@ -230,8 +223,6 @@ describe('CyberBear simulator', () => {
         );
         if (!button) throw new Error('Missing add input button');
         act(() => button.click());
-        const toggles = container.querySelectorAll<HTMLButtonElement>('button[aria-expanded]');
-        act(() => toggles[toggles.length - 1].click());
       };
       const change = (prefix: string, index: number, value: string) => {
         const control = container.querySelectorAll<HTMLInputElement | HTMLSelectElement>(

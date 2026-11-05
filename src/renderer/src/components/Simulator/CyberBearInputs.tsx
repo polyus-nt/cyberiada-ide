@@ -96,10 +96,9 @@ export const CyberBearInputs: React.FC<{
         {inputs.map((input, index) => (
           <li key={input.id} className="rounded-lg border border-border-primary">
             <div className="flex h-[30px] items-center gap-1 px-2">
-              <span className="w-3 shrink-0 text-xs text-text-inactive">{index + 1}</span>
               <button
                 type="button"
-                className="grid h-full min-w-0 flex-1 grid-cols-[10px_minmax(0,1fr)_24px_40px] items-center gap-1 rounded text-left text-xs hover:bg-bg-hover focus-visible:outline-primary"
+                className="grid h-full min-w-0 flex-1 grid-cols-[10px_12px_minmax(0,1fr)_24px_40px] items-center gap-1 rounded text-left text-xs hover:bg-bg-hover focus-visible:outline-primary"
                 aria-label={`${expandedId === input.id ? 'Свернуть' : 'Раскрыть'} элемент ${
                   index + 1
                 }`}
@@ -116,6 +115,7 @@ export const CyberBearInputs: React.FC<{
                   className={expandedId === input.id ? 'rotate-0' : '-rotate-90'}
                   aria-hidden="true"
                 />
+                <span className="text-text-inactive">{index + 1}</span>
                 <span className="truncate tabular-nums">{input.timeMs || '—'} мс</span>
                 <span>{input.channel === 'ir' ? 'ИК' : 'АК'}</span>
                 <span className="truncate tabular-nums">{input.value || '—'}</span>
@@ -188,17 +188,16 @@ export const CyberBearInputs: React.FC<{
         type="button"
         className="mt-2 h-8 w-full rounded-lg border border-border-primary px-3 text-xs enabled:hover:bg-bg-hover disabled:opacity-40"
         disabled={active || inputs.length >= MAX_CYBERBEAR_INPUTS}
-        onClick={() =>
-          onChange([
-            ...inputs,
-            {
-              id: nanoid(),
-              channel: inputs[inputs.length - 1]?.channel ?? 'ir',
-              timeMs: inputs[inputs.length - 1]?.timeMs ?? '0',
-              value: '',
-            },
-          ])
-        }
+        onClick={() => {
+          const input: CyberBearInputDraft = {
+            id: nanoid(),
+            channel: inputs[inputs.length - 1]?.channel ?? 'ir',
+            timeMs: inputs[inputs.length - 1]?.timeMs ?? '0',
+            value: '',
+          };
+          onChange([...inputs, input]);
+          setExpandedId(input.id);
+        }}
       >
         Добавить элемент
       </button>
