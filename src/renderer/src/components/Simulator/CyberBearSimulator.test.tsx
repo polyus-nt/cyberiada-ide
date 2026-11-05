@@ -35,6 +35,93 @@ import { createCyberBearState } from './cyberBearModel';
 import { CyberBearSimulator } from './CyberBearSimulator';
 
 describe('CyberBear simulator', () => {
+  it('waits for blur before showing field errors while blocking invalid runs', () => {
+    vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
+    const container = document.createElement('div');
+    const root = createRoot(container);
+    const onStart = vi.fn();
+    const change = (input: HTMLInputElement, value: string) =>
+      act(() => {
+        input.value = value;
+        Simulate.change(input);
+      });
+    const click = (text: string) => {
+      const button = Array.from(container.querySelectorAll('button')).find(
+        (item) => item.textContent === text
+      );
+      if (!button) throw new Error(`Missing button: ${text}`);
+      act(() => button.click());
+    };
+
+    try {
+      act(() =>
+        root.render(
+          <CyberBearSimulator
+            ready
+            active={false}
+            stale={false}
+            machineSelector={<span>Машина</span>}
+            onStart={onStart}
+            onCancel={vi.fn()}
+          />
+        )
+      );
+      click('Добавить элемент');
+      const value = container.querySelector<HTMLInputElement>('[id^="cyberbear-value-"]');
+      const time = container.querySelector<HTMLInputElement>('[id^="cyberbear-time-"]');
+      if (!value || !time) throw new Error('Missing sequence inputs');
+      expect(container.querySelector('[aria-invalid="true"]')).toBeNull();
+      expect(container.textContent).not.toContain('Укажите');
+      click('Запустить');
+      expect(onStart).not.toHaveBeenCalled();
+
+      // Visiting the valid time must not expose the untouched byte error.
+      act(() => Simulate.blur(time));
+      expect(container.textContent).not.toContain('Укажите');
+      change(value, '256');
+      expect(container.textContent).not.toContain('Укажите');
+      act(() => Simulate.blur(value));
+      expect(value.getAttribute('aria-invalid')).toBe('true');
+      expect(time.getAttribute('aria-invalid')).toBe('false');
+      expect(container.textContent).toContain('Укажите байт от 0 до 255');
+      const description = value.getAttribute('aria-describedby');
+      expect(container.querySelector(`[id="${description}"]`)?.textContent).toContain(
+        'Укажите байт'
+      );
+
+      change(value, '0xFF');
+      expect(container.textContent).not.toContain('Укажите');
+      click('Запустить');
+      expect(onStart).toHaveBeenCalledWith('finite', 10, {
+        inputs: [{ channel: 'ir', byte: 255, timeMs: 0 }],
+      });
+
+      change(time, '-1');
+      expect(time.getAttribute('aria-invalid')).toBe('true');
+      expect(value.getAttribute('aria-invalid')).toBe('false');
+      click('Добавить элемент');
+      const newValue = container.querySelectorAll<HTMLInputElement>('[id^="cyberbear-value-"]')[1];
+      const newTime = container.querySelectorAll<HTMLInputElement>('[id^="cyberbear-time-"]')[1];
+      expect(newTime.value).toBe('-1');
+      expect(newTime.getAttribute('aria-invalid')).toBe('false');
+      expect(newValue.getAttribute('aria-invalid')).toBe('false');
+
+      const moveDown = container.querySelector<HTMLButtonElement>(
+        '[aria-label="Опустить элемент 1"]'
+      );
+      if (!moveDown) throw new Error('Missing reorder button');
+      act(() => moveDown.click());
+      expect(time.getAttribute('aria-invalid')).toBe('true');
+      expect(newTime.getAttribute('aria-invalid')).toBe('false');
+      act(() => Simulate.blur(newTime));
+      expect(newTime.getAttribute('aria-invalid')).toBe('true');
+      expect(newValue.getAttribute('aria-invalid')).toBe('false');
+    } finally {
+      act(() => root.unmount());
+      vi.unstubAllGlobals();
+    }
+  });
+
   it('starts with the selected input and updates visual state during execution', () => {
     vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
     const container = document.createElement('div');

@@ -44,14 +44,21 @@ export type CyberBearInputDraft = {
 
 export const MAX_CYBERBEAR_INPUTS = 10_000;
 
-export const cyberBearInputError = ({ value, timeMs }: CyberBearInputDraft): string | undefined => {
+export const cyberBearByteError = (value: string): string | undefined => {
   const text = value.trim();
   if (!/^(?:\d+|0x[0-9a-f]+)$/i.test(text) || Number(text) > 255)
     return 'Укажите байт от 0 до 255 (можно 0xFF).';
+  return undefined;
+};
+
+export const cyberBearTimeError = (timeMs: string): string | undefined => {
   if (!/^\d+$/.test(timeMs.trim()) || !Number.isSafeInteger(Number(timeMs)))
     return 'Укажите целое неотрицательное время в миллисекундах.';
   return undefined;
 };
+
+export const cyberBearInputError = ({ value, timeMs }: CyberBearInputDraft): string | undefined =>
+  cyberBearByteError(value) ?? cyberBearTimeError(timeMs);
 
 export const cyberBearInputValue = (draft: CyberBearInputDraft): CyberBearInput => ({
   channel: draft.channel,
