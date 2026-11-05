@@ -70,9 +70,6 @@ export const CyberBearSimulator: React.FC<CyberBearSimulatorProps> = ({
         <div className="rounded-lg border border-border-primary bg-bg-primary px-6 py-2">
           <CyberBearView state={state} />
         </div>
-        <p className="mt-3 text-xs leading-4 text-text-inactive">
-          Глаза и матрица обновляются во время выполнения программы.
-        </p>
       </section>
       <div className="max-[983px]:col-span-2 max-[729px]:col-span-1">
         <CyberBearInputs inputs={inputs} active={active} onChange={setInputs} />

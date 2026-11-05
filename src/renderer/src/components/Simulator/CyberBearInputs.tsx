@@ -30,9 +30,6 @@ export const CyberBearInputs: React.FC<{
   return (
     <section>
       <h2 className="h2-header mb-3">Входная последовательность</h2>
-      <p className="mb-3 text-xs text-text-inactive">
-        Время от начала симуляции. При одинаковом времени байты отправляются по порядку списка.
-      </p>
       <ol className="max-h-[420px] space-y-3 overflow-y-auto">
         {inputs.map((input, index) => {
           const error = cyberBearInputError(input);
