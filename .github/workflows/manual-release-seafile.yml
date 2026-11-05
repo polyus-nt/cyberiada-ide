@@ -11,10 +11,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Docker 29.4.2's seccomp profile breaks Wine socket calls.
+      - name: Set up Docker
+        uses: docker/setup-docker-action@v5
+        with:
+          version: v29.9.3
+      - name: Show Docker version
+        run: docker version
+
       - name: Init submodules
         run: git submodule update --init --checkout --recursive
       - name: Build release image
         run: docker compose -f compose.release.yml build release
+      - name: Check Wine before downloading Windows toolchains
+        run: docker compose -f compose.release.yml run --rm --no-deps release winepath -w /project
       - name: Build Linux and Windows artifacts
         run: RELEASE_SEAFILE_STAGING=1 docker compose -f compose.release.yml run --rm release
 
