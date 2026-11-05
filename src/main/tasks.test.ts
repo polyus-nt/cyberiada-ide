@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { mkdtempSync, mkdirSync, rmSync, symlinkSync, writeFileSync } from 'fs';
+import { copyFileSync, mkdtempSync, mkdirSync, rmSync, symlinkSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import path from 'path';
 
@@ -163,7 +163,7 @@ describe('loadTaskCatalog', () => {
     const cornflowerPath = catalog.tasks.find((entry) => entry.id === 'gardener-cornflower-path');
 
     expect(catalog.diagnostics).toEqual([]);
-    expect(catalog.tasks.filter((entry) => entry.schemaVersion === 1)).toHaveLength(19);
+    expect(catalog.tasks.filter((entry) => entry.schemaVersion === 1)).toHaveLength(22);
     expect(
       catalog.tasks.filter((entry) => entry.schemaVersion === 1).every((entry) => entry.codeWord)
     ).toBe(true);
@@ -188,6 +188,10 @@ it('loads checker source from a task package and reports missing or escaping pat
     'resources/tasks/bear-station-callsign/bear-station-callsign.task.json'
   );
   const file = path.join(nested, 'bear.task.json');
+  copyFileSync(
+    'resources/tasks/bear-station-callsign/illustration.webp',
+    path.join(nested, 'illustration.webp')
+  );
   writeFileSync(file, JSON.stringify(task));
   expect(loadTaskCatalog(root).diagnostics).toHaveLength(1);
   writeFileSync(
@@ -210,12 +214,53 @@ it('discovers all bundled CyberBear task packages', () => {
   expect(catalog.diagnostics).toEqual([]);
   const tasks = catalog.tasks.filter((task) => task.platformId === 'blg-mb-junior');
   expect(tasks.map((task) => task.id).sort()).toEqual([
+    'bear-airlock-traffic',
+    'bear-cargo-sorting',
+    'bear-code-lock',
     'bear-dice',
+    'bear-ear-calibration',
+    'bear-every-byte',
+    'bear-hello',
+    'bear-hidden-measurements',
+    'bear-ir-remote',
+    'bear-light-music',
+    'bear-mood',
+    'bear-quiet-hour',
     'bear-station-callsign',
+    'bear-station-remote',
+    'bear-two-channels',
     'bear-two-halves',
+    'bear-whole-parcel',
   ]);
   expect(tasks.every((task) => task.checker?.source && task.schemaVersion === 2)).toBe(true);
   expect(
     tasks.find((task) => task.id === 'bear-two-halves')?.tests.some((test) => test.hideInputs)
   ).toBe(true);
+});
+
+it('keeps all 21 module tasks illustrated and presents both secret messages without spoilers', () => {
+  const catalog = loadTaskCatalog(path.resolve('resources/tasks'));
+  expect(catalog.diagnostics).toEqual([]);
+  const moduleTasks = catalog.tasks.filter(
+    (task) =>
+      task.platformId === 'blg-mb-junior' ||
+      [
+        'reader-reception',
+        'reader-double-signature',
+        'reader-gardener-radio-planting',
+        'reader-gardener-orbital-planting',
+      ].includes(task.id)
+  );
+  expect(moduleTasks).toHaveLength(21);
+  for (const task of moduleTasks) {
+    expect(task.description).toMatch(/!\[[^\]]+\]\([^)]*illustration\.webp\)/);
+    expect(task.description).not.toMatch(/теори[яию]|мастер[ -]класс|суть решения/i);
+  }
+  for (const id of ['bear-hidden-measurements', 'bear-two-halves']) {
+    const task = moduleTasks.find((task) => task.id === id)!;
+    expect(task.tests.some((test) => test.hideInputs)).toBe(true);
+    expect(task.codeWord).toBeUndefined();
+    expect(task.description).not.toMatch(/ГОРОД|БЕРЛОГА/);
+    expect(task.description).toContain('| Треугольник | Н | О | П | Р |');
+  }
 });

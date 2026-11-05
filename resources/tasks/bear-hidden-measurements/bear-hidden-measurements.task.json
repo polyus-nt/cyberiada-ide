@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 2,
+  "id": "bear-hidden-measurements",
+  "version": 1,
+  "title": "Тайник в замерах",
+  "summary": "Найдите скрытое сообщение в акустических замерах подводного зонда.",
+  "descriptionFile": "bear-hidden-measurements.md",
+  "platformId": "blg-mb-junior",
+  "tests": [
+    {
+      "id": "message",
+      "title": "Секретные замеры",
+      "input": {
+        "durationMs": 22000,
+        "inputs": [
+          {
+            "channel": "ears",
+            "byte": 36,
+            "timeMs": 2000
+          },
+          {
+            "channel": "ears",
+            "byte": 107,
+            "timeMs": 4000
+          },
+          {
+            "channel": "ears",
+            "byte": 175,
+            "timeMs": 6000
+          },
+          {
+            "channel": "ears",
+            "byte": 241,
+            "timeMs": 8000
+          },
+          {
+            "channel": "ears",
+            "byte": 55,
+            "timeMs": 10000
+          },
+          {
+            "channel": "ears",
+            "byte": 123,
+            "timeMs": 12000
+          },
+          {
+            "channel": "ears",
+            "byte": 191,
+            "timeMs": 14000
+          },
+          {
+            "channel": "ears",
+            "byte": 1,
+            "timeMs": 16000
+          },
+          {
+            "channel": "ears",
+            "byte": 69,
+            "timeMs": 18000
+          },
+          {
+            "channel": "ears",
+            "byte": 136,
+            "timeMs": 20000
+          }
+        ]
+      },
+      "checks": [
+        {
+          "type": "python"
+        }
+      ],
+      "hideInputs": true
+    },
+    {
+      "id": "another-measurement",
+      "title": "Другие замеры — тот же тайник",
+      "input": {
+        "durationMs": 22000,
+        "inputs": [
+          {
+            "channel": "ears",
+            "byte": 84,
+            "timeMs": 2000
+          },
+          {
+            "channel": "ears",
+            "byte": 203,
+            "timeMs": 4000
+          },
+          {
+            "channel": "ears",
+            "byte": 63,
+            "timeMs": 6000
+          },
+          {
+            "channel": "ears",
+            "byte": 177,
+            "timeMs": 8000
+          },
+          {
+            "channel": "ears",
+            "byte": 39,
+            "timeMs": 10000
+          },
+          {
+            "channel": "ears",
+            "byte": 155,
+            "timeMs": 12000
+          },
+          {
+            "channel": "ears",
+            "byte": 15,
+            "timeMs": 14000
+          },
+          {
+            "channel": "ears",
+            "byte": 129,
+            "timeMs": 16000
+          },
+          {
+            "channel": "ears",
+            "byte": 245,
+            "timeMs": 18000
+          },
+          {
+            "channel": "ears",
+            "byte": 104,
+            "timeMs": 20000
+          }
+        ]
+      },
+      "checks": [
+        {
+          "type": "python"
+        }
+      ],
+      "hideInputs": true
+    }
+  ],
+  "checker": {
+    "apiVersion": 1,
+    "file": "checker.py"
+  }
+}

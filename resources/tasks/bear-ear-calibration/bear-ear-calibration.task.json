@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 2,
+  "id": "bear-ear-calibration",
+  "version": 1,
+  "title": "Калибровка уха",
+  "summary": "Настройте подводный микрофон на ледовой базе Крифа-4.",
+  "descriptionFile": "bear-ear-calibration.md",
+  "platformId": "blg-mb-junior",
+  "tests": [
+    {
+      "id": "example",
+      "title": "Три остатка",
+      "input": {
+        "durationMs": 5000,
+        "inputs": [
+          {
+            "channel": "ears",
+            "byte": 3,
+            "timeMs": 1000
+          },
+          {
+            "channel": "ears",
+            "byte": 4,
+            "timeMs": 2000
+          },
+          {
+            "channel": "ears",
+            "byte": 5,
+            "timeMs": 3000
+          },
+          {
+            "channel": "ears",
+            "byte": 255,
+            "timeMs": 4000
+          }
+        ]
+      },
+      "checks": [
+        {
+          "type": "python"
+        }
+      ]
+    },
+    {
+      "id": "off",
+      "title": "Выключение после цветного сигнала",
+      "input": {
+        "durationMs": 8000,
+        "inputs": [
+          {
+            "channel": "ears",
+            "byte": 1,
+            "timeMs": 1000
+          },
+          {
+            "channel": "ears",
+            "byte": 2,
+            "timeMs": 2000
+          },
+          {
+            "channel": "ears",
+            "byte": 6,
+            "timeMs": 3000
+          },
+          {
+            "channel": "ears",
+            "byte": 8,
+            "timeMs": 4000
+          },
+          {
+            "channel": "ears",
+            "byte": 7,
+            "timeMs": 5000
+          },
+          {
+            "channel": "ears",
+            "byte": 254,
+            "timeMs": 6000
+          },
+          {
+            "channel": "ears",
+            "byte": 253,
+            "timeMs": 7000
+          }
+        ]
+      },
+      "checks": [
+        {
+          "type": "python"
+        }
+      ]
+    },
+    {
+      "id": "other-channel",
+      "title": "Другой канал",
+      "input": {
+        "durationMs": 3000,
+        "inputs": [
+          {
+            "channel": "ears",
+            "byte": 3,
+            "timeMs": 1000
+          },
+          {
+            "channel": "ir",
+            "byte": 1,
+            "timeMs": 1100
+          },
+          {
+            "channel": "ears",
+            "byte": 2,
+            "timeMs": 2000
+          }
+        ]
+      },
+      "checks": [
+        {
+          "type": "python"
+        }
+      ]
+    }
+  ],
+  "checker": {
+    "apiVersion": 1,
+    "file": "checker.py"
+  }
+}

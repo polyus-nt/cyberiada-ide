@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 2,
+  "id": "bear-hello",
+  "version": 1,
+  "title": "Привет, Мишка",
+  "summary": "Разбудите бортового помощника и настройте его световое приветствие.",
+  "descriptionFile": "bear-hello.md",
+  "platformId": "blg-mb-junior",
+  "tests": [
+    {
+      "id": "blink",
+      "title": "Приветствие и границы вспышек",
+      "input": {
+        "durationMs": 6000,
+        "inputs": []
+      },
+      "checks": [
+        {
+          "type": "python"
+        }
+      ]
+    }
+  ],
+  "checker": {
+    "apiVersion": 1,
+    "file": "checker.py"
+  }
+}

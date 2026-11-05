@@ -1,0 +1,648 @@
+{
+  "schemaVersion": 1,
+  "id": "reader-gardener-orbital-planting",
+  "version": 1,
+  "title": "Посадка с орбиты",
+  "summary": "Восстановите цветочные знаки по защищённым командам с орбиты.",
+  "descriptionFile": "reader-gardener-orbital-planting.md",
+  "platformId": "reader-gardener",
+  "tests": [
+    {
+      "id": "glyph-1",
+      "title": "Первый цветочный знак",
+      "input": {
+        "reader": {
+          "message": "ЖЖРРВВВВРРППВВЖЖППВВРРВВРРППППППВВЖЖППППППРРВВВВППВВППВВРРВВРРППППППВВППППППРРВВВВРРВ"
+        },
+        "gardener": {
+          "width": 7,
+          "height": 5,
+          "field": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          ],
+          "position": {
+            "x": 0,
+            "y": 0
+          },
+          "orientation": "EAST"
+        }
+      },
+      "checks": [
+        {
+          "type": "reader.impulses.equals",
+          "expected": [
+            "impulseC",
+            "impulseA",
+            "impulseA",
+            "impulseC",
+            "impulseB",
+            "impulseA",
+            "impulseB",
+            "impulseA",
+            "impulseC",
+            "impulseA",
+            "impulseC",
+            "impulseB",
+            "impulseB",
+            "impulseB",
+            "impulseA",
+            "impulseB",
+            "impulseB",
+            "impulseB",
+            "impulseC",
+            "impulseA",
+            "impulseA",
+            "impulseB",
+            "impulseA",
+            "impulseB",
+            "impulseA",
+            "impulseC",
+            "impulseA",
+            "impulseC",
+            "impulseB",
+            "impulseB",
+            "impulseB",
+            "impulseA",
+            "impulseB",
+            "impulseB",
+            "impulseB",
+            "impulseC",
+            "impulseA",
+            "impulseA",
+            "impulseC"
+          ]
+        },
+        {
+          "type": "gardener.field.equals",
+          "expected": [
+            [
+              1,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "type": "gardener.position.equals",
+          "expected": {
+            "x": 2,
+            "y": 4
+          }
+        }
+      ]
+    },
+    {
+      "id": "glyph-2",
+      "title": "Второй цветочный знак",
+      "input": {
+        "reader": {
+          "message": "РРВВРРЖЖВВРРППВВППРРЖЖВВВВРРППППППВВППЖЖППППРРВВВВРРППВВППРРВВВВРРППППППВВППППППРРВВРРВВРРВ"
+        },
+        "gardener": {
+          "width": 7,
+          "height": 5,
+          "field": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          ],
+          "position": {
+            "x": 0,
+            "y": 0
+          },
+          "orientation": "EAST"
+        }
+      },
+      "checks": [
+        {
+          "type": "reader.impulses.equals",
+          "expected": [
+            "impulseC",
+            "impulseA",
+            "impulseC",
+            "impulseA",
+            "impulseC",
+            "impulseB",
+            "impulseA",
+            "impulseB",
+            "impulseC",
+            "impulseA",
+            "impulseA",
+            "impulseC",
+            "impulseB",
+            "impulseB",
+            "impulseB",
+            "impulseA",
+            "impulseB",
+            "impulseB",
+            "impulseB",
+            "impulseC",
+            "impulseA",
+            "impulseA",
+            "impulseC",
+            "impulseB",
+            "impulseA",
+            "impulseB",
+            "impulseC",
+            "impulseA",
+            "impulseA",
+            "impulseC",
+            "impulseB",
+            "impulseB",
+            "impulseB",
+            "impulseA",
+            "impulseB",
+            "impulseB",
+            "impulseB",
+            "impulseC",
+            "impulseA",
+            "impulseC",
+            "impulseA",
+            "impulseC"
+          ]
+        },
+        {
+          "type": "gardener.field.equals",
+          "expected": [
+            [
+              1,
+              1,
+              1,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              1,
+              1,
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "type": "gardener.position.equals",
+          "expected": {
+            "x": 2,
+            "y": 4
+          }
+        }
+      ]
+    },
+    {
+      "id": "glyph-3",
+      "title": "Третий цветочный знак",
+      "input": {
+        "reader": {
+          "message": "ЖЖВВРРВВППВВЖЖППРРВВВВРРЖЖППППППВВППППППРРВВВВРРППВВППРРВВРРВВРРППППППВВППППППРРВВВВРРВ"
+        },
+        "gardener": {
+          "width": 7,
+          "height": 5,
+          "field": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          ],
+          "position": {
+            "x": 0,
+            "y": 0
+          },
+          "orientation": "EAST"
+        }
+      },
+      "checks": [
+        {
+          "type": "reader.impulses.equals",
+          "expected": [
+            "impulseA",
+            "impulseC",
+            "impulseA",
+            "impulseB",
+            "impulseA",
+            "impulseB",
+            "impulseC",
+            "impulseA",
+            "impulseA",
+            "impulseC",
+            "impulseB",
+            "impulseB",
+            "impulseB",
+            "impulseA",
+            "impulseB",
+            "impulseB",
+            "impulseB",
+            "impulseC",
+            "impulseA",
+            "impulseA",
+            "impulseC",
+            "impulseB",
+            "impulseA",
+            "impulseB",
+            "impulseC",
+            "impulseA",
+            "impulseC",
+            "impulseA",
+            "impulseC",
+            "impulseB",
+            "impulseB",
+            "impulseB",
+            "impulseA",
+            "impulseB",
+            "impulseB",
+            "impulseB",
+            "impulseC",
+            "impulseA",
+            "impulseA",
+            "impulseC"
+          ]
+        },
+        {
+          "type": "gardener.field.equals",
+          "expected": [
+            [
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              1,
+              1,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "type": "gardener.position.equals",
+          "expected": {
+            "x": 2,
+            "y": 4
+          }
+        }
+      ]
+    },
+    {
+      "id": "broken-only",
+      "title": "Помехи и обрыв",
+      "input": {
+        "reader": {
+          "message": "ЖЖВППРЖ"
+        },
+        "gardener": {
+          "width": 7,
+          "height": 5,
+          "field": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          ],
+          "position": {
+            "x": 0,
+            "y": 0
+          },
+          "orientation": "EAST"
+        }
+      },
+      "checks": [
+        {
+          "type": "reader.impulses.equals",
+          "expected": []
+        },
+        {
+          "type": "gardener.field.equals",
+          "expected": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "type": "gardener.position.equals",
+          "expected": {
+            "x": 0,
+            "y": 0
+          }
+        }
+      ]
+    }
+  ],
+  "codeWord": "КОД"
+}

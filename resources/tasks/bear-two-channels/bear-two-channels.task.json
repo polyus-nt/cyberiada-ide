@@ -1,0 +1,157 @@
+{
+  "schemaVersion": 2,
+  "id": "bear-two-channels",
+  "version": 1,
+  "title": "Два канала сразу",
+  "summary": "Принимайте пары ИК-команд, сохраняя приём после акустического выключения.",
+  "descriptionFile": "bear-two-channels.md",
+  "platformId": "blg-mb-junior",
+  "tests": [
+    {
+      "id": "example",
+      "title": "Выключение между половинками",
+      "input": {
+        "durationMs": 3000,
+        "inputs": [
+          {
+            "channel": "ir",
+            "byte": 1,
+            "timeMs": 1000
+          },
+          {
+            "channel": "ears",
+            "byte": 0,
+            "timeMs": 1500
+          },
+          {
+            "channel": "ir",
+            "byte": 2,
+            "timeMs": 2000
+          }
+        ]
+      },
+      "checks": [
+        {
+          "type": "python"
+        }
+      ]
+    },
+    {
+      "id": "pairs",
+      "title": "Картинки, цвета и сохранение приёма",
+      "input": {
+        "durationMs": 4000,
+        "inputs": [
+          {
+            "channel": "ir",
+            "byte": 2,
+            "timeMs": 500
+          },
+          {
+            "channel": "ir",
+            "byte": 5,
+            "timeMs": 800
+          },
+          {
+            "channel": "ir",
+            "byte": 4,
+            "timeMs": 1100
+          },
+          {
+            "channel": "ears",
+            "byte": 0,
+            "timeMs": 1200
+          },
+          {
+            "channel": "ears",
+            "byte": 9,
+            "timeMs": 1300
+          },
+          {
+            "channel": "ir",
+            "byte": 3,
+            "timeMs": 1400
+          },
+          {
+            "channel": "ears",
+            "byte": 0,
+            "timeMs": 1800
+          },
+          {
+            "channel": "ir",
+            "byte": 3,
+            "timeMs": 2100
+          },
+          {
+            "channel": "ir",
+            "byte": 4,
+            "timeMs": 2400
+          },
+          {
+            "channel": "ir",
+            "byte": 1,
+            "timeMs": 2700
+          },
+          {
+            "channel": "ir",
+            "byte": 1,
+            "timeMs": 3000
+          }
+        ]
+      },
+      "checks": [
+        {
+          "type": "python"
+        }
+      ]
+    },
+    {
+      "id": "same-time",
+      "title": "Порядок байтов в один момент",
+      "input": {
+        "durationMs": 2100,
+        "inputs": [
+          {
+            "channel": "ir",
+            "byte": 1,
+            "timeMs": 500
+          },
+          {
+            "channel": "ears",
+            "byte": 0,
+            "timeMs": 500
+          },
+          {
+            "channel": "ir",
+            "byte": 2,
+            "timeMs": 500
+          },
+          {
+            "channel": "ir",
+            "byte": 2,
+            "timeMs": 1000
+          },
+          {
+            "channel": "ir",
+            "byte": 3,
+            "timeMs": 1100
+          },
+          {
+            "channel": "ears",
+            "byte": 0,
+            "timeMs": 1100
+          }
+        ]
+      },
+      "checks": [
+        {
+          "type": "python"
+        }
+      ]
+    }
+  ],
+  "checker": {
+    "apiVersion": 1,
+    "file": "checker.py"
+  }
+}

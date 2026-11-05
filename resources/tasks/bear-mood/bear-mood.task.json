@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 2,
+  "id": "bear-mood",
+  "version": 1,
+  "title": "Настроение Мишки",
+  "summary": "Подарите экипажу случайную картинку каждые две секунды.",
+  "descriptionFile": "bear-mood.md",
+  "platformId": "blg-mb-junior",
+  "tests": [
+    {
+      "id": "all-pictures",
+      "title": "Все настроения и повторы",
+      "input": {
+        "durationMs": 16000,
+        "inputs": [],
+        "random": {
+          "values": [
+            0,
+            1,
+            2,
+            3,
+            3,
+            0,
+            2,
+            1
+          ]
+        }
+      },
+      "checks": [
+        {
+          "type": "python"
+        }
+      ]
+    },
+    {
+      "id": "another-seed",
+      "title": "Другой порядок",
+      "input": {
+        "durationMs": 10000,
+        "inputs": [],
+        "random": {
+          "seed": 81
+        }
+      },
+      "checks": [
+        {
+          "type": "python"
+        }
+      ]
+    }
+  ],
+  "checker": {
+    "apiVersion": 1,
+    "file": "checker.py"
+  }
+}

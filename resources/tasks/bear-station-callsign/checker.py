@@ -14,6 +14,6 @@ def check(case, execution):
     for t in moments(execution, case["input"]["durationMs"]):
         phase = t % 5500
         on = phase < 500 or 1000 <= phase < 1500 or 2000 <= phase < 3500
-        if not eyes_are(state_at(execution, t), "cyan" if on else "black"):
+        if not eyes_are(state_at(execution, t), "cyan" if on else "black") or not picture_is(state_at(execution, t), "empty"):
             return fail(t, "Нарушен позывной: проверьте длительности вспышек и пауз обоих глаз")
     return {"passed": True}

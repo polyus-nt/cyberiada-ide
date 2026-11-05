@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "id": "reader-reception",
+  "version": 1,
+  "title": "Строчник на приёме",
+  "summary": "Помогите связисту различать буквы и замечать две Б подряд.",
+  "descriptionFile": "reader-reception.md",
+  "platformId": "junior-reader",
+  "tests": [
+    {
+      "id": "0",
+      "title": "Пример из условия",
+      "input": {
+        "message": "ВАГББ"
+      },
+      "checks": [
+        {
+          "type": "reader.impulses.equals",
+          "expected": [
+            "impulseC",
+            "impulseA",
+            "impulseB",
+            "impulseB",
+            "impulseC"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "1",
+      "title": "Цепочки Б и разрывы",
+      "input": {
+        "message": "БББАБГББВ"
+      },
+      "checks": [
+        {
+          "type": "reader.impulses.equals",
+          "expected": [
+            "impulseB",
+            "impulseB",
+            "impulseC",
+            "impulseB",
+            "impulseC",
+            "impulseA",
+            "impulseB",
+            "impulseB",
+            "impulseB",
+            "impulseC",
+            "impulseC"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "2",
+      "title": "Посторонние символы",
+      "input": {
+        "message": "ГДЕЖ"
+      },
+      "checks": [
+        {
+          "type": "reader.impulses.equals",
+          "expected": []
+        }
+      ]
+    },
+    {
+      "id": "3",
+      "title": "Пустая строка",
+      "input": {
+        "message": ""
+      },
+      "checks": [
+        {
+          "type": "reader.impulses.equals",
+          "expected": []
+        }
+      ]
+    },
+    {
+      "id": "4",
+      "title": "Одна Б",
+      "input": {
+        "message": "Б"
+      },
+      "checks": [
+        {
+          "type": "reader.impulses.equals",
+          "expected": [
+            "impulseB"
+          ]
+        }
+      ]
+    }
+  ],
+  "codeWord": "СВЯЗИСТ"
+}

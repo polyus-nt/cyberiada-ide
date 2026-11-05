@@ -1,0 +1,107 @@
+[
+  {
+    "taskId": "bear-hello",
+    "prompt": "Use case: illustration-story. Asset type: landscape illustration for a Russian children's programming puzzle, no text. Scene: a friendly little silver robotic teddy bear with round ears, cyan glowing eyes, and a small vertical 5-column by 7-row LED matrix on its belly, waking up inside a cozy orbital space station control room and greeting an arriving maintenance drone. Through a round window are stars and the curve of a planet. Warm optimistic hand-painted digital children's science-fiction book illustration, clean readable shapes, detailed environment, teal and amber lighting, landscape 3:2. The bear is a robot, no fur. No letters, digits, captions, diagrams, watermarks or logos. One complete illustration, not a collage.",
+    "mode": "built-in image_gen"
+  },
+  {
+    "taskId": "bear-mood",
+    "prompt": "Use case: illustration-story. Asset type: landscape story illustration for a children's programming puzzle. Style: polished hand-painted digital science-fiction storybook art, clean readable shapes, richly detailed but uncluttered environment, warm amber and teal lighting, welcoming mood, landscape 3:2. The teddy bear is a little silver robot with round ears, two LED eyes and a small vertical 5-column by 7-row LED matrix panel on its belly, no fur. Gardener is a friendly compact wheeled robot; Reader is a friendly robot with a paper-tape spool. Constraints: one complete scene, no collage, no written text, no digits, no letters, no logos, no watermark, no UI screenshot. Do not depict answers to secret words. Scene: A silver robotic teddy bear with a glowing heart on its belly cheers up a tired astronaut tending seedlings in an orbital greenhouse, a gentle expressive moment.",
+    "mode": "built-in image_gen"
+  },
+  {
+    "taskId": "bear-station-callsign",
+    "prompt": "Use case: illustration-story. Asset type: landscape story illustration for a children's programming puzzle. Style: polished hand-painted digital science-fiction storybook art, clean readable shapes, richly detailed but uncluttered environment, warm amber and teal lighting, welcoming mood, landscape 3:2. The teddy bear is a little silver robot with round ears, two LED eyes and a small vertical 5-column by 7-row LED matrix panel on its belly, no fur. Gardener is a friendly compact wheeled robot; Reader is a friendly robot with a paper-tape spool. Constraints: one complete scene, no collage, no written text, no digits, no letters, no logos, no watermark, no UI screenshot. Do not depict answers to secret words. Scene: A silver robotic teddy bear with bright cyan eyes operates a beacon by a huge space station window; far outside, an approaching small spaceship follows pulses from a tall station light.",
+    "mode": "built-in image_gen"
+  },
+  {
+    "taskId": "bear-light-music",
+    "prompt": "Use case: illustration-story. Asset type: landscape story illustration for a children's programming puzzle. Style: polished hand-painted digital science-fiction storybook art, clean readable shapes, richly detailed but uncluttered environment, warm amber and teal lighting, welcoming mood, landscape 3:2. The teddy bear is a little silver robot with round ears, two LED eyes and a small vertical 5-column by 7-row LED matrix panel on its belly, no fur. Gardener is a friendly compact wheeled robot; Reader is a friendly robot with a paper-tape spool. Constraints: one complete scene, no collage, no written text, no digits, no letters, no logos, no watermark, no UI screenshot. Do not depict answers to secret words. Scene: A silver robotic teddy bear runs a cheerful light show in a spacecraft common room; colorful light reflects on floating board-game pieces and crew decorations in zero gravity.",
+    "mode": "built-in image_gen"
+  },
+  {
+    "taskId": "bear-dice",
+    "prompt": "Use case: illustration-story. Asset type: landscape story illustration for a children's programming puzzle. Style: polished hand-painted digital science-fiction storybook art, clean readable shapes, richly detailed but uncluttered environment, warm amber and teal lighting, welcoming mood, landscape 3:2. The teddy bear is a little silver robot with round ears, two LED eyes and a small vertical 5-column by 7-row LED matrix panel on its belly, no fur. Gardener is a friendly compact wheeled robot; Reader is a friendly robot with a paper-tape spool. Constraints: one complete scene, no collage, no written text, no digits, no letters, no logos, no watermark, no UI screenshot. Do not depict answers to secret words. Scene: A silver robotic teddy bear serves as a dice for a board game on a spaceship table; its belly displays six glowing points and its eyes shine green; a physical dice floats out of reach in zero gravity.",
+    "mode": "built-in image_gen"
+  },
+  {
+    "taskId": "bear-quiet-hour",
+    "prompt": "Use case: illustration-story. Asset type: landscape story illustration for a children's programming puzzle. Style: polished hand-painted digital science-fiction storybook art, clean readable shapes, richly detailed but uncluttered environment, warm amber and teal lighting, welcoming mood, landscape 3:2. The teddy bear is a little silver robot with round ears, two LED eyes and a small vertical 5-column by 7-row LED matrix panel on its belly, no fur. Gardener is a friendly compact wheeled robot; Reader is a friendly robot with a paper-tape spool. Constraints: one complete scene, no collage, no written text, no digits, no letters, no logos, no watermark, no UI screenshot. Do not depict answers to secret words. Scene: A silver robotic teddy bear dozes beside a space station control console, eyes and belly panel dark; a soft blue night light and quiet stars beyond the window suggest a peaceful short rest.",
+    "mode": "built-in image_gen"
+  },
+  {
+    "taskId": "reader-reception",
+    "prompt": "Use case: illustration-story. Asset type: landscape story illustration for a children's programming puzzle. Style: polished hand-painted digital science-fiction storybook art, clean readable shapes, richly detailed but uncluttered environment, warm amber and teal lighting, welcoming mood, landscape 3:2. The teddy bear is a little silver robot with round ears, two LED eyes and a small vertical 5-column by 7-row LED matrix panel on its belly, no fur. Gardener is a friendly compact wheeled robot; Reader is a friendly robot with a paper-tape spool. Constraints: one complete scene, no collage, no written text, no digits, no letters, no logos, no watermark, no UI screenshot. Do not depict answers to secret words. Scene: A friendly small robot reading long paper tape at a space station communications desk, three indicator lamps and a spool of incoming messages; an orderly playful scene about recognizing letters, without any readable text.",
+    "mode": "built-in image_gen"
+  },
+  {
+    "taskId": "reader-gardener-radio-planting",
+    "prompt": "Use case: illustration-story. Asset type: landscape story illustration for a children's programming puzzle. Style: polished hand-painted digital science-fiction storybook art, clean readable shapes, richly detailed but uncluttered environment, warm amber and teal lighting, welcoming mood, landscape 3:2. The teddy bear is a little silver robot with round ears, two LED eyes and a small vertical 5-column by 7-row LED matrix panel on its belly, no fur. Gardener is a friendly compact wheeled robot; Reader is a friendly robot with a paper-tape spool. Constraints: one complete scene, no collage, no written text, no digits, no letters, no logos, no watermark, no UI screenshot. Do not depict answers to secret words. Scene: A friendly tape-reading robot at a radio desk communicates with a small wheeled gardening robot in a glass space station greenhouse; a row of roses, mint and cornflowers stretches beside the gardener.",
+    "mode": "built-in image_gen"
+  },
+  {
+    "taskId": "bear-airlock-traffic",
+    "prompt": "Use case: illustration-story. Asset type: landscape story illustration for a children's programming puzzle. Style: polished hand-painted digital science-fiction storybook art, clean readable shapes, richly detailed but uncluttered environment, warm amber and teal lighting, welcoming mood, landscape 3:2. The teddy bear is a little silver robot with round ears, two LED eyes and a small vertical 5-column by 7-row LED matrix panel on its belly, no fur. Gardener is a friendly compact wheeled robot; Reader is a friendly robot with a paper-tape spool. Constraints: one complete scene, no collage, no written text, no digits, no letters, no logos, no watermark, no UI screenshot. Do not depict answers to secret words. Scene: A silver robotic teddy bear acts as a traffic controller next to an orbital station airlock; green eyes and a smiling LED belly panel signal a small cargo rover to pass; amber night lighting outside.",
+    "mode": "built-in image_gen"
+  },
+  {
+    "taskId": "reader-double-signature",
+    "prompt": "Use case: illustration-story. Asset type: landscape story illustration for a children's programming puzzle. Style: polished hand-painted digital science-fiction storybook art, clean readable shapes, richly detailed but uncluttered environment, warm amber and teal lighting, welcoming mood, landscape 3:2. The teddy bear is a little silver robot with round ears, two LED eyes and a small vertical 5-column by 7-row LED matrix panel on its belly, no fur. Gardener is a friendly compact wheeled robot; Reader is a friendly robot with a paper-tape spool. Constraints: one complete scene, no collage, no written text, no digits, no letters, no logos, no watermark, no UI screenshot. Do not depict answers to secret words. Scene: A friendly small tape-reading robot checks pairs of matching stamped shapes on a long paper ribbon at a station communications desk; two matching stamp blocks and one torn strip suggest error detection; no letters or numbers.",
+    "mode": "built-in image_gen"
+  },
+  {
+    "taskId": "reader-gardener-orbital-planting",
+    "prompt": "Use case: illustration-story. Asset type: landscape story illustration for a children's programming puzzle. Style: polished hand-painted digital science-fiction storybook art, clean readable shapes, richly detailed but uncluttered environment, warm amber and teal lighting, welcoming mood, landscape 3:2. The teddy bear is a little silver robot with round ears, two LED eyes and a small vertical 5-column by 7-row LED matrix panel on its belly, no fur. Gardener is a friendly compact wheeled robot; Reader is a friendly robot with a paper-tape spool. Constraints: one complete scene, no collage, no written text, no digits, no letters, no logos, no watermark, no UI screenshot. Do not depict answers to secret words. Scene: An orbital greenhouse seen at an angle, a tape-reading communications robot sends instructions to a small gardening rover planting precise rose patterns in square beds; planet through the dome, no readable letters.",
+    "mode": "built-in image_gen"
+  },
+  {
+    "taskId": "bear-every-byte",
+    "prompt": "Use case: illustration-story. Asset type: landscape story illustration for a children's programming puzzle. Style: polished hand-painted digital science-fiction storybook art, clean readable shapes, richly detailed but uncluttered environment, warm amber and teal lighting, welcoming mood, landscape 3:2. The teddy bear is a little silver robot with round ears, two LED eyes and a small vertical 5-column by 7-row LED matrix panel on its belly, no fur. Gardener is a friendly compact wheeled robot; Reader is a friendly robot with a paper-tape spool. Constraints: one complete scene, no collage, no written text, no digits, no letters, no logos, no watermark, no UI screenshot. Do not depict answers to secret words. Scene: A silver robotic teddy bear listens to a small acoustic transmitter inside a space station; subtle luminous sound ripples cross the air toward its round ears and its eyes glow yellow.",
+    "mode": "built-in image_gen"
+  },
+  {
+    "taskId": "bear-code-lock",
+    "prompt": "Use case: illustration-story. Asset type: landscape story illustration for a children's programming puzzle. Style: polished hand-painted digital science-fiction storybook art, clean readable shapes, richly detailed but uncluttered environment, warm amber and teal lighting, welcoming mood, landscape 3:2. The teddy bear is a little silver robot with round ears, two LED eyes and a small vertical 5-column by 7-row LED matrix panel on its belly, no fur. Gardener is a friendly compact wheeled robot; Reader is a friendly robot with a paper-tape spool. Constraints: one complete scene, no collage, no written text, no digits, no letters, no logos, no watermark, no UI screenshot. Do not depict answers to secret words. Scene: A silver robotic teddy bear guards a heavy circular hatch inside a space station; the hatch has just opened to a softly lit corridor, bear eyes green and belly displays a smile, no keypad text.",
+    "mode": "built-in image_gen"
+  },
+  {
+    "taskId": "bear-cargo-sorting",
+    "prompt": "Use case: illustration-story. Asset type: landscape story illustration for a children's programming puzzle. Style: polished hand-painted digital science-fiction storybook art, clean readable shapes, richly detailed but uncluttered environment, warm amber and teal lighting, welcoming mood, landscape 3:2. The teddy bear is a little silver robot with round ears, two LED eyes and a small vertical 5-column by 7-row LED matrix panel on its belly, no fur. Gardener is a friendly compact wheeled robot; Reader is a friendly robot with a paper-tape spool. Constraints: one complete scene, no collage, no written text, no digits, no letters, no logos, no watermark, no UI screenshot. Do not depict answers to secret words. Scene: A silver robotic teddy bear helps a compact cargo loader divide sealed containers between two warehouse shelves inside a space station; green eyes illuminate one selected container, clean friendly logistics scene.",
+    "mode": "built-in image_gen"
+  },
+  {
+    "taskId": "bear-ear-calibration",
+    "prompt": "Use case: illustration-story. Asset type: landscape story illustration for a children's programming puzzle. Style: polished hand-painted digital science-fiction storybook art, clean readable shapes, richly detailed but uncluttered environment, warm amber and teal lighting, welcoming mood, landscape 3:2. The teddy bear is a little silver robot with round ears, two LED eyes and a small vertical 5-column by 7-row LED matrix panel on its belly, no fur. Gardener is a friendly compact wheeled robot; Reader is a friendly robot with a paper-tape spool. Constraints: one complete scene, no collage, no written text, no digits, no letters, no logos, no watermark, no UI screenshot. Do not depict answers to secret words. Scene: On a remote blue ice planet, a silver robotic teddy bear inside a small warm research shelter adjusts an underwater microphone cable lowered through a round hole in thick ice; green eyes, scientific instruments.",
+    "mode": "built-in image_gen"
+  },
+  {
+    "taskId": "bear-hidden-measurements",
+    "prompt": "Use case: illustration-story. Asset type: landscape story illustration for a children's programming puzzle. Style: polished hand-painted digital science-fiction storybook art, clean readable shapes, richly detailed but uncluttered environment, warm amber and teal lighting, welcoming mood, landscape 3:2. The teddy bear is a little silver robot with round ears, two LED eyes and a small vertical 5-column by 7-row LED matrix panel on its belly, no fur. Gardener is a friendly compact wheeled robot; Reader is a friendly robot with a paper-tape spool. Constraints: one complete scene, no collage, no written text, no digits, no letters, no logos, no watermark, no UI screenshot. Do not depict answers to secret words. Scene: Cutaway-style narrative scene on a frozen ocean planet: a silver robotic teddy bear listens in a warm ice research shelter to a small underwater exploration probe beneath the ice; glowing abstract triangle on bear belly, deep mysterious water, no ruins and no secret-word clues.",
+    "mode": "built-in image_gen"
+  },
+  {
+    "taskId": "bear-whole-parcel",
+    "prompt": "Use case: illustration-story. Asset type: landscape story illustration for a children's programming puzzle. Style: polished hand-painted digital science-fiction storybook art, clean readable shapes, richly detailed but uncluttered environment, warm amber and teal lighting, welcoming mood, landscape 3:2. The teddy bear is a little silver robot with round ears, two LED eyes and a small vertical 5-column by 7-row LED matrix panel on its belly, no fur. Gardener is a friendly compact wheeled robot; Reader is a friendly robot with a paper-tape spool. Constraints: one complete scene, no collage, no written text, no digits, no letters, no logos, no watermark, no UI screenshot. Do not depict answers to secret words. Scene: Inside a polar research shelter a silver robotic teddy bear receives paired sound pulses from an underwater probe, warm green eyes and a smiling belly panel indicate a good transmission; snowy window, hydrophone cable.",
+    "mode": "built-in image_gen"
+  },
+  {
+    "taskId": "bear-ir-remote",
+    "prompt": "Use case: illustration-story. Asset type: landscape story illustration for a children's programming puzzle. Style: polished hand-painted digital science-fiction storybook art, clean readable shapes, richly detailed but uncluttered environment, warm amber and teal lighting, welcoming mood, landscape 3:2. The teddy bear is a little silver robot with round ears, two LED eyes and a small vertical 5-column by 7-row LED matrix panel on its belly, no fur. Gardener is a friendly compact wheeled robot; Reader is a friendly robot with a paper-tape spool. Constraints: one complete scene, no collage, no written text, no digits, no letters, no logos, no watermark, no UI screenshot. Do not depict answers to secret words. Scene: Inside a space station a silver robotic teddy bear with cyan eyes receives a narrow beam of infrared light illustrated as a subtle warm red glow from a small handheld remote; cozy control room.",
+    "mode": "built-in image_gen"
+  },
+  {
+    "taskId": "bear-two-channels",
+    "prompt": "Use case: illustration-story. Asset type: landscape story illustration for a children's programming puzzle. Style: polished hand-painted digital science-fiction storybook art, clean readable shapes, richly detailed but uncluttered environment, warm amber and teal lighting, welcoming mood, landscape 3:2. The teddy bear is a little silver robot with round ears, two LED eyes and a small vertical 5-column by 7-row LED matrix panel on its belly, no fur. Gardener is a friendly compact wheeled robot; Reader is a friendly robot with a paper-tape spool. Constraints: one complete scene, no collage, no written text, no digits, no letters, no logos, no watermark, no UI screenshot. Do not depict answers to secret words. Scene: A silver robotic teddy bear at a station communications console receives an infrared beam from a remote and soft sound ripples from a speaker at the same time; its belly has a glowing heart and eyes are green.",
+    "mode": "built-in image_gen"
+  },
+  {
+    "taskId": "bear-station-remote",
+    "prompt": "Use case: illustration-story. Asset type: landscape story illustration for a children's programming puzzle. Style: polished hand-painted digital science-fiction storybook art, clean readable shapes, richly detailed but uncluttered environment, warm amber and teal lighting, welcoming mood, landscape 3:2. The teddy bear is a little silver robot with round ears, two LED eyes and a small vertical 5-column by 7-row LED matrix panel on its belly, no fur. Gardener is a friendly compact wheeled robot; Reader is a friendly robot with a paper-tape spool. Constraints: one complete scene, no collage, no written text, no digits, no letters, no logos, no watermark, no UI screenshot. Do not depict answers to secret words. Scene: A silver robotic teddy bear among several different station appliances and service robots receives a signal from a handheld remote; only the bear responds with green eyes and a smiling belly; warm clear science fiction scene.",
+    "mode": "built-in image_gen"
+  },
+  {
+    "taskId": "bear-two-halves",
+    "prompt": "Use case: illustration-story. Asset type: landscape story illustration for a children's programming puzzle. Style: polished hand-painted digital science-fiction storybook art, clean readable shapes, richly detailed but uncluttered environment, warm amber and teal lighting, welcoming mood, landscape 3:2. The teddy bear is a little silver robot with round ears, two LED eyes and a small vertical 5-column by 7-row LED matrix panel on its belly, no fur. Gardener is a friendly compact wheeled robot; Reader is a friendly robot with a paper-tape spool. Constraints: one complete scene, no collage, no written text, no digits, no letters, no logos, no watermark, no UI screenshot. Do not depict answers to secret words. Scene: A silver robotic teddy bear in a private orbital station communications alcove receives two complementary signals: warm red infrared beam from a remote and blue sound ripples from a speaker; square light on belly and yellow eyes, atmosphere of a secret message, no decoded letters or word clues.",
+    "mode": "built-in image_gen"
+  }
+]

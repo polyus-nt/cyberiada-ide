@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 2,
+  "id": "bear-every-byte",
+  "version": 1,
+  "title": "Каждый байт",
+  "summary": "Превратите каждый акустический пакет в новый световой отклик.",
+  "descriptionFile": "bear-every-byte.md",
+  "platformId": "blg-mb-junior",
+  "tests": [
+    {
+      "id": "example",
+      "title": "Три акустических пакета",
+      "input": {
+        "durationMs": 4000,
+        "inputs": [
+          {
+            "channel": "ears",
+            "byte": 10,
+            "timeMs": 1000
+          },
+          {
+            "channel": "ears",
+            "byte": 200,
+            "timeMs": 2000
+          },
+          {
+            "channel": "ears",
+            "byte": 10,
+            "timeMs": 3000
+          }
+        ],
+        "random": {
+          "values": [
+            0,
+            4,
+            1
+          ]
+        }
+      },
+      "checks": [
+        {
+          "type": "python"
+        }
+      ]
+    },
+    {
+      "id": "repeats",
+      "title": "Повторяющиеся байты и посторонний канал",
+      "input": {
+        "durationMs": 5000,
+        "inputs": [
+          {
+            "channel": "ir",
+            "byte": 7,
+            "timeMs": 500
+          },
+          {
+            "channel": "ears",
+            "byte": 0,
+            "timeMs": 1000
+          },
+          {
+            "channel": "ears",
+            "byte": 255,
+            "timeMs": 2000
+          },
+          {
+            "channel": "ears",
+            "byte": 255,
+            "timeMs": 2100
+          },
+          {
+            "channel": "ir",
+            "byte": 0,
+            "timeMs": 2500
+          },
+          {
+            "channel": "ears",
+            "byte": 10,
+            "timeMs": 3000
+          },
+          {
+            "channel": "ears",
+            "byte": 10,
+            "timeMs": 4000
+          }
+        ],
+        "random": {
+          "values": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ]
+        }
+      },
+      "checks": [
+        {
+          "type": "python"
+        }
+      ]
+    }
+  ],
+  "checker": {
+    "apiVersion": 1,
+    "file": "checker.py"
+  }
+}
