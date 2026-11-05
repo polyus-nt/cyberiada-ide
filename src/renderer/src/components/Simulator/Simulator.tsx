@@ -707,9 +707,7 @@ export const JointSimulator: React.FC<JointSimulatorProps> = ({
   });
   const valid =
     readers.some(({ id }) => id === readerId) && gardeners.some(({ id }) => id === gardenerId);
-  const error = !valid
-    ? 'Добавьте в документ Строчника и Садовника.'
-    : referenceError.length
+  const error = referenceError.length
     ? `В схемах отсутствуют компоненты: ${referenceError.join(', ')}`
     : interpreter.ready && !interpreter.supportsSession
     ? 'Обновите интерпретатор для совместного запуска.'
@@ -813,7 +811,7 @@ export const JointSimulator: React.FC<JointSimulatorProps> = ({
           <div
             role="tablist"
             aria-label="Участники симуляции"
-            className="flex shrink-0 gap-1 border-b border-border-primary bg-bg-secondary px-3 pt-2"
+            className="flex shrink-0 gap-1 border-b border-border-primary px-3 pt-2"
           >
             {tabs.map(({ id, label }) => (
               <button
