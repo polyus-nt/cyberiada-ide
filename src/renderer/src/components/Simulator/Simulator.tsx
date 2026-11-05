@@ -2,6 +2,7 @@ import React, { useEffect, useLayoutEffect, useMemo, useState } from 'react';
 
 import { twMerge } from 'tailwind-merge';
 
+import { ReactComponent as ArrowIcon } from '@renderer/assets/icons/arrow-down.svg';
 import { ParameterSelect } from '@renderer/components/UI';
 import { getMissingComponentReferences } from '@renderer/lib/data/ComponentReferences';
 import { exportCGML, exportStateMachineCGML } from '@renderer/lib/data/GraphmlBuilder';
@@ -455,6 +456,7 @@ const GardenerSimulator: React.FC<GardenerRuntimeProps> = ({
         <FieldSettingsContainer>
           {hideRunPanel ? (
             <summary className="cursor-pointer rounded-lg border border-border-primary p-3 text-xs font-medium">
+              <ArrowIcon className="joint-disclosure-arrow size-3" aria-hidden="true" />
               Настройки · {width} × {height}
             </summary>
           ) : (
@@ -579,6 +581,7 @@ const GardenerSimulator: React.FC<GardenerRuntimeProps> = ({
         {hideRunPanel && (
           <details className="mt-4 rounded-lg border border-border-primary p-3 [&_section]:mt-3">
             <summary className="cursor-pointer text-xs font-medium">
+              <ArrowIcon className="joint-disclosure-arrow size-3" aria-hidden="true" />
               История · {steps.length} шагов
             </summary>
             {historyControls}
@@ -853,30 +856,75 @@ export const JointSimulator: React.FC<JointSimulatorProps> = ({
               id="joint-panel-reader"
               aria-labelledby="joint-tab-reader"
               tabIndex={0}
-              className="h-full min-h-52"
+              className="h-full min-h-[360px]"
               hidden={tab !== 'reader'}
             >
-              <div className="flex h-full flex-col gap-3">
-                <label className="h2-header" htmlFor="joint-reader-message">
-                  Входная строка
-                </label>
-                <textarea
-                  id="joint-reader-message"
-                  className={twMerge(
-                    controlClassName,
-                    'min-h-32 flex-1 resize-none py-3 leading-6 disabled:cursor-not-allowed disabled:text-text-inactive'
-                  )}
-                  placeholder="Введите строку для Строчника"
-                  value={message}
-                  disabled={interpreter.active}
-                  onChange={(event) =>
-                    setMessage(limitUnicodeCharacters(event.target.value, 10_000))
-                  }
-                />
-                <div className="flex justify-between gap-3 text-xs text-text-inactive">
-                  <span>До 10 000 символов</span>
-                  <span>{countUnicodeCharacters(message)} / 10 000</span>
+              <div className="flex h-full min-h-0 flex-col gap-4">
+                <div className="grid shrink-0 gap-2">
+                  <div className="flex items-center justify-between gap-3">
+                    <label className="h2-header" htmlFor="joint-reader-message">
+                      Входная строка
+                    </label>
+                    <span className="text-xs text-text-inactive">
+                      {countUnicodeCharacters(message)} / 10 000
+                    </span>
+                  </div>
+                  <textarea
+                    id="joint-reader-message"
+                    className={twMerge(
+                      controlClassName,
+                      'h-20 resize-none py-2 leading-6 disabled:cursor-not-allowed disabled:text-text-inactive'
+                    )}
+                    placeholder="Введите строку для Строчника"
+                    value={message}
+                    disabled={interpreter.active}
+                    onChange={(event) =>
+                      setMessage(limitUnicodeCharacters(event.target.value, 10_000))
+                    }
+                  />
                 </div>
+
+                <section
+                  className="flex min-h-0 flex-1 flex-col gap-3"
+                  aria-label="Выходные импульсы Строчника"
+                >
+                  <h2 className="h2-header flex shrink-0 items-center gap-2">
+                    Выходные импульсы
+                    <span className="rounded bg-bg-secondary px-2 py-0.5 text-xs font-normal text-text-inactive">
+                      {impulses.length}
+                    </span>
+                  </h2>
+                  {readerResult?.message && (
+                    <p className="shrink-0 break-words text-xs">{readerResult.message}</p>
+                  )}
+                  <div
+                    className={twMerge(
+                      'min-h-0 flex-1 overflow-auto rounded-lg border border-border-primary p-3',
+                      impulses.length === 0 && 'flex items-center justify-center'
+                    )}
+                    tabIndex={0}
+                  >
+                    {impulses.length > 0 ? (
+                      <ol className="grid gap-2">
+                        {impulses.map((impulse, index) => (
+                          <li
+                            key={`${index}:${impulse}`}
+                            className="flex items-center gap-3 rounded-lg border border-border-primary px-3 py-2 text-xs"
+                          >
+                            <span className="text-text-inactive">{index + 1}</span>
+                            <span className="break-all">{getReaderImpulseLabel(impulse)}</span>
+                          </li>
+                        ))}
+                      </ol>
+                    ) : (
+                      <p className="text-center text-xs text-text-inactive">
+                        {interpreter.active
+                          ? 'Ожидание выходных импульсов…'
+                          : 'Импульсы появятся после запуска.'}
+                      </p>
+                    )}
+                  </div>
+                </section>
               </div>
             </div>
             <div
@@ -900,43 +948,6 @@ export const JointSimulator: React.FC<JointSimulatorProps> = ({
               />
             </div>
           </div>
-
-          <section
-            className="flex min-h-[66px] shrink-0 items-center gap-4 border-t border-border-primary px-4 py-3"
-            aria-label="Общая лента импульсов"
-            title="Строчник → Садовник"
-          >
-            <h2 className="h2-header flex shrink-0 items-center gap-2">
-              Импульсы
-              <span className="rounded bg-bg-secondary px-2 py-0.5 text-xs font-normal text-text-inactive">
-                {impulses.length}
-              </span>
-            </h2>
-            {impulses.length > 0 ? (
-              <ol className="flex min-w-0 flex-1 gap-2 overflow-x-auto" tabIndex={0}>
-                {impulses.map((impulse, index) => (
-                  <li
-                    key={`${index}:${impulse}`}
-                    className="flex shrink-0 items-center gap-2 rounded-lg border border-border-primary px-3 py-1.5 text-xs"
-                  >
-                    <span className="text-text-inactive">{index + 1}</span>
-                    <span>{getReaderImpulseLabel(impulse)}</span>
-                  </li>
-                ))}
-              </ol>
-            ) : (
-              <p className="text-xs text-text-inactive">
-                {interpreter.active
-                  ? 'Ожидание выходных импульсов…'
-                  : 'Строчник → Садовник · Ожидание запуска'}
-              </p>
-            )}
-            {readerResult?.message && (
-              <p className="min-w-0 max-w-[40%] truncate text-xs" title={readerResult.message}>
-                {readerResult.message}
-              </p>
-            )}
-          </section>
         </section>
       </div>
     </div>

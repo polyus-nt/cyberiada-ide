@@ -2,6 +2,10 @@ import { createRoot } from 'react-dom/client';
 import { act, Simulate } from 'react-dom/test-utils';
 import { expect, it, vi } from 'vitest';
 
+vi.mock('@renderer/assets/icons/arrow-down.svg', () => ({
+  ReactComponent: (props: React.SVGProps<SVGSVGElement>) => <svg {...props} />,
+}));
+
 vi.mock('@renderer/components/UI', () => ({ ParameterSelect: () => <select /> }));
 vi.mock('@renderer/lib/data/GraphmlBuilder', () => ({
   exportCGML: vi.fn(),
@@ -104,11 +108,13 @@ it('keeps input and field configuration across tabs and switches tabs during the
     expect(input.disabled).toBe(true);
     act(() => button('Садовник').click());
     expect(container.querySelector('#joint-panel-gardener')?.hasAttribute('hidden')).toBe(false);
-    expect(container.querySelector('[aria-label="Общая лента импульсов"]')?.textContent).toContain(
-      'Импульс А'
-    );
+    const impulses = container.querySelector('[aria-label="Выходные импульсы Строчника"]');
+    expect(impulses?.textContent).toContain('Импульс А');
+    expect(impulses?.closest('[role="tabpanel"]')?.id).toBe('joint-panel-reader');
+    expect(impulses?.closest('[role="tabpanel"]')?.hasAttribute('hidden')).toBe(true);
     act(() => Simulate.keyDown(button('Садовник'), { key: 'ArrowLeft' }));
     expect(button('Строчник').getAttribute('aria-selected')).toBe('true');
+    expect(impulses?.closest('[role="tabpanel"]')?.hasAttribute('hidden')).toBe(false);
     expect(document.activeElement).toBe(button('Строчник'));
     expect(input.value).toBe('АБВ');
     expect(width.value).toBe('4');

@@ -21,6 +21,27 @@
   align-items: start;
 }
 
+.joint-gardener summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  list-style: none;
+}
+
+.joint-gardener summary::-webkit-details-marker {
+  display: none;
+}
+
+.joint-disclosure-arrow {
+  flex-shrink: 0;
+  transform: rotate(-90deg);
+  transition: transform 150ms;
+}
+
+.joint-gardener details[open] > summary > .joint-disclosure-arrow {
+  transform: rotate(0);
+}
+
 /* The embedded field responds to its pane, independently of the window width. */
 @container joint-workspace (max-width: 580px) {
   .joint-gardener {

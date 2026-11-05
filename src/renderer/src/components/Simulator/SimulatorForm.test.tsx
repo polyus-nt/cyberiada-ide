@@ -2,6 +2,10 @@ import { createRoot } from 'react-dom/client';
 import { act } from 'react-dom/test-utils';
 import { expect, it, vi } from 'vitest';
 
+vi.mock('@renderer/assets/icons/arrow-down.svg', () => ({
+  ReactComponent: (props: React.SVGProps<SVGSVGElement>) => <svg {...props} />,
+}));
+
 vi.mock('@renderer/components/UI', () => ({ ParameterSelect: () => <select /> }));
 vi.mock('@renderer/lib/data/GraphmlBuilder', () => ({
   exportCGML: vi.fn(),
