@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import type {
   CyberBearParameters,
   CyberBearState,
-  RGBK,
   SimulationResult,
 } from '@renderer/types/InterpreterTypes';
 
@@ -14,7 +13,6 @@ import {
   createCyberBearState,
   cyberBearInputError,
   cyberBearInputValue,
-  rgbkColor,
 } from './cyberBearModel';
 import { SimulationMode, SimulationRunPanel } from './SimulationRunPanel';
 
@@ -29,27 +27,6 @@ interface CyberBearSimulatorProps {
   onStart: (mode: SimulationMode, timeout: number, parameters: CyberBearParameters) => void;
   onCancel: () => void;
 }
-
-const EyeValues: React.FC<{ label: string; value: RGBK }> = ({ label, value }) => (
-  <section className="rounded-lg border border-border-primary p-3">
-    <h3 className="mb-3 flex items-center gap-2 text-xs font-medium">
-      <span
-        className="size-4 rounded-full border border-border-primary"
-        style={{ backgroundColor: rgbkColor(value) }}
-        aria-hidden="true"
-      />
-      {label}
-    </h3>
-    <dl className="grid grid-cols-4 gap-2 text-center text-xs">
-      {['R', 'G', 'B', 'K'].map((channel, index) => (
-        <div key={channel}>
-          <dt className="text-text-inactive">{channel}</dt>
-          <dd className="mt-1 font-mono tabular-nums">{value[index]}</dd>
-        </div>
-      ))}
-    </dl>
-  </section>
-);
 
 export const CyberBearSimulator: React.FC<CyberBearSimulatorProps> = ({
   machineSelector,
@@ -97,13 +74,7 @@ export const CyberBearSimulator: React.FC<CyberBearSimulatorProps> = ({
           Глаза и матрица обновляются во время выполнения программы.
         </p>
       </section>
-      <div className="space-y-3 max-[983px]:col-span-2 max-[729px]:col-span-1">
-        <h2 className="h2-header">Глаза RGBK</h2>
-        <EyeValues label="Правый глаз" value={state.eyes.right} />
-        <EyeValues label="Левый глаз" value={state.eyes.left} />
-        <p className="text-xs leading-4 text-text-inactive">
-          Матрица: 5 × 7, яркость от 0 до 100%.
-        </p>
+      <div className="max-[983px]:col-span-2 max-[729px]:col-span-1">
         <CyberBearInputs inputs={inputs} active={active} onChange={setInputs} />
       </div>
     </div>

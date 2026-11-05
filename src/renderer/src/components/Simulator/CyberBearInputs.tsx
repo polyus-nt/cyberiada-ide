@@ -28,7 +28,7 @@ export const CyberBearInputs: React.FC<{
   };
 
   return (
-    <section className="border-t border-border-primary pt-3">
+    <section>
       <h2 className="h2-header mb-3">Входная последовательность</h2>
       <p className="mb-3 text-xs text-text-inactive">
         Время от начала симуляции. При одинаковом времени байты отправляются по порядку списка.
