@@ -1,14 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 import { ScrollArea } from '@renderer/components/UI/ScrollArea';
-
 import type {
   CyberBearParameters,
   CyberBearState,
   SimulationResult,
 } from '@renderer/types/InterpreterTypes';
 
-import { CyberBearView } from './CyberBearView';
 import { CyberBearInputs } from './CyberBearInputs';
 import {
   CyberBearInputDraft,
@@ -16,6 +14,8 @@ import {
   cyberBearInputError,
   cyberBearInputValue,
 } from './cyberBearModel';
+import { CyberBearView } from './CyberBearView';
+import { useSimulatorState } from './sessionState';
 import { SimulationMode, SimulationRunPanel } from './SimulationRunPanel';
 
 interface CyberBearSimulatorProps {
@@ -41,9 +41,9 @@ export const CyberBearSimulator: React.FC<CyberBearSimulatorProps> = ({
   onStart,
   onCancel,
 }) => {
-  const [mode, setMode] = useState<SimulationMode>('finite');
-  const [timeout, setTimeoutValue] = useState(10);
-  const [inputs, setInputs] = useState<CyberBearInputDraft[]>([]);
+  const [mode, setMode] = useSimulatorState<SimulationMode>('mode', 'finite');
+  const [timeout, setTimeoutValue] = useSimulatorState('timeout', 10);
+  const [inputs, setInputs] = useSimulatorState<CyberBearInputDraft[]>('bear-inputs', []);
   const state = cyberBear ?? createCyberBearState();
 
   return (
