@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 
 import { nanoid } from 'nanoid';
 
-import { ReactComponent as ArrowIcon } from '@renderer/assets/icons/arrow-down.svg';
 import { ReactComponent as MoveDownIcon } from '@renderer/assets/icons/move-down.svg';
 import { ReactComponent as MoveUpIcon } from '@renderer/assets/icons/move-up.svg';
 import { ParameterSelect } from '@renderer/components/UI';
@@ -150,7 +149,9 @@ export const CyberBearInputs: React.FC<{
             {inputs.map((input, index) => (
               <li
                 key={input.id}
-                className={`group overflow-hidden rounded-lg border hover:bg-bg-hover ${
+                className={`group overflow-hidden rounded-lg border ${
+                  expandedId === input.id ? '' : 'hover:bg-bg-hover'
+                } ${
                   !active && dropTargetId === input.id
                     ? 'border-primary bg-bg-hover'
                     : 'border-border-primary'
@@ -186,7 +187,7 @@ export const CyberBearInputs: React.FC<{
                 <div className="relative">
                   <button
                     type="button"
-                    className={`grid h-[30px] w-full min-w-0 grid-cols-[10px_16px_minmax(0,1fr)_auto] items-center gap-1 pl-3 text-left text-xs focus-visible:outline-primary ${
+                    className={`grid h-[30px] w-full min-w-0 grid-cols-[16px_minmax(0,1fr)_auto] items-center gap-1 pl-3 text-left text-xs focus-visible:outline-primary ${
                       expandedId === input.id
                         ? 'pr-[96px]'
                         : 'pr-3 group-focus-within:pr-[96px] group-hover:pr-[96px]'
@@ -220,10 +221,6 @@ export const CyberBearInputs: React.FC<{
                       setExpandedId((current) => (current === input.id ? undefined : input.id))
                     }
                   >
-                    <ArrowIcon
-                      className={expandedId === input.id ? 'rotate-0' : '-rotate-90'}
-                      aria-hidden="true"
-                    />
                     <span className="text-text-inactive">{index + 1}</span>
                     <span className="truncate tabular-nums">
                       {input.channel === 'ir' ? 'ИК' : 'АК'} {input.value || '—'}
