@@ -44,6 +44,18 @@ export type CyberBearInputDraft = {
 
 export const MAX_CYBERBEAR_INPUTS = 10_000;
 
+export const swapCyberBearInputs = (
+  inputs: CyberBearInputDraft[],
+  from: number,
+  to: number
+): CyberBearInputDraft[] => {
+  if (from === to || !inputs[from] || !inputs[to]) return inputs;
+  const next = [...inputs];
+  next[from] = { ...inputs[to], timeMs: inputs[from].timeMs };
+  next[to] = { ...inputs[from], timeMs: inputs[to].timeMs };
+  return next;
+};
+
 export const cyberBearByteError = (value: string): string | undefined => {
   const text = value.trim();
   if (!/^(?:\d+|0x[0-9a-f]+)$/i.test(text) || Number(text) > 255)

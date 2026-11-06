@@ -16,6 +16,7 @@ import {
   cyberBearByteError,
   cyberBearTimeError,
   MAX_CYBERBEAR_INPUTS,
+  swapCyberBearInputs,
 } from './cyberBearModel';
 
 const channels: { value: CyberBearChannel; label: string }[] = [
@@ -106,12 +107,16 @@ export const CyberBearInputs: React.FC<{
   onChange: (inputs: CyberBearInputDraft[]) => void;
 }> = ({ inputs, active, onChange }) => {
   const [expandedId, setExpandedId] = useState<string>();
+  const [draggedId, setDraggedId] = useState<string>();
+  const [dropTargetId, setDropTargetId] = useState<string>();
   const update = (index: number, patch: Partial<CyberBearInputDraft>) =>
     onChange(inputs.map((input, current) => (current === index ? { ...input, ...patch } : input)));
   const move = (index: number, direction: number) => {
-    const next = [...inputs];
-    [next[index], next[index + direction]] = [next[index + direction], next[index]];
-    onChange(next);
+    if (!active) onChange(swapCyberBearInputs(inputs, index, index + direction));
+  };
+  const endDrag = () => {
+    setDraggedId(undefined);
+    setDropTargetId(undefined);
   };
 
   return (
@@ -145,7 +150,38 @@ export const CyberBearInputs: React.FC<{
             {inputs.map((input, index) => (
               <li
                 key={input.id}
-                className="group overflow-hidden rounded-lg border border-border-primary hover:bg-bg-hover"
+                className={`group overflow-hidden rounded-lg border hover:bg-bg-hover ${
+                  !active && dropTargetId === input.id
+                    ? 'border-primary bg-bg-hover'
+                    : 'border-border-primary'
+                } ${!active && draggedId === input.id ? 'opacity-50' : ''}`}
+                onDragOver={(event) => {
+                  if (active || !draggedId) return;
+                  event.preventDefault();
+                  event.stopPropagation();
+                  event.dataTransfer.dropEffect = 'move';
+                  setDropTargetId(input.id === draggedId ? undefined : input.id);
+                }}
+                onDragLeave={(event) => {
+                  if (
+                    !(event.relatedTarget instanceof Node) ||
+                    !event.currentTarget.contains(event.relatedTarget)
+                  ) {
+                    setDropTargetId(undefined);
+                  }
+                }}
+                onDrop={(event) => {
+                  if (!draggedId) return;
+                  event.preventDefault();
+                  event.stopPropagation();
+                  if (!active) {
+                    const from = inputs.findIndex(({ id }) => id === draggedId);
+                    if (from !== index && from !== -1) {
+                      onChange(swapCyberBearInputs(inputs, from, index));
+                    }
+                  }
+                  endDrag();
+                }}
               >
                 <div className="relative">
                   <button
@@ -162,7 +198,24 @@ export const CyberBearInputs: React.FC<{
                     aria-controls={`cyberbear-input-editor-${input.id}`}
                     title={`Время: ${input.timeMs || '—'} мс; канал: ${
                       input.channel === 'ir' ? 'ИК' : 'Акустика'
-                    }; байт: ${input.value || '—'}`}
+                    }; байт: ${input.value || '—'}${
+                      active ? '' : '\nПеретащите на другой байт, чтобы обменять их время отправки.'
+                    }`}
+                    draggable={!active && inputs.length > 1}
+                    style={{
+                      cursor: active ? undefined : draggedId === input.id ? 'grabbing' : 'grab',
+                    }}
+                    onDragStart={(event) => {
+                      if (active) {
+                        event.preventDefault();
+                        return;
+                      }
+                      event.stopPropagation();
+                      event.dataTransfer.effectAllowed = 'move';
+                      event.dataTransfer.setData('application/x-cyberbear-input', input.id);
+                      setDraggedId(input.id);
+                    }}
+                    onDragEnd={endDrag}
                     onClick={() =>
                       setExpandedId((current) => (current === input.id ? undefined : input.id))
                     }

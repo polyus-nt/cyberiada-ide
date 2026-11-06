@@ -51,6 +51,113 @@ import { createCyberBearState } from './cyberBearModel';
 import { CyberBearSimulator } from './CyberBearSimulator';
 
 describe('CyberBear simulator', () => {
+  it('drags bytes between distant positions, exchanges their times and blocks dragging during a run', async () => {
+    vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
+    const container = document.createElement('div');
+    const root = createRoot(container);
+    const onStart = vi.fn();
+    const submit = vi.fn((event: React.FormEvent) => event.preventDefault());
+    const outerDrop = vi.fn();
+    const props = {
+      ready: true,
+      active: false,
+      stale: false,
+      machineSelector: null,
+      onStart,
+      onCancel: vi.fn(),
+    };
+    const render = (active = false) =>
+      act(() =>
+        root.render(
+          <form onSubmit={submit} onDrop={outerDrop}>
+            <CyberBearSimulator {...props} active={active} />
+          </form>
+        )
+      );
+    const button = (label: string) => {
+      const node = Array.from(container.querySelectorAll('button')).find(
+        (element) => element.getAttribute('aria-label') === label || element.textContent === label
+      );
+      if (!node) throw new Error(`Missing button: ${label}`);
+      return node;
+    };
+    const change = (prefix: string, index: number, value: string) => {
+      const control = container.querySelectorAll<HTMLInputElement | HTMLSelectElement>(
+        `[id^="${prefix}"]`
+      )[index];
+      act(() => {
+        control.value = value;
+        Simulate.change(control);
+      });
+    };
+    const dataTransfer = {
+      effectAllowed: '',
+      dropEffect: '',
+      setData: vi.fn(),
+    } as unknown as DataTransfer;
+    const dispatchDrag = (type: string, element: Element) => {
+      const event = new Event(type, { bubbles: true, cancelable: true });
+      Object.defineProperty(event, 'dataTransfer', { value: dataTransfer });
+      element.dispatchEvent(event);
+    };
+    try {
+      render();
+      for (let index = 0; index < 3; index++) {
+        act(() => button('Добавить элемент').click());
+        change('cyberbear-value-', index, String(10 + index * 10));
+        change('cyberbear-time-', index, ['100', '200', '500'][index]);
+        change('cyberbear-channel-', index, index === 0 ? 'ir' : 'ears');
+      }
+      act(() => button('Раскрыть элемент 1').click());
+      const source = button('Свернуть элемент 1');
+      const target = button('Раскрыть элемент 3').closest('li');
+      if (!target) throw new Error('Missing drop target');
+      act(() => dispatchDrag('dragstart', source));
+      expect(dataTransfer.effectAllowed).toBe('move');
+      act(() => dispatchDrag('dragover', target));
+      expect(dataTransfer.dropEffect).toBe('move');
+      act(() => dispatchDrag('drop', target));
+      act(() => dispatchDrag('dragend', source));
+      expect(outerDrop).not.toHaveBeenCalled();
+      expect(button('Свернуть элемент 3')).toBe(source);
+      expect(
+        Array.from(container.querySelectorAll<HTMLInputElement>('[id^="cyberbear-time-"]')).map(
+          (input) => input.value
+        )
+      ).toEqual(['100', '200', '500']);
+      act(() => button('Запустить').click());
+      expect(onStart).toHaveBeenLastCalledWith('finite', 10, {
+        inputs: [
+          { byte: 30, channel: 'ears', timeMs: 100 },
+          { byte: 20, channel: 'ears', timeMs: 200 },
+          { byte: 10, channel: 'ir', timeMs: 500 },
+        ],
+      });
+      // Cancelling a drag outside the list keeps the sequence intact.
+      act(() => dispatchDrag('dragstart', source));
+      act(() => dispatchDrag('dragend', source));
+      act(() => dispatchDrag('drop', target));
+      act(() => button('Запустить').click());
+      expect(onStart.mock.lastCall).toEqual(onStart.mock.calls[0]);
+      act(() => dispatchDrag('dragstart', source));
+      render(true);
+      expect(source.draggable).toBe(false);
+      act(() => dispatchDrag('dragstart', source));
+      act(() => dispatchDrag('dragover', target));
+      act(() => dispatchDrag('drop', target));
+      render();
+      act(() => button('Запустить').click());
+      expect(onStart.mock.lastCall).toEqual(onStart.mock.calls[0]);
+      expect(submit).not.toHaveBeenCalled();
+      await act(async () => {
+        await Promise.resolve();
+      });
+    } finally {
+      act(() => root.unmount());
+      vi.unstubAllGlobals();
+    }
+  });
+
   it('opens each added input and keeps only one editor expanded, including after reordering', () => {
     vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
     const container = document.createElement('div');
@@ -116,7 +223,7 @@ describe('CyberBear simulator', () => {
       expect(editors().map((editor) => editor.hidden)).toEqual([true, false]);
       expect(editors()[1]).toBe(originalEditor);
       expect(container.querySelector('[aria-label="Свернуть элемент 2"]')?.textContent).toMatch(
-        /АК 0x2A500\sмс$/
+        /АК 0x2A0\sмс$/
       );
       click('Удалить элемент 2');
       expect(editors().map((editor) => editor.hidden)).toEqual([true]);
@@ -267,6 +374,11 @@ describe('CyberBear simulator', () => {
           (input) => input.value
         )
       ).toEqual(['204', '168', '0x2A']);
+      expect(
+        Array.from(container.querySelectorAll<HTMLInputElement>('[id^="cyberbear-time-"]')).map(
+          (input) => input.value
+        )
+      ).toEqual(['0', '500', '1500']);
       const moveUp = container.querySelector<HTMLButtonElement>('[aria-label="Поднять элемент 3"]');
       if (!moveUp) throw new Error('Missing reorder button');
       act(() => moveUp.click());
