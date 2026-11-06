@@ -14,6 +14,7 @@ import {
 } from '@renderer/types/InterpreterTypes';
 
 import { applyRunState, finishRunState } from './liveState';
+import { useSimulatorState } from './sessionState';
 
 import { InterpreterClient } from '../Modules/Interpreter';
 import { ClientStatus } from '../Modules/Websocket/ClientStatus';
@@ -32,10 +33,14 @@ export const useInterpreter = () => {
   const [operationKind, setOperationKind] = useState(InterpreterClient.activeKind);
   const activeTestId = useRef<string>();
   const activeTaskXml = useRef<string>();
-  const [result, setResult] = useState<SimulationResult>();
-  const liveResult = useRef<SimulationResult>();
+  const [result, setResult] = useSimulatorState<SimulationResult | undefined>(
+    'result',
+    undefined,
+    false
+  );
+  const liveResult = useRef<SimulationResult | undefined>(result);
   const [supportsCyberBear, setSupportsCyberBear] = useState(hasCyberBearSupport());
-  const [error, setError] = useState<string>();
+  const [error, setError] = useSimulatorState<string | undefined>('error', undefined, false);
 
   useEffect(() => {
     InterpreterClient.bind(
@@ -154,55 +159,68 @@ export const useInterpreter = () => {
       unsubscribe();
       if (InterpreterClient.activeRunId && InterpreterClient.activeKind !== 'submission') {
         InterpreterClient.cancel(InterpreterClient.activeRunId);
+        if (liveResult.current?.status === 'running') {
+          liveResult.current = { ...liveResult.current, status: 'cancelled' };
+          setResult(liveResult.current);
+        }
       }
     };
-  }, []);
+  }, [setError, setResult]);
 
   useEffect(() => {
     if (!settings || settings.localPort <= 0) return;
     void InterpreterClient.connect(settings.localHost, settings.localPort);
   }, [settings]);
 
-  const start = useCallback((payload: RunStartPayload) => {
-    setError(undefined);
-    setResult(undefined);
-    liveResult.current = undefined;
-    const runId = InterpreterClient.start(payload);
-    if (runId) setActiveRunId(runId);
-    if (runId) setOperationKind('run');
-    else setError('Интерпретатор ещё не готов к запуску');
-  }, []);
+  const start = useCallback(
+    (payload: RunStartPayload) => {
+      setError(undefined);
+      setResult(undefined);
+      liveResult.current = undefined;
+      const runId = InterpreterClient.start(payload);
+      if (runId) setActiveRunId(runId);
+      if (runId) setOperationKind('run');
+      else setError('Интерпретатор ещё не готов к запуску');
+    },
+    [setError, setResult]
+  );
 
-  const startTest = useCallback((payload: TestStartPayload) => {
-    setError(undefined);
-    setResult(undefined);
-    liveResult.current = undefined;
-    const runId = InterpreterClient.startTest(payload);
-    if (!runId) {
-      setError('Интерпретатор ещё не готов к запуску');
-      return;
-    }
-    activeTestId.current = payload.testId;
-    activeTaskXml.current = payload.xml;
-    setActiveRunId(runId);
-    setOperationKind('test');
-    useTasks.getState().startTrial(payload.testId);
-  }, []);
+  const startTest = useCallback(
+    (payload: TestStartPayload) => {
+      setError(undefined);
+      setResult(undefined);
+      liveResult.current = undefined;
+      const runId = InterpreterClient.startTest(payload);
+      if (!runId) {
+        setError('Интерпретатор ещё не готов к запуску');
+        return;
+      }
+      activeTestId.current = payload.testId;
+      activeTaskXml.current = payload.xml;
+      setActiveRunId(runId);
+      setOperationKind('test');
+      useTasks.getState().startTrial(payload.testId);
+    },
+    [setError, setResult]
+  );
 
-  const startSubmission = useCallback((payload: TaskStartPayload) => {
-    setError(undefined);
-    setResult(undefined);
-    liveResult.current = undefined;
-    const runId = InterpreterClient.startSubmission(payload);
-    if (!runId) {
-      setError('Интерпретатор ещё не готов к запуску');
-      return;
-    }
-    activeTaskXml.current = payload.xml;
-    setActiveRunId(runId);
-    setOperationKind('submission');
-    useTasks.getState().startSubmission();
-  }, []);
+  const startSubmission = useCallback(
+    (payload: TaskStartPayload) => {
+      setError(undefined);
+      setResult(undefined);
+      liveResult.current = undefined;
+      const runId = InterpreterClient.startSubmission(payload);
+      if (!runId) {
+        setError('Интерпретатор ещё не готов к запуску');
+        return;
+      }
+      activeTaskXml.current = payload.xml;
+      setActiveRunId(runId);
+      setOperationKind('submission');
+      useTasks.getState().startSubmission();
+    },
+    [setError, setResult]
+  );
 
   const cancel = useCallback(() => {
     if (activeRunId) InterpreterClient.cancel(activeRunId);
@@ -212,7 +230,7 @@ export const useInterpreter = () => {
     setResult(undefined);
     liveResult.current = undefined;
     setError(undefined);
-  }, []);
+  }, [setError, setResult]);
 
   return {
     status,

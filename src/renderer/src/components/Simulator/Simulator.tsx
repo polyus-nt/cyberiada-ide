@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import React, { useContext, useEffect, useLayoutEffect, useState } from 'react';
 
 import { twMerge } from 'tailwind-merge';
 
@@ -44,6 +44,7 @@ import {
   isSimulationResultStale,
   selectInitialMachineId,
 } from './selection';
+import { getSimulatorDocumentKey, SimulatorStateContext, useSimulatorState } from './sessionState';
 import { SimulationMode, SimulationRunPanel } from './SimulationRunPanel';
 import { TaskMode } from './TaskMode';
 import { taskForProtocol } from './taskProtocol';
@@ -179,11 +180,14 @@ const GardenerSimulator: React.FC<GardenerRuntimeProps> = ({
   onStart,
   onCancel,
 }) => {
-  const [width, setWidth] = useState(10);
-  const [height, setHeight] = useState(8);
-  const [field, setField] = useState(() => createField(width, height));
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [orientation, setOrientation] = useState<GardenerOrientation>('east');
+  const [width, setWidth] = useSimulatorState('field-width', 10);
+  const [height, setHeight] = useSimulatorState('field-height', 8);
+  const [field, setField] = useSimulatorState('field', () => createField(width, height));
+  const [position, setPosition] = useSimulatorState('position', { x: 0, y: 0 });
+  const [orientation, setOrientation] = useSimulatorState<GardenerOrientation>(
+    'orientation',
+    'east'
+  );
   useEffect(() => {
     onParametersChange?.({
       width,
@@ -193,14 +197,27 @@ const GardenerSimulator: React.FC<GardenerRuntimeProps> = ({
       orientation: orientation.toUpperCase() as Uppercase<GardenerOrientation>,
     });
   }, [width, height, field, position, orientation, onParametersChange]);
-  const [selectedTool, setSelectedTool] = useState<GardenerTool>(0);
+  const [selectedTool, setSelectedTool] = useSimulatorState<GardenerTool>('tool', 0);
   const [isMouseDown, setIsMouseDown] = useState(false);
   const [isRightMouseDown, setIsRightMouseDown] = useState(false);
-  const [mode, setMode] = useState<SimulationMode>('finite');
-  const [timeout, setTimeoutValue] = useState(10);
-  const [historyIndex, setHistoryIndex] = useState(0);
-  const [reviewingHistory, setReviewingHistory] = useState(false);
-  const [showCurrentState, setShowCurrentState] = useState(false);
+  const [mode, setMode] = useSimulatorState<SimulationMode>('mode', 'finite');
+  const [timeout, setTimeoutValue] = useSimulatorState('timeout', 10);
+  const [historyIndex, setHistoryIndex] = useSimulatorState('history-index', 0, false);
+  const [reviewingHistory, setReviewingHistory] = useSimulatorState(
+    'reviewing-history',
+    false,
+    false
+  );
+  const [showCurrentState, setShowCurrentState] = useSimulatorState(
+    'show-current-state',
+    false,
+    false
+  );
+  const [previousSteps, setPreviousSteps] = useSimulatorState<SimulationResult['steps']>(
+    'history-steps',
+    undefined,
+    false
+  );
   const [isPlaying, setIsPlaying] = useState(false);
   const resultSteps = result?.steps;
   const steps = resultSteps ?? [];
@@ -236,11 +253,21 @@ const GardenerSimulator: React.FC<GardenerRuntimeProps> = ({
   }, [reviewingHistory]);
 
   useLayoutEffect(() => {
+    if (previousSteps === resultSteps) return;
+    setPreviousSteps(resultSteps);
     setHistoryIndex(Math.max(0, steps.length - 1));
     setReviewingHistory(false);
     setShowCurrentState(true);
     setIsPlaying(false);
-  }, [resultSteps, steps.length]);
+  }, [
+    resultSteps,
+    steps.length,
+    previousSteps,
+    setHistoryIndex,
+    setPreviousSteps,
+    setReviewingHistory,
+    setShowCurrentState,
+  ]);
 
   useEffect(() => {
     if (!isPlaying) return;
@@ -252,7 +279,7 @@ const GardenerSimulator: React.FC<GardenerRuntimeProps> = ({
       setHistoryIndex((current) => nextPlaybackIndex(current, steps.length));
     }, PLAYBACK_INTERVAL_MS);
     return () => window.clearTimeout(timer);
-  }, [historyIndex, isPlaying, steps.length]);
+  }, [historyIndex, isPlaying, steps.length, setHistoryIndex]);
 
   const selectHistoryStep = (index: number) => {
     setIsPlaying(false);
@@ -617,12 +644,12 @@ const ReaderSimulator: React.FC<ReaderRuntimeProps> = ({
   onStart,
   onCancel,
 }) => {
-  const [message, setMessage] = useState('');
-  const [mode, setMode] = useState<SimulationMode>('finite');
-  const [timeout, setTimeoutValue] = useState(10);
+  const [message, setMessage] = useSimulatorState('message', '');
+  const [mode, setMode] = useSimulatorState<SimulationMode>('mode', 'finite');
+  const [timeout, setTimeoutValue] = useSimulatorState('timeout', 10);
 
   return (
-    <div className="grid min-h-0 flex-1 grid-cols-[205px_250px_170px] justify-start gap-x-6 gap-y-5 overflow-hidden text-sm max-[983px]:content-start max-[983px]:overflow-auto max-[729px]:grid-cols-1">
+    <div className="grid min-h-0 flex-1 grid-cols-[205px_250px_170px] justify-start gap-x-6 gap-y-5 overflow-auto text-sm max-[760px]:grid-cols-1">
       <SimulationRunPanel
         machineSelector={machineSelector}
         mode={mode}
@@ -641,7 +668,7 @@ const ReaderSimulator: React.FC<ReaderRuntimeProps> = ({
         <ReaderResult result={result} stale={stale} active={active} />
       </section>
 
-      <section className="min-w-0 max-[983px]:col-span-2 max-[729px]:col-span-1">
+      <section className="min-w-0">
         <h2 className="h2-header mb-2">Входная строка</h2>
         <div className="rounded-lg border border-border-primary p-3">
           <textarea
@@ -694,23 +721,30 @@ export const JointSimulator: React.FC<JointSimulatorProps> = ({
 }) => {
   const readers = options.filter(({ machine }) => machine.platform === 'junior-reader');
   const gardeners = options.filter(({ machine }) => machine.platform === 'junior-gardener');
-  const [selectedReaderId, setReaderId] = useState(readers[0]?.id ?? '');
-  const [selectedGardenerId, setGardenerId] = useState(gardeners[0]?.id ?? '');
+  const [selectedReaderId, setReaderId] = useSimulatorState('reader-id', readers[0]?.id ?? '');
+  const [selectedGardenerId, setGardenerId] = useSimulatorState(
+    'gardener-id',
+    gardeners[0]?.id ?? ''
+  );
   const readerId = readers.some(({ id }) => id === selectedReaderId)
     ? selectedReaderId
     : readers[0]?.id ?? '';
   const gardenerId = gardeners.some(({ id }) => id === selectedGardenerId)
     ? selectedGardenerId
     : gardeners[0]?.id ?? '';
-  const [tab, setTab] = useState<'reader' | 'gardener'>('reader');
-  const [message, setMessage] = useState('');
+  const [tab, setTab] = useSimulatorState<'reader' | 'gardener'>('tab', 'reader');
+  const [message, setMessage] = useSimulatorState('message', '');
   const [parameters, setParameters] = useState<GardenerParameters>();
-  const [mode, setMode] = useState<SimulationMode>('finite');
-  const [timeout, setTimeoutValue] = useState(10);
+  const [mode, setMode] = useSimulatorState<SimulationMode>('mode', 'finite');
+  const [timeout, setTimeoutValue] = useSimulatorState('timeout', 10);
   const model = useModelContext();
   useJointMachineRevision(model, readerId);
   useJointMachineRevision(model, gardenerId);
-  const [runRevision, setRunRevision] = useState<string>();
+  const [runRevision, setRunRevision] = useSimulatorState<string | undefined>(
+    'run-revision',
+    undefined,
+    false
+  );
   const currentRevision = JSON.stringify([
     model.model.data.elements.stateMachines[readerId],
     model.model.data.elements.stateMachines[gardenerId],
@@ -1083,14 +1117,36 @@ export const JointTaskMode: React.FC<{
   );
 };
 
-export const Simulator: React.FC<SimulatorProps> = ({
-  initialSmId,
-  onStatusChange,
-  onAutoSizeChange,
-}) => {
+export const Simulator: React.FC<SimulatorProps> = (props) => {
+  const { model } = useModelContext();
+  model.useData('', 'basename');
+  const documentKey = getSimulatorDocumentKey(model.data);
+  return (
+    <SimulatorStateContext.Provider key={documentKey} value={documentKey}>
+      <SimulatorWorkspace {...props} />
+    </SimulatorStateContext.Provider>
+  );
+};
+
+const SimulatorWorkspace: React.FC<SimulatorProps> = (props) => {
+  const [joint, setJoint] = useSimulatorState('joint', false);
+  const documentKey = useContext(SimulatorStateContext);
+  const mode = joint ? 'joint' : 'single';
+  return (
+    <SimulatorStateContext.Provider key={mode} value={`${documentKey}:${mode}`}>
+      <SimulatorMode {...props} joint={joint} setJoint={setJoint} />
+    </SimulatorStateContext.Provider>
+  );
+};
+
+const SimulatorMode: React.FC<
+  SimulatorProps & {
+    joint: boolean;
+    setJoint: (joint: boolean) => void;
+  }
+> = ({ initialSmId, onStatusChange, onAutoSizeChange, joint, setJoint }) => {
   const modelController = useModelContext();
   const interpreter = useInterpreter();
-  const [joint, setJoint] = useState(false);
   const [activeTask, solutionMachineId, selectSolution] = useTasks((state) => [
     getActiveTask(state),
     state.solutionMachineId,
@@ -1106,48 +1162,22 @@ export const Simulator: React.FC<SimulatorProps> = ({
       )
     : allOptions;
   const optionIds = JSON.stringify(options.map(({ id }) => id));
-  const [selectedSmId, setSelectedSmId] = useState(() =>
+  const [selectedSmId, setSelectedSmId] = useSimulatorState('machine-id', () =>
     selectInitialMachineId(options, solutionMachineId ?? initialSmId)
   );
-  const [lastRunRevision, setLastRunRevision] = useState<object>();
+  const [lastInitialSmId, setLastInitialSmId] = useSimulatorState<string | undefined>(
+    'initial-machine-id',
+    undefined,
+    false
+  );
+  const [lastRunRevision, setLastRunRevision] = useSimulatorState<string | undefined>(
+    'run-revision',
+    undefined,
+    false
+  );
   const subscriptionSmId = selectedSmId ?? '';
-  const statesRevision = modelController.model.useData(subscriptionSmId, 'elements.states');
-  const transitionsRevision = modelController.model.useData(
-    subscriptionSmId,
-    'elements.transitions'
-  );
-  const componentsRevision = modelController.model.useData(subscriptionSmId, 'elements.components');
-  const initialStatesRevision = modelController.model.useData(
-    subscriptionSmId,
-    'elements.initialStates'
-  );
-  const finalStatesRevision = modelController.model.useData(
-    subscriptionSmId,
-    'elements.finalStates'
-  );
-  const choiceStatesRevision = modelController.model.useData(
-    subscriptionSmId,
-    'elements.choiceStates'
-  );
-  const shallowHistoryRevision = modelController.model.useData(
-    subscriptionSmId,
-    'elements.shallowHistory'
-  );
-  const nameRevision = modelController.model.useData(subscriptionSmId, 'elements.name');
-  const currentRevision = useMemo(
-    () => ({}),
-    [
-      subscriptionSmId,
-      statesRevision,
-      transitionsRevision,
-      componentsRevision,
-      initialStatesRevision,
-      finalStatesRevision,
-      choiceStatesRevision,
-      shallowHistoryRevision,
-      nameRevision,
-    ]
-  );
+  useJointMachineRevision(modelController, subscriptionSmId);
+  const currentRevision = JSON.stringify(stateMachines[subscriptionSmId]);
   const machine = selectedSmId ? stateMachines[selectedSmId] : undefined;
   const platform = machine ? getPlatform(machine.platform) : undefined;
   const missingComponentReferences =
@@ -1179,8 +1209,13 @@ export const Simulator: React.FC<SimulatorProps> = ({
   }, [interpreter.status, onStatusChange]);
 
   useEffect(() => {
-    onAutoSizeChange?.(activeTask?.platformId === 'junior-gardener');
-  }, [activeTask?.platformId, onAutoSizeChange]);
+    onAutoSizeChange?.(
+      activeTask
+        ? activeTask.platformId === 'junior-gardener'
+        : !joint &&
+            (machine?.platform === 'junior-gardener' || machine?.platform === 'junior-reader')
+    );
+  }, [activeTask, joint, machine?.platform, onAutoSizeChange]);
 
   useEffect(() => {
     if (!activeTask || activeTask.platformId === 'reader-gardener') return;
@@ -1188,7 +1223,9 @@ export const Simulator: React.FC<SimulatorProps> = ({
   }, [activeTask, currentRevision, selectSolution, selectedSmId]);
 
   useEffect(() => {
-    if (!initialSmId || interpreter.active) return;
+    if (initialSmId === lastInitialSmId || interpreter.active) return;
+    setLastInitialSmId(initialSmId);
+    if (!initialSmId || initialSmId === selectedSmId) return;
     if (options.some(({ id }) => id === initialSmId)) {
       setSelectedSmId(initialSmId);
       setLastRunRevision(undefined);
@@ -1287,10 +1324,9 @@ export const Simulator: React.FC<SimulatorProps> = ({
             disabled={interpreter.active}
             onClick={() => {
               setJoint(false);
-              interpreter.clear();
             }}
           >
-            Одна машина
+            Одна машина состояний
           </button>
           <button
             type="button"
@@ -1302,7 +1338,6 @@ export const Simulator: React.FC<SimulatorProps> = ({
             disabled={interpreter.active}
             onClick={() => {
               setJoint(true);
-              interpreter.clear();
             }}
           >
             Строчник + Садовник
