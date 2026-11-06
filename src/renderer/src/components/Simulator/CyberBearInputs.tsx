@@ -142,7 +142,7 @@ export const CyberBearInputs: React.FC<{
         <ScrollArea
           className="h-auto max-h-[420px] rounded-lg border border-border-primary py-0"
           viewportClassName="p-3"
-          verticalOverflowViewportClassName="pr-0"
+          reserveVerticalScrollbarSpace
           horizontalScroll={false}
         >
           <ol className="space-y-1.5">
@@ -187,11 +187,7 @@ export const CyberBearInputs: React.FC<{
                 <div className="relative">
                   <button
                     type="button"
-                    className={`grid h-[30px] w-full min-w-0 grid-cols-[16px_minmax(0,1fr)_auto] items-center gap-1 pl-3 text-left text-xs focus-visible:outline-primary ${
-                      expandedId === input.id
-                        ? 'pr-[96px]'
-                        : 'pr-3 group-focus-within:pr-[96px] group-hover:pr-[96px]'
-                    }`}
+                    className="grid h-[30px] w-full min-w-0 grid-cols-[16px_minmax(0,1fr)_auto] items-center gap-1 pl-3 pr-[96px] text-left text-xs focus-visible:outline-primary"
                     aria-label={`${expandedId === input.id ? 'Свернуть' : 'Раскрыть'} элемент ${
                       index + 1
                     }`}

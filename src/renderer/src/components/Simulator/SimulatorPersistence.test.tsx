@@ -176,7 +176,7 @@ it('retains independent drafts and results across modes and closing the simulato
       reader: { status: 'success', result: { signals: [], calledSignals: ['impulseB'] } },
     },
   });
-  click('Одна машина');
+  click('Одна машина состояний');
   expect(input('textarea').value).toBe('одна машина');
   expect(input('#simulator-timeout').value).toBe('7');
   expect(container.textContent).toContain('Импульс А');
@@ -213,7 +213,7 @@ it('restores drafts from disk after a fresh session and isolates documents', () 
   render();
   expect(input('#joint-reader-message').value).toBe('две машины');
   expect(input('#simulator-field-width').value).toBe('5');
-  click('Одна машина');
+  click('Одна машина состояний');
   expect(input('textarea').value).toBe('сохранённая строка');
   model.model.data = { ...model.model.data, basename: '/project/other.graphml' };
   render();
@@ -243,7 +243,7 @@ it('keeps the selected machine and history position when reopened, and marks edi
   complete({ status: 'success', steps });
   change('[aria-label="Шаг истории"]', '0');
   click('Строчник + Садовник');
-  click('Одна машина');
+  click('Одна машина состояний');
   expect(input('#simulator-state-machine').value).toBe('gardener');
   expect(input('[aria-label="Шаг истории"]').value).toBe('0');
   expect(container.textContent).toContain('Просмотр шага 1 из 2.');

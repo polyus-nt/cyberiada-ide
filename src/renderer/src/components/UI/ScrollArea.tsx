@@ -16,6 +16,8 @@ export interface ScrollAreaProps extends HTMLAttributes<HTMLDivElement> {
   viewportClassName?: string;
   /** Classes applied to the viewport only while its content overflows vertically. */
   verticalOverflowViewportClassName?: string;
+  /** Keep the content width stable when the vertical scrollbar appears. */
+  reserveVerticalScrollbarSpace?: boolean;
   /** Classes applied to the element that directly wraps `children`. Use these for content layout. */
   contentClassName?: string;
   /** Whether content may overflow and scroll horizontally. */
@@ -58,6 +60,7 @@ export const ScrollArea = forwardRef<HTMLDivElement, ScrollAreaProps>(
       className,
       viewportClassName,
       verticalOverflowViewportClassName,
+      reserveVerticalScrollbarSpace = false,
       contentClassName,
       horizontalScroll = true,
       onScroll,
@@ -297,8 +300,13 @@ export const ScrollArea = forwardRef<HTMLDivElement, ScrollAreaProps>(
             </div>
           </div>
 
-          {hasVerticalOverflow && (
-            <div className="relative my-[5px] w-[18px] shrink-0">
+          {(hasVerticalOverflow || reserveVerticalScrollbarSpace) && (
+            <div
+              className={twMerge(
+                'relative my-[5px] w-[18px] shrink-0',
+                !hasVerticalOverflow && 'invisible'
+              )}
+            >
               {/* Scrollbar track */}
               <div className="absolute inset-y-0 left-[10px] w-[2px] rounded-lg bg-scrollbar-track">
                 {/* Scrollbar thumb */}
@@ -338,7 +346,9 @@ export const ScrollArea = forwardRef<HTMLDivElement, ScrollAreaProps>(
               </div>
             </div>
 
-            {hasVerticalOverflow && <div className="w-[18px] shrink-0" />}
+            {(hasVerticalOverflow || reserveVerticalScrollbarSpace) && (
+              <div className="w-[18px] shrink-0" />
+            )}
           </div>
         )}
       </div>

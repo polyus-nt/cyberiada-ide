@@ -649,7 +649,7 @@ const ReaderSimulator: React.FC<ReaderRuntimeProps> = ({
   const [timeout, setTimeoutValue] = useSimulatorState('timeout', 10);
 
   return (
-    <div className="grid min-h-0 flex-1 grid-cols-[205px_250px_170px] justify-start gap-x-6 gap-y-5 overflow-hidden text-sm max-[983px]:content-start max-[983px]:overflow-auto max-[729px]:grid-cols-1">
+    <div className="grid min-h-0 flex-1 grid-cols-[205px_250px_170px] justify-start gap-x-6 gap-y-5 overflow-auto text-sm max-[760px]:grid-cols-1">
       <SimulationRunPanel
         machineSelector={machineSelector}
         mode={mode}
@@ -668,7 +668,7 @@ const ReaderSimulator: React.FC<ReaderRuntimeProps> = ({
         <ReaderResult result={result} stale={stale} active={active} />
       </section>
 
-      <section className="min-w-0 max-[983px]:col-span-2 max-[729px]:col-span-1">
+      <section className="min-w-0">
         <h2 className="h2-header mb-2">Входная строка</h2>
         <div className="rounded-lg border border-border-primary p-3">
           <textarea
@@ -1209,8 +1209,13 @@ const SimulatorMode: React.FC<
   }, [interpreter.status, onStatusChange]);
 
   useEffect(() => {
-    onAutoSizeChange?.(activeTask?.platformId === 'junior-gardener');
-  }, [activeTask?.platformId, onAutoSizeChange]);
+    onAutoSizeChange?.(
+      activeTask
+        ? activeTask.platformId === 'junior-gardener'
+        : !joint &&
+            (machine?.platform === 'junior-gardener' || machine?.platform === 'junior-reader')
+    );
+  }, [activeTask, joint, machine?.platform, onAutoSizeChange]);
 
   useEffect(() => {
     if (!activeTask || activeTask.platformId === 'reader-gardener') return;
@@ -1321,7 +1326,7 @@ const SimulatorMode: React.FC<
               setJoint(false);
             }}
           >
-            Одна машина
+            Одна машина состояний
           </button>
           <button
             type="button"

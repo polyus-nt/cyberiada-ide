@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import { toast } from 'sonner';
 
+import { ConnectionIndicator } from '@renderer/components/UI/ConnectionIndicator';
 import { useSettings } from '@renderer/hooks';
 import type { FileMenuItem } from '@renderer/hooks/useFileMenu';
 import { useFlasherHooks } from '@renderer/hooks/useFlasherHooks';
@@ -10,7 +11,6 @@ import { useWindowManagerStore } from '@renderer/hooks/useWindowManagerStore';
 import { useDoc } from '@renderer/store/useDoc';
 import { useSimulatorWindow } from '@renderer/store/useSimulatorWindow';
 import { getActiveTask, useTasks } from '@renderer/store/useTasks';
-import { ConnectionIndicator } from '@renderer/components/UI/ConnectionIndicator';
 
 import {
   AboutTheProgramModal,
@@ -240,12 +240,12 @@ export const Header: React.FC<HeaderProps> = ({ fileMenuItems, initialSimulation
         position={{ x: 20, y: 18 }}
         onRequestClose={closeSimulatorWindow}
         hideCancelButton
-        className={`max-h-[calc(100vh-36px)] max-w-[calc(100vw-40px)] p-6 [&>.content]:overflow-hidden ${
+        className={`max-h-[calc(100vh-36px)] max-w-[calc(100vw-40px)] p-6 ${
           isAutoSizedSimulator
             ? 'h-fit w-fit'
             : isJointTask
-            ? 'h-[664px] w-[1200px]'
-            : 'h-[664px] w-[976px]'
+            ? 'h-[664px] w-[1200px] [&>.content]:overflow-hidden'
+            : 'h-[664px] w-[976px] [&>.content]:overflow-hidden'
         }`}
       >
         <Simulator

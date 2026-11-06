@@ -51,7 +51,7 @@ const interpreter = {
 };
 
 it.each(['reader', 'gardener', 'bear'])(
-  'keeps window sizing stable when switching modes from %s without submitting the modal form',
+  'sizes the single %s simulator to its content and keeps joint tabs stable without submitting',
   (initialSmId) => {
     vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
     const container = document.createElement('div');
@@ -75,7 +75,7 @@ it.each(['reader', 'gardener', 'bear'])(
           </form>
         )
       );
-      expect(onAutoSizeChange).toHaveBeenLastCalledWith(false);
+      expect(onAutoSizeChange).toHaveBeenLastCalledWith(initialSmId !== 'bear');
       click('Строчник + Садовник');
       expect(onAutoSizeChange).toHaveBeenLastCalledWith(false);
       expect(container.querySelector('[role="tablist"]')).not.toBeNull();
@@ -86,8 +86,8 @@ it.each(['reader', 'gardener', 'bear'])(
       click('Строчник');
       expect(container.querySelector('#joint-panel-reader')?.hasAttribute('hidden')).toBe(false);
       expect(submit).not.toHaveBeenCalled();
-      click('Одна машина');
-      expect(onAutoSizeChange.mock.calls.every(([autoSize]) => autoSize === false)).toBe(true);
+      click('Одна машина состояний');
+      expect(onAutoSizeChange).toHaveBeenLastCalledWith(initialSmId !== 'bear');
       expect(container.querySelector('[role="tablist"]')).toBeNull();
       expect(submit).not.toHaveBeenCalled();
     } finally {
