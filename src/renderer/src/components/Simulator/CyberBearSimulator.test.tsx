@@ -5,6 +5,18 @@ import { describe, expect, it, vi } from 'vitest';
 vi.mock('@renderer/assets/icons/arrow-down.svg', () => ({
   ReactComponent: (props: React.SVGProps<SVGSVGElement>) => <svg {...props} />,
 }));
+vi.mock('@renderer/assets/icons/add.svg', () => ({
+  ReactComponent: (props: React.SVGProps<SVGSVGElement>) => <svg {...props} />,
+}));
+vi.mock('@renderer/assets/icons/delete.svg', () => ({
+  ReactComponent: (props: React.SVGProps<SVGSVGElement>) => <svg {...props} />,
+}));
+vi.mock('@renderer/assets/icons/move-up.svg', () => ({
+  ReactComponent: (props: React.SVGProps<SVGSVGElement>) => <svg {...props} />,
+}));
+vi.mock('@renderer/assets/icons/move-down.svg', () => ({
+  ReactComponent: (props: React.SVGProps<SVGSVGElement>) => <svg {...props} />,
+}));
 
 vi.mock('@renderer/components/UI', () => ({
   ParameterSelect: ({
@@ -85,14 +97,14 @@ describe('CyberBear simulator', () => {
       click('Свернуть элемент 2');
       expect(editors().map((editor) => editor.hidden)).toEqual([true, true]);
       const first = container.querySelector('[aria-label="Раскрыть элемент 1"]');
-      expect(first?.textContent).toContain('0 мсИК—');
+      expect(first?.textContent).toMatch(/ИК —0\sмс$/);
 
       click('Раскрыть элемент 1');
       expect(editors().map((editor) => editor.hidden)).toEqual([false, true]);
       change('cyberbear-time-', '500');
       change('cyberbear-channel-', 'ears');
       change('cyberbear-value-', '0x2A');
-      expect(first?.textContent).toContain('500 мсАК0x2A');
+      expect(first?.textContent).toMatch(/АК 0x2A500\sмс$/);
       const originalEditor = editors()[0];
 
       click('Раскрыть элемент 2');
@@ -103,8 +115,8 @@ describe('CyberBear simulator', () => {
       click('Опустить элемент 1');
       expect(editors().map((editor) => editor.hidden)).toEqual([true, false]);
       expect(editors()[1]).toBe(originalEditor);
-      expect(container.querySelector('[aria-label="Свернуть элемент 2"]')?.textContent).toContain(
-        '500 мсАК0x2A'
+      expect(container.querySelector('[aria-label="Свернуть элемент 2"]')?.textContent).toMatch(
+        /АК 0x2A500\sмс$/
       );
       click('Удалить элемент 2');
       expect(editors().map((editor) => editor.hidden)).toEqual([true]);
@@ -127,7 +139,7 @@ describe('CyberBear simulator', () => {
       });
     const click = (text: string) => {
       const button = Array.from(container.querySelectorAll('button')).find(
-        (item) => item.textContent === text
+        (item) => item.getAttribute('aria-label') === text || item.textContent === text
       );
       if (!button) throw new Error(`Missing button: ${text}`);
       act(() => button.click());
@@ -219,7 +231,7 @@ describe('CyberBear simulator', () => {
       act(() => root.render(<CyberBearSimulator {...props} />));
       const add = () => {
         const button = Array.from(container.querySelectorAll('button')).find(
-          (item) => item.textContent === 'Добавить элемент'
+          (item) => item.getAttribute('aria-label') === 'Добавить элемент'
         );
         if (!button) throw new Error('Missing add input button');
         act(() => button.click());
