@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "bear-hello",
-  "version": 1,
+  "version": 2,
   "title": "Привет, Мишка",
   "summary": "Разбудите бортового помощника и настройте его световое приветствие.",
   "descriptionFile": "bear-hello.md",
