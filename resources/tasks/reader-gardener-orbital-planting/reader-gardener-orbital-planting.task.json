@@ -3,7 +3,7 @@
   "id": "reader-gardener-orbital-planting",
   "version": 1,
   "title": "Посадка с орбиты",
-  "summary": "Восстановите цветочные знаки по защищённым командам с орбиты.",
+  "summary": "Вырастите цветочные знаки по командам с орбиты.",
   "descriptionFile": "reader-gardener-orbital-planting.md",
   "platformId": "reader-gardener",
   "tests": [
