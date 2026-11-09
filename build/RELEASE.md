@@ -8,6 +8,15 @@ npm run release:docker
 Команда создаёт содержимое `dist/` и `outputs/` так же, как Linux/Windows-часть
 ручных release-workflow. Она не публикует артефакты и не собирает macOS-версию.
 
+В GitHub Actions Linux и Windows собираются отдельными jobs `linux-build` и
+`windows-build`, каждый на своём Ubuntu runner с отдельным Docker-хранилищем.
+Linux job задаёт `RELEASE_SKIP_WINDOWS=1`, Windows job — `RELEASE_SKIP_LINUX=1`,
+чтобы зависимости и промежуточные файлы обеих платформ не занимали диск одного
+runner. Это применяется к обоим ручным workflow и релизу по тегу.
+В релизе по тегу job `publish-release` получает готовые артефакты обеих платформ
+через GitHub Actions artifacts и создаёт общий релиз; затем macOS job добавляет
+DMG. В Seafile каждый job отправляет только артефакты своей платформы.
+
 Docker Compose сохраняет скачанные архивы зависимостей в именованном volume
 `release-download-cache`. При повторном запуске они не загружаются заново.
 Также кешируются Electron и electron-builder, а `node_modules`, `out`, `dist` и

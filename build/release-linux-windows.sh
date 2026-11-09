@@ -348,7 +348,9 @@ fi
 
 if [[ "$release_seafile_staging" == "1" ]]; then
   mkdir -p outputs/seafile-upload
-  cp "outputs/cyberiada-${version}-windows.zip" outputs/seafile-upload/
+  if [[ "$release_skip_windows" != "1" ]]; then
+    cp "outputs/cyberiada-${version}-windows.zip" outputs/seafile-upload/
+  fi
   find "${release_artifacts_dist_dir:-dist}" -maxdepth 1 -type f \( \
     -name '*.deb' -o -name '*.rpm' -o -name '*.snap' -o -name '*.AppImage' \
     \) -exec cp {} outputs/seafile-upload/ \;

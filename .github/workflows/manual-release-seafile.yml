@@ -1,9 +1,62 @@
-name: Build Windows Release manually (Seafile upload)
+name: Build Release manually (Seafile upload)
 
 on:
   workflow_dispatch:
 
 jobs:
+  linux-build:
+    runs-on: ubuntu-latest
+
+    env:
+      RELEASE_SKIP_WINDOWS: '1'
+      RELEASE_SEAFILE_STAGING: '1'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Init submodules
+        run: git submodule update --init --checkout --recursive
+
+      - name: Build release image
+        run: docker compose -f compose.release.yml build release
+
+      - name: Build Linux artifacts
+        run: docker compose -f compose.release.yml run --rm release
+
+      - name: Upload to Seafile
+        uses: chekoopa/upload-to-seafile@v1
+        with:
+          server-url: ${{ secrets.SEAFILE_SERVER_URL }}
+          username: ${{ secrets.SEAFILE_USERNAME }}
+          password: ${{ secrets.SEAFILE_PASSWORD }}
+          repo-id: ${{ secrets.SEAFILE_REPO_ID }}
+          remote-path: '/'
+          # remote-path: /${{ env.date }}
+          local-path: 'outputs/seafile-upload/*'
+          overwrite: 'true'
+
+      - name: Save deb artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: deb-build
+          path: |
+            dist/*.deb
+
+      - name: Save snap artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: snap-build
+          path: |
+            dist/*.snap
+
+      - name: Save AppImage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: appimage-build
+          path: |
+            dist/*.AppImage
+
   windows-build:
     runs-on: ubuntu-latest
     env:

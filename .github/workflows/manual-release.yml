@@ -4,31 +4,31 @@ on:
   workflow_dispatch:
 
 jobs:
-  linux-windows-build:
+  linux-build:
     runs-on: ubuntu-latest
+
+    env:
+      RELEASE_SKIP_WINDOWS: '1'
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
       - name: Init submodules
         run: git submodule update --init --checkout --recursive
+
       - name: Build release image
         run: docker compose -f compose.release.yml build release
-      - name: Build Linux and Windows artifacts
+
+      - name: Build Linux artifacts
         run: docker compose -f compose.release.yml run --rm release
+
       - name: Save deb artifact
         uses: actions/upload-artifact@v4
         with:
           name: deb-build
           path: |
             dist/*.deb
-
-      - name: Save exe artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: exe-build
-          path: |
-            dist/*.exe
 
       - name: Save snap artifact
         uses: actions/upload-artifact@v4
@@ -37,13 +37,6 @@ jobs:
           path: |
             dist/*.snap
 
-      - name: Save windows zip artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows-zip-build
-          path: |
-            outputs/cyberiada-*-windows.zip
-
       - name: Save AppImage artifact
         uses: actions/upload-artifact@v4
         with:
@@ -51,10 +44,43 @@ jobs:
           path: |
             dist/*.AppImage
 
+  windows-build:
+    runs-on: ubuntu-latest
+
+    env:
+      RELEASE_SKIP_LINUX: '1'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Init submodules
+        run: git submodule update --init --checkout --recursive
+
+      - name: Build release image
+        run: docker compose -f compose.release.yml build release
+
+      - name: Build Windows artifacts
+        run: docker compose -f compose.release.yml run --rm release
+
+      - name: Save exe artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: exe-build
+          path: |
+            dist/*.exe
+
+      - name: Save windows zip artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-zip-build
+          path: |
+            outputs/cyberiada-*-windows.zip
+
   mac-build:
     runs-on: 'macos-latest'
 
-    needs: linux-windows-build
+    needs: [linux-build, windows-build]
 
     steps:
       - name: Checkout code
