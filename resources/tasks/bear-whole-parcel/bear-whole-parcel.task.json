@@ -1,10 +1,11 @@
 {
   "schemaVersion": 2,
   "id": "bear-whole-parcel",
-  "version": 1,
+  "version": 2,
   "title": "Целая посылка",
-  "summary": "Проверьте повторённые замеры и обнаружьте искажения в подводной связи.",
+  "summary": "Проверьте, совпали ли две копии каждого замера зонда.",
   "descriptionFile": "bear-whole-parcel.md",
+  "codeWord": "ЦЕЛОСТНОСТЬ",
   "platformId": "blg-mb-junior",
   "tests": [
     {

@@ -1,9 +1,9 @@
 {
   "schemaVersion": 2,
   "id": "bear-cargo-sorting",
-  "version": 1,
+  "version": 2,
   "title": "Сортировка грузов",
-  "summary": "Помогите грузчику выбрать полку по чётности номера контейнера.",
+  "summary": "Подскажите грузчику полку по чётности номера контейнера.",
   "descriptionFile": "bear-cargo-sorting.md",
   "platformId": "blg-mb-junior",
   "tests": [

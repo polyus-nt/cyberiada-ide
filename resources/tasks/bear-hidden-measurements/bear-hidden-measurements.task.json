@@ -1,9 +1,9 @@
 {
   "schemaVersion": 2,
   "id": "bear-hidden-measurements",
-  "version": 1,
+  "version": 2,
   "title": "Тайник в замерах",
-  "summary": "Найдите скрытое сообщение в акустических замерах подводного зонда.",
+  "summary": "Найдите тайное сообщение в замерах подводного зонда.",
   "descriptionFile": "bear-hidden-measurements.md",
   "platformId": "blg-mb-junior",
   "tests": [

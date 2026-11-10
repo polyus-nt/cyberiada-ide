@@ -1,9 +1,9 @@
 {
   "schemaVersion": 2,
   "id": "bear-every-byte",
-  "version": 1,
+  "version": 2,
   "title": "Каждый байт",
-  "summary": "Превратите каждый акустический пакет в новый световой отклик.",
+  "summary": "Отвечайте на каждый байт по акустике новым цветом глаз.",
   "descriptionFile": "bear-every-byte.md",
   "platformId": "blg-mb-junior",
   "tests": [
