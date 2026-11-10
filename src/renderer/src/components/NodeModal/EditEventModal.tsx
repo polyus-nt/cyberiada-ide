@@ -13,7 +13,7 @@ export const EditEventModal: React.FC<EditEventModalProps> = (props) => {
   const { trigger, condition, actions, showCondition, event, error } = props;
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-6">
+    <div className="state-event-editor flex h-full min-h-0 flex-col gap-6">
       <Trigger event={event} {...trigger} />
       {showCondition && <Condition {...condition} />}
       <Actions

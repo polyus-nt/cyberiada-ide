@@ -17,3 +17,28 @@
 .editor .cm-activeLine {
   @apply bg-bg-hover;
 }
+
+@media (max-height: 800px) {
+  .state-modal {
+    --actions-min-height: 200px;
+    --matrix-actions-max-height: clamp(
+      200px,
+      calc(var(--moving-window-max-height, 100vh) - 420px),
+      400px
+    );
+    padding: 16px;
+  }
+
+  .state-modal .moving-modal-header {
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+  }
+
+  .state-modal .moving-modal-footer {
+    padding-top: 12px;
+  }
+
+  .state-modal .state-event-editor {
+    gap: 12px;
+  }
+}

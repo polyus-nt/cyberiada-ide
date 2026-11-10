@@ -3,7 +3,7 @@
   "id": "bear-mood",
   "version": 1,
   "title": "Настроение Мишки",
-  "summary": "Подарите экипажу случайную картинку каждые две секунды.",
+  "summary": "Каждые две секунды показывайте экипажу случайную картинку.",
   "descriptionFile": "bear-mood.md",
   "platformId": "blg-mb-junior",
   "tests": [

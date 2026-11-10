@@ -80,13 +80,32 @@ class ModuleCheckerTests(unittest.TestCase):
         points[-1] = (15000, 'black', 'smile')
         self.assertFalse(run('bear-quiet-hour', points, duration=15499)['passed'])
 
-    def test_airlock_interrupts_green_at_twelve_seconds(self):
+    def test_airlock_repeats_both_yellows_and_interrupts_red_after_ten_seconds(self):
+        points = []
+        for start in (0, 15000, 30000):
+            points.extend((start + t, color, picture) for t, color, picture in [
+                (0, 'red', 'square'), (3000, 'yellow', 'question'),
+                (4000, 'green', 'smile'), (7000, 'yellow', 'question'),
+                (8000, 'red', 'square'),
+            ] if start + t <= 35000)
+            points.extend((start + t, 'yellow' if t % 1000 == 0 else 'black', 'empty')
+                          for t in range(10000, 15000, 500) if start + t <= 35000)
+        self.assertTrue(run('bear-airlock-traffic', points, duration=35000)['passed'])
+        # The first yellow, the second yellow, and the following night/day boundaries
+        # are independently required, including the one millisecond before each.
+        for time in (3000, 4000, 7000, 8000, 10000, 10500, 15000, 25000, 30000):
+            with self.subTest(time=time):
+                for offset in (-1, 1):
+                    wrong = [(t + offset if t == time else t, color, picture)
+                             for t, color, picture in points]
+                    self.assertFalse(run('bear-airlock-traffic', wrong,
+                                         duration=35000)['passed'])
+
+    def test_airlock_rejects_the_previous_three_color_cycle(self):
         points = [(0, 'red', 'square'), (3000, 'green', 'smile'),
                   (6000, 'yellow', 'question'), (7000, 'red', 'square'),
-                  (10000, 'green', 'smile'), (12000, 'yellow', 'empty'),
-                  (12500, 'black', 'empty')]
-        self.assertTrue(run('bear-airlock-traffic', points, duration=12999)['passed'])
-        self.assertFalse(run('bear-airlock-traffic', points[:-2], duration=12999)['passed'])
+                  (10000, 'green', 'smile'), (12000, 'yellow', 'empty')]
+        self.assertFalse(run('bear-airlock-traffic', points, duration=12000)['passed'])
 
     def test_code_can_restart_with_three_and_stays_open(self):
         values = [3, 1, 3, 1, 4, 0]

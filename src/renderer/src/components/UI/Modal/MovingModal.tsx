@@ -76,17 +76,19 @@ export const MovingModal: React.FC<ModalProps> = ({
         className
       )}
       header={
-        <div className="relative mb-6 flex w-full items-center justify-between border-b border-border-primary pb-6">
+        <div className="moving-modal-header relative mb-6 flex w-full items-center justify-between border-b border-border-primary pb-6">
           <h1 className="text-[14px] font-medium">{title}</h1>
           <CloseButton onClick={props.onRequestClose} />
         </div>
       }
     >
-      <form onSubmit={onSubmit} className="flex h-full min-h-0 flex-col">
-        <div className="min-h-0 flex-1">{children}</div>
+      <form onSubmit={onSubmit} className="flex min-h-0 flex-1 flex-col">
+        <div className="min-h-0 flex-1 overflow-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-current">
+          {children}
+        </div>
 
         {hasFooter && (
-          <div className="flex items-center justify-end gap-2 pt-6">
+          <div className="moving-modal-footer flex shrink-0 items-center justify-end gap-2 pt-6">
             <button
               type="button"
               className={

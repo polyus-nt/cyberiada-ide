@@ -3,8 +3,9 @@
   "id": "bear-light-music",
   "version": 1,
   "title": "Светомузыка",
-  "summary": "Устройте в невесомости праздник с непредсказуемыми цветами.",
+  "summary": "Устройте праздничную светомузыку из случайных цветов.",
   "descriptionFile": "bear-light-music.md",
+  "codeWord": "ЦВЕТА",
   "platformId": "blg-mb-junior",
   "tests": [
     {

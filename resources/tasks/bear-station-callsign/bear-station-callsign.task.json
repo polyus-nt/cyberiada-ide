@@ -5,6 +5,7 @@
   "title": "Позывной станции",
   "summary": "Зажгите маяк «Орбиты-7»: две короткие вспышки и одна длинная.",
   "descriptionFile": "bear-station-callsign.md",
+  "codeWord": "КИБЕРМИШКА",
   "platformId": "blg-mb-junior",
   "tests": [
     {

@@ -5,6 +5,7 @@
   "title": "Кубик",
   "summary": "Замените улетевший игровой кубик световыми гранями Мишки.",
   "descriptionFile": "bear-dice.md",
+  "codeWord": "ИГРА",
   "platformId": "blg-mb-junior",
   "tests": [
     {
