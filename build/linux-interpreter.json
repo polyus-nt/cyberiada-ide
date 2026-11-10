@@ -1,0 +1,12 @@
+{
+  "binary": "resources/modules/linux/sm-interpreter",
+  "sha256": "3fb0ecaf023f6c97fbc142d471e4eca8c8782054abcabbee84fb17ef767d766e",
+  "sourceRepository": "sm-interpreter",
+  "sourceCommit": "ddd9ceeaa78ce66d719381de8361198f357e2349",
+  "version": "2.0.0",
+  "platform": "linux-x86_64",
+  "pythonVersion": "3.12.16",
+  "pyinstallerVersion": "6.22.3",
+  "buildGlibcVersion": "2.31",
+  "maximumRequiredGlibcVersion": "2.17"
+}
