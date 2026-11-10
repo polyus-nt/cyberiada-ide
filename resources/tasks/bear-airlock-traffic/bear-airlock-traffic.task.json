@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "bear-airlock-traffic",
-  "version": 1,
+  "version": 2,
   "title": "Светофор шлюза",
   "summary": "Настройте дневную смену и ночной режим светофора.",
   "descriptionFile": "bear-airlock-traffic.md",

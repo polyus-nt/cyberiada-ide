@@ -3,7 +3,7 @@
   "id": "bear-hello",
   "version": 2,
   "title": "Привет, Мишка",
-  "summary": "Разбудите бортового помощника и научите его здороваться.",
+  "summary": "Научите бортового помощника здороваться миганием глаз.",
   "descriptionFile": "bear-hello.md",
   "platformId": "blg-mb-junior",
   "tests": [

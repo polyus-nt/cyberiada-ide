@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns">
+  <data key="gFormat">Cyberiada-GraphML-1.0</data>
+  <key attr.name="name" attr.type="string" for="node" id="dName"></key>
+  <key attr.name="data" attr.type="string" for="node" id="dData"></key>
+  <key attr.name="data" attr.type="string" for="edge" id="dData"></key>
+  <key attr.name="initial" attr.type="string" for="node" id="dInitial"></key>
+  <key for="edge" id="dGeometry"></key>
+  <key for="node" id="dGeometry"></key>
+  <key for="edge" id="dColor"></key>
+  <key for="node" id="dNote"></key>
+  <key for="node" id="dColor"></key>
+  <graph id="Machine1">
+    <data key="dStateMachine"></data>
+    <data key="dName">Строчник</data>
+    <data key="dGeometry">
+      <rect x="0" y="0" width="450" height="100"></rect>
+    </data>
+    <node id="coreMeta">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_META</data>
+      <data key="dData">standardVersion/ 1.0
+
+platformVersion/ 1.0
+
+lapkiVisual/ true
+
+platform/ junior-reader
+
+</data>
+    </node>
+    <node id="dbmeopsgehiuswansxme">
+      <data key="dName">Чтение</data>
+      <data key="dData">entry/
+Reader1.read()
+
+Reader1.char_accepted[Reader1.current_char == А]/
+Impulse1.impulseA()
+Reader1.read()
+
+Reader1.char_accepted[Reader1.current_char == Б]/
+Impulse1.impulseB()
+Reader1.read()
+
+Reader1.char_accepted[Reader1.current_char == В]/
+Impulse1.impulseC()
+Reader1.read()
+
+</data>
+      <data key="dGeometry">
+        <rect x="187.00717163085938" y="507.5006504058838" width="450" height="95"></rect>
+      </data>
+    </node>
+    <node id="hyhuoueztanmpfqlvhbs">
+      <data key="dVertex">initial</data>
+      <data key="dGeometry">
+        <point x="-10.992828369140625" y="237.5006504058838"></point>
+      </data>
+    </node>
+    <node id="cReader1">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT</data>
+      <data key="dData">id/ Reader1
+
+type/ Reader
+
+name/ Считыватель
+
+</data>
+      <data key="dLapkiSchemePosition">
+        <point x="30" y="30"></point>
+      </data>
+    </node>
+    <node id="cImpulse1">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT</data>
+      <data key="dData">id/ Impulse1
+
+type/ Impulse
+
+name/ Сигнал
+
+</data>
+      <data key="dLapkiSchemePosition">
+        <point x="30" y="30"></point>
+      </data>
+    </node>
+    <edge id="mzjypzvqtcomqhtnakqq" source="hyhuoueztanmpfqlvhbs" target="dbmeopsgehiuswansxme"></edge>
+  </graph>
+  <graph id="Machine2">
+    <data key="dStateMachine"></data>
+    <data key="dName">Садовник</data>
+    <data key="dGeometry">
+      <rect x="0" y="0" width="450" height="100"></rect>
+    </data>
+    <node id="coreMeta">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_META</data>
+      <data key="dData">standardVersion/ 1.0
+
+platformVersion/ 1.0
+
+lapkiVisual/ true
+
+platform/ junior-gardener
+
+</data>
+    </node>
+    <node id="mxmnmvpwonbnadcchfub">
+      <data key="dName">Работа</data>
+      <data key="dData">Receiver1.impulse_received[Receiver1.received_impulse == Receiver1.impulseA]/
+Flower1.plant(1)
+Mover1.move_forward()
+
+Receiver1.impulse_received[Receiver1.received_impulse == Receiver1.impulseB]/
+Flower1.plant(2)
+Mover1.move_forward()
+
+Receiver1.impulse_received[Receiver1.received_impulse == Receiver1.impulseC]/
+Flower1.plant(3)
+Mover1.move_forward()
+
+</data>
+      <data key="dGeometry">
+        <rect x="187.00717163085938" y="507.5006504058838" width="450" height="95"></rect>
+      </data>
+    </node>
+    <node id="lzhausacbiexkzpodtjt">
+      <data key="dVertex">initial</data>
+      <data key="dGeometry">
+        <point x="-10.992828369140625" y="237.5006504058838"></point>
+      </data>
+    </node>
+    <node id="cReceiver1">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT</data>
+      <data key="dData">id/ Receiver1
+
+type/ Receiver
+
+name/ Приёмник
+
+</data>
+      <data key="dLapkiSchemePosition">
+        <point x="30" y="30"></point>
+      </data>
+    </node>
+    <node id="cFlower1">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT</data>
+      <data key="dData">id/ Flower1
+
+type/ Flower
+
+name/ Цветы
+
+</data>
+      <data key="dLapkiSchemePosition">
+        <point x="30" y="30"></point>
+      </data>
+    </node>
+    <node id="cMover1">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT</data>
+      <data key="dData">id/ Mover1
+
+type/ Mover
+
+name/ Движение
+
+</data>
+      <data key="dLapkiSchemePosition">
+        <point x="30" y="30"></point>
+      </data>
+    </node>
+    <edge id="gpzoltkjeeyxbemqmufn" source="lzhausacbiexkzpodtjt" target="mxmnmvpwonbnadcchfub"></edge>
+  </graph>
+</graphml>

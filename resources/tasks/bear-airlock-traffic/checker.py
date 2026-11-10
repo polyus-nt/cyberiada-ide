@@ -28,19 +28,26 @@ def timeline(case, execution, points):
         if color is not None and not eyes_are(state, color):
             return fail(t, "Неверный цвет глаз: проверьте входные данные, последовательность и время реакции")
         if picture is not None and not picture_is(state, picture):
-            return fail(t, "Неверная картинка на животе: проверьте выбор рисунка и момент выключения")
+            return fail(t, "Неверная картинка на матрице: проверьте выбор рисунка и момент выключения")
     return {"passed": True}
 
 
 def check(case, execution):
+    # День 10 с: красный 3 с, жёлтый 1 с, зелёный 3 с, жёлтый 1 с и снова красный.
+    # Ночь 5 с: матрица пустая, глаза мигают жёлтым - 500 мс горят, 500 мс погашены.
     points = []
     for t in range(0, case["input"]["durationMs"] + 1, 500):
-        phase = t % 17000
-        if phase < 12000:
-            color, picture = ("red", "square") if phase % 7000 < 3000 else (
-                ("green", "smile") if phase % 7000 < 6000 else ("yellow", "question"))
+        phase = t % 15000
+        if phase < 10000:
+            p = phase % 8000
+            if p < 3000:
+                color, picture = "red", "square"
+            elif p < 4000 or p >= 7000:
+                color, picture = "yellow", "question"
+            else:
+                color, picture = "green", "smile"
         else:
-            color = "yellow" if (phase - 12000) % 1000 == 0 else "black"
+            color = "yellow" if (phase - 10000) % 1000 == 0 else "black"
             picture = "empty"
         points.append((t, color, picture))
     return timeline(case, execution, points)

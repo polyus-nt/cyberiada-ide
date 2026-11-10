@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns">
+  <data key="gFormat">Cyberiada-GraphML-1.0</data>
+  <key attr.name="name" attr.type="string" for="node" id="dName"></key>
+  <key attr.name="data" attr.type="string" for="node" id="dData"></key>
+  <key attr.name="data" attr.type="string" for="edge" id="dData"></key>
+  <key attr.name="initial" attr.type="string" for="node" id="dInitial"></key>
+  <key for="edge" id="dGeometry"></key>
+  <key for="node" id="dGeometry"></key>
+  <key for="edge" id="dColor"></key>
+  <key for="node" id="dNote"></key>
+  <key for="node" id="dColor"></key>
+  <graph id="CyBear1">
+    <data key="dStateMachine"></data>
+    <data key="dGeometry">
+      <rect x="0" y="0" width="450" height="100"></rect>
+    </data>
+    <node id="coreMeta">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_META</data>
+      <data key="dData">standardVersion/ 1.0
+
+platformVersion/ 1.0
+
+lapkiVisual/ true
+
+platform/ blg-mb-junior
+
+</data>
+    </node>
+    <node id="awxqccudujgkkdkbekqp">
+      <data key="dName">Дежурит</data>
+      <data key="dData">entry/
+MatrixPicture1.draw(smile);
+Timer2.start(10000);
+
+</data>
+      <data key="dGeometry">
+        <rect x="121.9843835449218" y="862.7008983612061" width="450" height="95"></rect>
+      </data>
+      <data key="dColor">#FFFFFF</data>
+      <graph id="awxqccudujgkkdkbekqp">
+        <node id="okflwlkfywvbfboxvtnz">
+          <data key="dName">Горят</data>
+          <data key="dData">entry/
+Eyes1.setColorPalette(&amp;ColorCyan);
+Eyes2.setColorPalette(&amp;ColorCyan);
+Timer1.start(500);
+
+</data>
+          <data key="dGeometry">
+            <rect x="115" y="130" width="450" height="95"></rect>
+          </data>
+          <data key="dColor">#FFFFFF</data>
+        </node>
+        <node id="kocyhvlqsciswfwtqgil">
+          <data key="dName">Погасли</data>
+          <data key="dData">entry/
+Eyes1.off();
+Eyes2.off();
+Timer1.start(500);
+
+</data>
+          <data key="dGeometry">
+            <rect x="113.18995971679719" y="444.1204024505617" width="450" height="95"></rect>
+          </data>
+          <data key="dColor">#FFFFFF</data>
+        </node>
+        <node id="phpzooosjafhsjnuuauk">
+          <data key="dVertex">initial</data>
+          <data key="dGeometry">
+            <point x="15" y="110"></point>
+          </data>
+        </node>
+      </graph>
+    </node>
+    <node id="dxzmwtuahkthntaehpof">
+      <data key="dName">Тихий час</data>
+      <data key="dData">entry/
+Eyes1.off();
+Eyes2.off();
+MatrixPicture1.draw(empty);
+Timer2.start(5000);
+
+</data>
+      <data key="dGeometry">
+        <rect x="1111.033666381836" y="1011.3108333206177" width="450" height="95"></rect>
+      </data>
+      <data key="dColor">#FFFFFF</data>
+    </node>
+    <node id="lyziztcjdoajczlbykxk">
+      <data key="dVertex">initial</data>
+      <data key="dGeometry">
+        <point x="21.984383544921798" y="842.7008983612061"></point>
+      </data>
+    </node>
+    <node id="cEyes1">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT</data>
+      <data key="dData">id/ Eyes1
+
+type/ Eyes
+
+pin/ 2
+
+name/ Левый глаз
+
+</data>
+      <data key="dLapkiSchemePosition">
+        <point x="30" y="30"></point>
+      </data>
+    </node>
+    <node id="cEyes2">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT</data>
+      <data key="dData">id/ Eyes2
+
+type/ Eyes
+
+pin/ 1
+
+name/ Правый глаз
+
+</data>
+      <data key="dLapkiSchemePosition">
+        <point x="30" y="30"></point>
+      </data>
+    </node>
+    <node id="cTimer1">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT</data>
+      <data key="dData">id/ Timer1
+
+type/ Timer
+
+name/ Таймер мигания
+
+label/ М
+
+labelColor/ #f26419
+
+</data>
+      <data key="dLapkiSchemePosition">
+        <point x="30" y="30"></point>
+      </data>
+    </node>
+    <node id="cMatrixPicture1">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT</data>
+      <data key="dData">id/ MatrixPicture1
+
+type/ MatrixPicture
+
+name/ Матрица
+
+</data>
+      <data key="dLapkiSchemePosition">
+        <point x="30" y="30"></point>
+      </data>
+    </node>
+    <node id="cTimer2">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT</data>
+      <data key="dData">id/ Timer2
+
+type/ Timer
+
+name/ Таймер сна
+
+label/ С
+
+labelColor/ #4b296b
+
+</data>
+      <data key="dLapkiSchemePosition">
+        <point x="30" y="30"></point>
+      </data>
+    </node>
+    <edge id="miskycbgivlijsbmctdh" source="lyziztcjdoajczlbykxk" target="awxqccudujgkkdkbekqp"></edge>
+    <edge id="vbfvxkqjsjuajvckkesc" source="okflwlkfywvbfboxvtnz" target="kocyhvlqsciswfwtqgil">
+      <data key="dData">Timer1.timeout/
+
+</data>
+      <data key="dLabelGeometry">
+        <point x="306.95434326171875" y="1173.521300811767"></point>
+      </data>
+    </edge>
+    <edge id="ooffzxcvvtpeqqlajloe" source="kocyhvlqsciswfwtqgil" target="okflwlkfywvbfboxvtnz">
+      <data key="dData">Timer1.timeout/
+
+</data>
+      <data key="dLabelGeometry">
+        <point x="501.89434326171863" y="1174.4213008117677"></point>
+      </data>
+    </edge>
+    <edge id="gwlatmaieilwhiyegdfg" source="awxqccudujgkkdkbekqp" target="dxzmwtuahkthntaehpof">
+      <data key="dData">Timer2.timeout/
+
+</data>
+      <data key="dLabelGeometry">
+        <point x="835.6040048217772" y="1037.3560670661925"></point>
+      </data>
+    </edge>
+    <edge id="dwfkgbeupkpanzgzhegx" source="dxzmwtuahkthntaehpof" target="awxqccudujgkkdkbekqp">
+      <data key="dData">Timer2.timeout/
+
+</data>
+      <data key="dLabelGeometry">
+        <point x="840.5840048217772" y="1231.1560670661922"></point>
+      </data>
+    </edge>
+    <edge id="iiktyojtyfjcsbswvxtz" source="phpzooosjafhsjnuuauk" target="okflwlkfywvbfboxvtnz"></edge>
+  </graph>
+</graphml>

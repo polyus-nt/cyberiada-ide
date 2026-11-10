@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns">
+  <data key="gFormat">Cyberiada-GraphML-1.0</data>
+  <key attr.name="name" attr.type="string" for="node" id="dName"></key>
+  <key attr.name="data" attr.type="string" for="node" id="dData"></key>
+  <key attr.name="data" attr.type="string" for="edge" id="dData"></key>
+  <key attr.name="initial" attr.type="string" for="node" id="dInitial"></key>
+  <key for="edge" id="dGeometry"></key>
+  <key for="node" id="dGeometry"></key>
+  <key for="edge" id="dColor"></key>
+  <key for="node" id="dNote"></key>
+  <key for="node" id="dColor"></key>
+  <graph id="Machine1">
+    <data key="dStateMachine"></data>
+    <data key="dName">Строчник</data>
+    <data key="dGeometry">
+      <rect x="0" y="0" width="450" height="100"></rect>
+    </data>
+    <node id="coreMeta">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_META</data>
+      <data key="dData">standardVersion/ 1.0
+
+platformVersion/ 1.0
+
+lapkiVisual/ true
+
+platform/ junior-reader
+
+</data>
+    </node>
+    <node id="fyhgbvumsqhsdevijbew">
+      <data key="dName">Первая</data>
+      <data key="dData">entry/
+Reader1.read()
+
+</data>
+      <data key="dGeometry">
+        <rect x="100" y="400" width="450" height="95"></rect>
+      </data>
+    </node>
+    <node id="pcldtwqqiyudxsvevwbu">
+      <data key="dName">Была В</data>
+      <data key="dData">entry/
+Reader1.read()
+
+</data>
+      <data key="dGeometry">
+        <rect x="800" y="100" width="450" height="95"></rect>
+      </data>
+    </node>
+    <node id="dljlxiezvsbuuwfymaao">
+      <data key="dName">Была П</data>
+      <data key="dData">entry/
+Reader1.read()
+
+</data>
+      <data key="dGeometry">
+        <rect x="800" y="350" width="450" height="95"></rect>
+      </data>
+    </node>
+    <node id="olmhvblsvokjrneincch">
+      <data key="dName">Была Р</data>
+      <data key="dData">entry/
+Reader1.read()
+
+</data>
+      <data key="dGeometry">
+        <rect x="800" y="600" width="450" height="95"></rect>
+      </data>
+    </node>
+    <node id="kgxqmbojhjkinbaanybu">
+      <data key="dName">Была чужая</data>
+      <data key="dData">entry/
+Reader1.read()
+
+</data>
+      <data key="dGeometry">
+        <rect x="800" y="850" width="450" height="95"></rect>
+      </data>
+    </node>
+    <node id="ijbrlcilqjorhhbchojb">
+      <data key="dVertex">initial</data>
+      <data key="dGeometry">
+        <point x="0" y="380"></point>
+      </data>
+    </node>
+    <node id="cReader1">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT</data>
+      <data key="dData">id/ Reader1
+
+type/ Reader
+
+name/ Считыватель
+
+</data>
+      <data key="dLapkiSchemePosition">
+        <point x="30" y="30"></point>
+      </data>
+    </node>
+    <node id="cImpulse1">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT</data>
+      <data key="dData">id/ Impulse1
+
+type/ Impulse
+
+name/ Сигнал
+
+</data>
+      <data key="dLapkiSchemePosition">
+        <point x="30" y="30"></point>
+      </data>
+    </node>
+    <edge id="dnrinxvdewyknvxlzpmp" source="ijbrlcilqjorhhbchojb" target="fyhgbvumsqhsdevijbew"></edge>
+    <edge id="vpqcmkmknjjpoaxhcicu" source="fyhgbvumsqhsdevijbew" target="pcldtwqqiyudxsvevwbu">
+      <data key="dData">Reader1.char_accepted[Reader1.current_char == В]/
+
+</data>
+      <data key="dLabelGeometry">
+        <point x="675.0" y="297.5"></point>
+      </data>
+    </edge>
+    <edge id="rsbzebadtgqpojgcjrkj" source="pcldtwqqiyudxsvevwbu" target="fyhgbvumsqhsdevijbew">
+      <data key="dData">Reader1.char_accepted[Reader1.current_char == В]/
+Impulse1.impulseA()
+
+</data>
+      <data key="dLabelGeometry">
+        <point x="715.0" y="327.5"></point>
+      </data>
+    </edge>
+    <edge id="petolijfmyjaxwdaxhwn" source="pcldtwqqiyudxsvevwbu" target="fyhgbvumsqhsdevijbew">
+      <data key="dData">Reader1.char_accepted[else]/
+
+</data>
+      <data key="dLabelGeometry">
+        <point x="755.0" y="357.5"></point>
+      </data>
+    </edge>
+    <edge id="rgseetdfioofshvmjntn" source="fyhgbvumsqhsdevijbew" target="dljlxiezvsbuuwfymaao">
+      <data key="dData">Reader1.char_accepted[Reader1.current_char == П]/
+
+</data>
+      <data key="dLabelGeometry">
+        <point x="675.0" y="422.5"></point>
+      </data>
+    </edge>
+    <edge id="waftaywodelxodnidbcj" source="dljlxiezvsbuuwfymaao" target="fyhgbvumsqhsdevijbew">
+      <data key="dData">Reader1.char_accepted[Reader1.current_char == П]/
+Impulse1.impulseB()
+
+</data>
+      <data key="dLabelGeometry">
+        <point x="715.0" y="452.5"></point>
+      </data>
+    </edge>
+    <edge id="uzfynkbnkbqasepuexvo" source="dljlxiezvsbuuwfymaao" target="fyhgbvumsqhsdevijbew">
+      <data key="dData">Reader1.char_accepted[else]/
+
+</data>
+      <data key="dLabelGeometry">
+        <point x="755.0" y="482.5"></point>
+      </data>
+    </edge>
+    <edge id="eipqxmikksjkagxfmjfc" source="fyhgbvumsqhsdevijbew" target="olmhvblsvokjrneincch">
+      <data key="dData">Reader1.char_accepted[Reader1.current_char == Р]/
+
+</data>
+      <data key="dLabelGeometry">
+        <point x="675.0" y="547.5"></point>
+      </data>
+    </edge>
+    <edge id="jjbfpisettoneugrnkjb" source="olmhvblsvokjrneincch" target="fyhgbvumsqhsdevijbew">
+      <data key="dData">Reader1.char_accepted[Reader1.current_char == Р]/
+Impulse1.impulseC()
+
+</data>
+      <data key="dLabelGeometry">
+        <point x="715.0" y="577.5"></point>
+      </data>
+    </edge>
+    <edge id="xiqgswnqyzfzoctgycad" source="olmhvblsvokjrneincch" target="fyhgbvumsqhsdevijbew">
+      <data key="dData">Reader1.char_accepted[else]/
+
+</data>
+      <data key="dLabelGeometry">
+        <point x="755.0" y="607.5"></point>
+      </data>
+    </edge>
+    <edge id="eirvzgvbnepvyylsjnga" source="fyhgbvumsqhsdevijbew" target="kgxqmbojhjkinbaanybu">
+      <data key="dData">Reader1.char_accepted[else]/
+
+</data>
+      <data key="dLabelGeometry">
+        <point x="675.0" y="672.5"></point>
+      </data>
+    </edge>
+    <edge id="mnnqzjanhloicodbtoyq" source="kgxqmbojhjkinbaanybu" target="fyhgbvumsqhsdevijbew">
+      <data key="dData">Reader1.char_accepted/
+
+</data>
+      <data key="dLabelGeometry">
+        <point x="715.0" y="702.5"></point>
+      </data>
+    </edge>
+  </graph>
+  <graph id="Machine2">
+    <data key="dStateMachine"></data>
+    <data key="dName">Садовник</data>
+    <data key="dGeometry">
+      <rect x="0" y="0" width="450" height="100"></rect>
+    </data>
+    <node id="coreMeta">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_META</data>
+      <data key="dData">standardVersion/ 1.0
+
+platformVersion/ 1.0
+
+lapkiVisual/ true
+
+platform/ junior-gardener
+
+</data>
+    </node>
+    <node id="ghrdzcptttefopwvczar">
+      <data key="dName">Работа</data>
+      <data key="dData">Receiver1.impulse_received[Receiver1.received_impulse == Receiver1.impulseA]/
+Mover1.move_forward()
+
+Receiver1.impulse_received[Receiver1.received_impulse == Receiver1.impulseB]/
+Mover1.turn_right()
+
+Receiver1.impulse_received[Receiver1.received_impulse == Receiver1.impulseC]/
+Flower1.plant(1)
+
+</data>
+      <data key="dGeometry">
+        <rect x="100" y="100" width="450" height="200"></rect>
+      </data>
+    </node>
+    <node id="fkgkweeliwvzfcaqkzoc">
+      <data key="dVertex">initial</data>
+      <data key="dGeometry">
+        <point x="0" y="80"></point>
+      </data>
+    </node>
+    <node id="cReceiver1">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT</data>
+      <data key="dData">id/ Receiver1
+
+type/ Receiver
+
+name/ Приёмник
+
+</data>
+      <data key="dLapkiSchemePosition">
+        <point x="30" y="30"></point>
+      </data>
+    </node>
+    <node id="cFlower1">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT</data>
+      <data key="dData">id/ Flower1
+
+type/ Flower
+
+name/ Цветы
+
+</data>
+      <data key="dLapkiSchemePosition">
+        <point x="30" y="30"></point>
+      </data>
+    </node>
+    <node id="cMover1">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT</data>
+      <data key="dData">id/ Mover1
+
+type/ Mover
+
+name/ Движение
+
+</data>
+      <data key="dLapkiSchemePosition">
+        <point x="30" y="30"></point>
+      </data>
+    </node>
+    <edge id="qtxblbepfuewmufzwrlz" source="fkgkweeliwvzfcaqkzoc" target="ghrdzcptttefopwvczar"></edge>
+  </graph>
+</graphml>
