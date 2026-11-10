@@ -5,6 +5,7 @@
   "title": "Светомузыка",
   "summary": "Устройте праздничную светомузыку из случайных цветов.",
   "descriptionFile": "bear-light-music.md",
+  "codeWord": "ЦВЕТА",
   "platformId": "blg-mb-junior",
   "tests": [
     {

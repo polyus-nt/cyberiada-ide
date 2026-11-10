@@ -5,6 +5,7 @@
   "title": "Светофор шлюза",
   "summary": "Настройте дневную смену и ночной режим светофора.",
   "descriptionFile": "bear-airlock-traffic.md",
+  "codeWord": "ДВИЖЕНИЕ",
   "platformId": "blg-mb-junior",
   "tests": [
     {
