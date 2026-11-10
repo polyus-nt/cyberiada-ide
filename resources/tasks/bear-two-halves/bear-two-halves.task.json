@@ -1,9 +1,9 @@
 {
   "schemaVersion": 2,
   "id": "bear-two-halves",
-  "version": 2,
+  "version": 3,
   "title": "Две половинки",
-  "summary": "Соберите секретное слово из картинок и цветов двух независимых каналов.",
+  "summary": "Соберите тайное слово из половинок, которые приходят по двум каналам.",
   "descriptionFile": "bear-two-halves.md",
   "platformId": "blg-mb-junior",
   "tests": [

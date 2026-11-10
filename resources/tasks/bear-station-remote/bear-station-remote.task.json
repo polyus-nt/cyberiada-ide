@@ -1,9 +1,9 @@
 {
   "schemaVersion": 2,
   "id": "bear-station-remote",
-  "version": 1,
+  "version": 2,
   "title": "Пульт станции",
-  "summary": "Выделите адрес Мишки среди команд восьми станционных приборов.",
+  "summary": "Научите Мишку выполнять только команды со своим адресом.",
   "descriptionFile": "bear-station-remote.md",
   "codeWord": "АДРЕСАТ",
   "platformId": "blg-mb-junior",
