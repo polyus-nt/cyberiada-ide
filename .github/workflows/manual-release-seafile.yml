@@ -13,7 +13,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Init submodules
         run: git submodule update --init --checkout --recursive
@@ -65,7 +65,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # Docker 29.4.2's seccomp profile breaks Wine socket calls.
       - name: Set up Docker
@@ -83,11 +83,6 @@ jobs:
         run: docker compose -f compose.release.yml run --rm --no-deps release winepath -w /project
       - name: Build Windows artifacts
         run: RELEASE_SEAFILE_STAGING=1 docker compose -f compose.release.yml run --rm release
-
-      - name: Get current date
-        id: date
-        run: |
-          echo "{date}={$(date +'%Y-%m-%d_%H.%M.%S')}" >> $GITHUB_STATE
 
       - name: Upload to Seafile
         uses: chekoopa/upload-to-seafile@v1
@@ -114,3 +109,43 @@ jobs:
           name: windows-zip-build
           path: |
             outputs/cyberiada-*-windows.zip
+
+  mac-build:
+    runs-on: macos-latest
+
+    needs: [linux-build, windows-build]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - run: npm ci
+      - name: Check macOS module packaging and repair script
+        run: node --test build/test-macos-packaging.cjs
+      - run: npm run build
+      - run: npm run bundle:mac
+        env:
+          USE_HARD_LINKS: 'false'
+
+      - name: Save dmg artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dmg-build
+          if-no-files-found: error
+          path: dist/*.dmg
+
+      - name: Upload to Seafile
+        uses: chekoopa/upload-to-seafile@v1
+        with:
+          server-url: ${{ secrets.SEAFILE_SERVER_URL }}
+          username: ${{ secrets.SEAFILE_USERNAME }}
+          password: ${{ secrets.SEAFILE_PASSWORD }}
+          repo-id: ${{ secrets.SEAFILE_REPO_ID }}
+          remote-path: '/'
+          local-path: 'dist/*.dmg'
+          overwrite: 'true'

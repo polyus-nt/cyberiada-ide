@@ -16,6 +16,9 @@ runner. Это применяется к обоим ручным workflow и р�
 В релизе по тегу job `publish-release` получает готовые артефакты обеих платформ
 через GitHub Actions artifacts и создаёт общий релиз; затем macOS job добавляет
 DMG. В Seafile каждый job отправляет только артефакты своей платформы.
+В Seafile-workflow macOS job запускается после успешных Linux- и Windows-сборок,
+проверяет права запуска модулей, собирает DMG, сохраняет его в GitHub Actions
+artifacts и загружает в Seafile.
 
 Docker Compose сохраняет скачанные архивы зависимостей в именованном volume
 `release-download-cache`. При повторном запуске они не загружаются заново.
