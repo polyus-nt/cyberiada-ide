@@ -5,6 +5,7 @@
   "title": "Пульт станции",
   "summary": "Выделите адрес Мишки среди команд восьми станционных приборов.",
   "descriptionFile": "bear-station-remote.md",
+  "codeWord": "АДРЕСАТ",
   "platformId": "blg-mb-junior",
   "tests": [
     {

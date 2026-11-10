@@ -5,6 +5,7 @@
   "title": "Калибровка уха",
   "summary": "Настройте подводный микрофон на ледовой базе Крифа-4.",
   "descriptionFile": "bear-ear-calibration.md",
+  "codeWord": "ЭХО",
   "platformId": "blg-mb-junior",
   "tests": [
     {

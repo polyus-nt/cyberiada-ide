@@ -5,6 +5,7 @@
   "title": "Целая посылка",
   "summary": "Проверьте повторённые замеры и обнаружьте искажения в подводной связи.",
   "descriptionFile": "bear-whole-parcel.md",
+  "codeWord": "ЦЕЛОСТНОСТЬ",
   "platformId": "blg-mb-junior",
   "tests": [
     {
