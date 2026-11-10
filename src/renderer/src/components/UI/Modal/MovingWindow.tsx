@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import './css/moving_window.css';
 import { twMerge } from 'tailwind-merge';
@@ -43,8 +43,9 @@ export const Window = ({
   // Get selected animation type - if provided in props, use it, otherwise use the store's value
   const windowRef = useRef<HTMLDivElement>(null);
 
-  const [size, setSize] = useState({ width: 0, height: 0 });
   const [windowPosition, setWindowPosition] = useState(position);
+  const windowPositionRef = useRef(windowPosition);
+  windowPositionRef.current = windowPosition;
 
   // Drag state refs
   const isDragging = useRef(false);
@@ -59,12 +60,6 @@ export const Window = ({
     windowY: 0,
   });
 
-  useLayoutEffect(() => {
-    if (!windowRef.current || !isOpen) return;
-    const newSize = windowRef.current.getBoundingClientRect();
-    setSize(newSize);
-  }, [isOpen, id, windowRef]);
-
   // Animation frame Id for cleanup
   const animationFrameId = useRef<number | null>(null);
 
@@ -76,21 +71,55 @@ export const Window = ({
       : Math.max(currentWindow?.zIndex ?? 1, INACTIVE_WINDOW_Z_INDEX);
 
   // Clamp the window position to the screen boundaries
-  const clampPositionToScreen = (x: number, y: number) => {
+  const clampPositionToScreen = useCallback((x: number, y: number) => {
     const el = windowRef.current;
     if (!el) return { x, y };
 
     const parent = (el.offsetParent as HTMLElement) ?? el.parentElement ?? document.documentElement;
-    const parentRect = parent.getBoundingClientRect();
+    const parentRect =
+      parent === document.body || parent === document.documentElement
+        ? { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight }
+        : parent.getBoundingClientRect();
+    const minX = Math.max(0, -parentRect.left);
+    const minY = Math.max(0, -parentRect.top);
+    const right = Math.min(parentRect.width, window.innerWidth - parentRect.left);
+    const bottom = Math.min(parentRect.height, window.innerHeight - parentRect.top);
 
-    const maxX = Math.max(0, parentRect.width - size.width);
-    const maxY = Math.max(0, parentRect.height - size.height);
+    el.style.setProperty('--moving-window-max-width', `${Math.max(0, right - minX)}px`);
+    el.style.setProperty('--moving-window-max-height', `${Math.max(0, bottom - minY)}px`);
+    const size = el.getBoundingClientRect();
+    const maxX = Math.max(minX, right - size.width);
+    const maxY = Math.max(minY, bottom - size.height);
 
-    const clampedX = Math.max(0, Math.min(x, maxX));
-    const clampedY = Math.max(0, Math.min(y, maxY));
+    const clampedX = Math.max(minX, Math.min(x, maxX));
+    const clampedY = Math.max(minY, Math.min(y, maxY));
 
     return { x: clampedX, y: clampedY };
-  };
+  }, []);
+
+  useLayoutEffect(() => {
+    const el = windowRef.current;
+    if (!el || !isOpen) return;
+
+    const fitToScreen = () => {
+      setWindowPosition((previous) => {
+        const next = clampPositionToScreen(previous.x, previous.y);
+        return next.x === previous.x && next.y === previous.y ? previous : next;
+      });
+    };
+
+    fitToScreen();
+    const observer = new ResizeObserver(fitToScreen);
+    observer.observe(el);
+    const parent = el.offsetParent ?? el.parentElement;
+    if (parent) observer.observe(parent);
+    window.addEventListener('resize', fitToScreen);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', fitToScreen);
+    };
+  }, [isOpen, id, clampPositionToScreen]);
 
   // Window activation and bring to front
   const handleWindowActivation = (e: React.MouseEvent) => {
@@ -156,7 +185,7 @@ export const Window = ({
     const handleMouseUp = () => {
       if (isDragging.current) {
         isDragging.current = false;
-        updateWindow(id, { position: windowPosition });
+        updateWindow(id, { position: windowPositionRef.current });
         endSplitOnDrag(id);
       }
 
@@ -170,16 +199,9 @@ export const Window = ({
     const handleTouchEnd = () => {
       if (isDragging.current) {
         isDragging.current = false;
+        updateWindow(id, { position: windowPositionRef.current });
         endSplitOnDrag(id);
       }
-    };
-
-    const handleResize = () => {
-      // Check if the window position is within the screen boundaries when the screen size changes
-      setWindowPosition((prevPos) => {
-        const { x: clampedX, y: clampedY } = clampPositionToScreen(prevPos.x, prevPos.y);
-        return { x: clampedX, y: clampedY };
-      });
     };
 
     // Add event listeners
@@ -187,21 +209,19 @@ export const Window = ({
     document.addEventListener('mouseup', handleMouseUp);
     document.addEventListener('touchmove', handleTouchMove);
     document.addEventListener('touchend', handleTouchEnd);
-    window.addEventListener('resize', handleResize);
 
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
       document.removeEventListener('touchmove', handleTouchMove);
       document.removeEventListener('touchend', handleTouchEnd);
-      window.removeEventListener('resize', handleResize);
 
       // Clean up animation
       if (animationFrameId.current !== null) {
         cancelAnimationFrame(animationFrameId.current);
       }
     };
-  }, [id, size]); // windowSize dependency'lerini ekle
+  }, [id, clampPositionToScreen, updateWindow, endSplitOnDrag]);
 
   useEffect(() => {
     if (!windowRef.current) return;
@@ -346,7 +366,9 @@ export const Window = ({
     <div
       ref={windowRef}
       className={twMerge(
-        `react-window-manager window ${activeWindowId === id ? 'active' : ''}`,
+        `react-window-manager window max-h-[var(--moving-window-max-height,100vh)] max-w-[var(--moving-window-max-width,100vw)] ${
+          activeWindowId === id ? 'active' : ''
+        }`,
         className
       )}
       style={{
@@ -361,13 +383,13 @@ export const Window = ({
         onMouseDown={handleDragStart}
         onTouchStart={handleTouchStart}
         onDoubleClick={handleHeaderDoubleClick}
-        className="cursor-grab"
+        className="shrink-0 cursor-grab"
       >
         {header}
       </div>
 
       {/* Content */}
-      <div className="react-window-manager content">{children}</div>
+      <div className="react-window-manager content flex flex-col">{children}</div>
     </div>
   );
 };
