@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "bear-ir-remote",
-  "version": 2,
+  "version": 3,
   "title": "ИК-пульт",
   "summary": "Научите Мишку выполнять команды инфракрасного пульта.",
   "descriptionFile": "bear-ir-remote.md",

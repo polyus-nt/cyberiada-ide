@@ -1,9 +1,9 @@
 {
   "schemaVersion": 2,
   "id": "bear-two-channels",
-  "version": 2,
+  "version": 3,
   "title": "Два канала сразу",
-  "summary": "Собирайте открытки из двух байтов по ИК и гасите свет по команде, пришедшей по акустике.",
+  "summary": "Показывайте открытки из двух байтов по ИК и гасите свет по команде, пришедшей по акустике.",
   "descriptionFile": "bear-two-channels.md",
   "platformId": "blg-mb-junior",
   "tests": [

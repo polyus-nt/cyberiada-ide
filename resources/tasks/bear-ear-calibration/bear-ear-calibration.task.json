@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "bear-ear-calibration",
-  "version": 2,
+  "version": 3,
   "title": "Калибровка уха",
   "summary": "Настройте подводный микрофон на ледовой базе Крифа-4.",
   "descriptionFile": "bear-ear-calibration.md",

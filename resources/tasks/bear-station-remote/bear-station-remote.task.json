@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "bear-station-remote",
-  "version": 2,
+  "version": 3,
   "title": "Пульт станции",
   "summary": "Научите Мишку выполнять только команды со своим адресом.",
   "descriptionFile": "bear-station-remote.md",

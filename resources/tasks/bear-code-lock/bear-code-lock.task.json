@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "bear-code-lock",
-  "version": 2,
+  "version": 3,
   "title": "Кодовый замок",
   "summary": "Откройте люк между отсеками кодом из трёх байтов.",
   "descriptionFile": "bear-code-lock.md",

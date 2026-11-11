@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "bear-hidden-measurements",
-  "version": 2,
+  "version": 3,
   "title": "Тайник в замерах",
   "summary": "Найдите тайное сообщение в замерах подводного зонда.",
   "descriptionFile": "bear-hidden-measurements.md",

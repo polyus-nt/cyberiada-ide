@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "bear-every-byte",
-  "version": 2,
+  "version": 3,
   "title": "Каждый байт",
   "summary": "Отвечайте на каждый байт по акустике новым цветом глаз.",
   "descriptionFile": "bear-every-byte.md",

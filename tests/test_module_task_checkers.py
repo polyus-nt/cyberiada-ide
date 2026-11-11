@@ -130,9 +130,40 @@ class ModuleCheckerTests(unittest.TestCase):
 
     def test_acoustic_zero_preserves_partial_ir_pair(self):
         events = [input_byte(500, 1, 'ir'), input_byte(700, 0), input_byte(1000, 2, 'ir')]
-        points = [(0, 'black', 'empty'), (1000, 'green', 'heart')]
+        points = [(0, 'black', 'empty'), (500, 'black', 'heart'),
+                  (700, 'black', 'empty'), (1000, 'green', 'empty')]
         self.assertTrue(run('bear-two-channels', points, events)['passed'])
-        self.assertFalse(run('bear-two-channels', points[:1], events)['passed'])
+        # The second half changes only the eyes; it must not restore the cleared picture.
+        restored = points[:-1] + [(1000, 'green', 'heart')]
+        self.assertFalse(run('bear-two-channels', restored, events)['passed'])
+        delayed = [points[0], (1000, 'green', 'heart')]
+        self.assertFalse(run('bear-two-channels', delayed, events)['passed'])
+        restarted = points[:-1] + [(1000, 'black', 'smile')]
+        self.assertFalse(run('bear-two-channels', restarted, events)['passed'])
+
+    def test_each_ir_half_changes_only_its_output_immediately(self):
+        events = [input_byte(500, 1, 'ir'), input_byte(1000, 2, 'ir'),
+                  input_byte(1500, 4, 'ir'), input_byte(1750, 9),
+                  input_byte(2000, 5, 'ir'), input_byte(2500, 3, 'ir')]
+        points = [(0, 'black', 'empty'), (500, 'black', 'heart'),
+                  (1000, 'green', 'heart'), (1500, 'green', 'square'),
+                  (2000, 'white', 'square'), (2500, 'white', 'question')]
+        self.assertTrue(run('bear-two-channels', points, events)['passed'])
+        for time in (500, 1000, 1500, 2000, 2500):
+            with self.subTest(time=time):
+                delayed = [(t + 1 if t == time else t, color, picture)
+                           for t, color, picture in points]
+                self.assertFalse(run('bear-two-channels', delayed, events)['passed'])
+
+    def test_same_time_blackout_keeps_ir_byte_order(self):
+        events = [input_byte(500, 1, 'ir'), input_byte(500, 0),
+                  input_byte(500, 2, 'ir'), input_byte(1000, 2, 'ir'),
+                  input_byte(1100, 3, 'ir'), input_byte(1100, 0)]
+        points = [(0, 'black', 'empty'), (500, 'green', 'empty'),
+                  (1000, 'green', 'smile'), (1100, 'black', 'empty')]
+        self.assertTrue(run('bear-two-channels', points, events)['passed'])
+        wrong = points[:1] + [(500, 'green', 'heart')] + points[2:]
+        self.assertFalse(run('bear-two-channels', wrong, events)['passed'])
 
     def test_foreign_seven_is_not_an_address(self):
         events = [input_byte((i + 1) * 400, v, 'ir') for i, v in enumerate([5, 7, 7, 2])]

@@ -28,22 +28,27 @@ def timeline(case, execution, points):
         if color is not None and not eyes_are(state, color):
             return fail(t, "Неверный цвет глаз: проверьте входные данные, последовательность и время реакции")
         if picture is not None and not picture_is(state, picture):
-            return fail(t, "Неверная картинка на животе: проверьте выбор рисунка и момент выключения")
+            return fail(t, "Неверная картинка на матрице: проверьте выбор рисунка и момент выключения")
     return {"passed": True}
 
 
 def check(case, execution):
+    # Новое условие (10.11.2026): каждая часть открытки горит сразу. Первый байт пары по ИК - картинка,
+    # она появляется сразу; второй - цвет глаз, глаза загораются сразу. 0 по акустике гасит и глаза, и матрицу,
+    # а приём пары продолжается с того же места.
     pictures = ["empty", "heart", "smile", "question", "square"]
     colors = ["black", "red", "green", "cyan", "yellow", "white"]
-    first = None
-    points = [(0, "black", "empty")]
+    color, picture, first = "black", "empty", True
+    points = [(0, color, picture)]
     for event in inputs(case):
         if event["channel"] == "ears":
             if event["byte"] == 0:
-                points.append((event["timeMs"], "black", "empty"))
-        elif first is None:
-            first = event["byte"]
+                color, picture = "black", "empty"
+                points.append((event["timeMs"], color, picture))
+        elif first:
+            picture, first = pictures[event["byte"]], False
+            points.append((event["timeMs"], color, picture))
         else:
-            points.append((event["timeMs"], colors[event["byte"]], pictures[first]))
-            first = None
+            color, first = colors[event["byte"]], True
+            points.append((event["timeMs"], color, picture))
     return timeline(case, execution, points)
